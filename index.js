@@ -98,12 +98,17 @@ const songId = response.data.item.id;
 }
 
 lastSongId = songId;
-    const song = response.data.item.name;
-    const artist = response.data.item.artists
-      .map(a => a.name)
-      .join(", ");
+const song = response.data.item.name;
+const artist = response.data.item.artists
+  .map(a => a.name)
+  .join(", ");
 
-    res.json({ title: `${song} - ${artist}` });
+const albumImage = response.data.item.album.images[0]?.url || null;
+
+res.json({
+  title: `${song} - ${artist}`,
+  image: albumImage
+});
 
   } catch (err) {
     res.json({ title: "Error getting song" });
@@ -132,6 +137,7 @@ app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 
 );
+
 
 
 
