@@ -29,7 +29,7 @@ async function getAccessToken() {
       headers: {
         Authorization:
           "Basic " +
-          Buffer.from(CLIENT_ID + ":" + CLIENT_SECRET).toString("base64"),
+          Buffer.from(process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET).toString("base64"),
       },
     }
   );
@@ -79,7 +79,7 @@ app.get("/login", (req, res) => {
     "https://accounts.spotify.com/authorize?" +
     querystring.stringify({
       response_type: "code",
-      client_id: CLIENT_ID,
+      client_id: process.env.CLIENT_ID,
       scope: scope,
       redirect_uri: redirect_uri,
     });
@@ -109,4 +109,5 @@ app.get("/callback", async (req, res) => {
 
   res.send("Your Refresh Token is: " + response.data.refresh_token);
 });
+
 
