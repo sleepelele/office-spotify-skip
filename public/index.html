@@ -30,6 +30,36 @@
     userName = prompt("Enter your name (only once):");
     localStorage.setItem("userName", userName);
   }
+  function refreshVotes() {
+  fetch("/votes")
+    .then(res => res.json())
+    .then(data => {
+
+      // Update vote counter
+      document.getElementById("result").innerText =
+        `Votes: ${data.count}/${data.needed}`;
+
+      // Update voter list
+      const voterList = document.getElementById("voters");
+      voterList.innerHTML = "";
+
+      data.voters.forEach(v => {
+        const li = document.createElement("li");
+        li.innerText = v;
+        voterList.appendChild(li);
+      });
+
+      // Optional: Disable button during cooldown
+      const button = document.querySelector("button");
+      if (data.cooldown) {
+        button.disabled = true;
+        button.innerText = "Cooldown...";
+      } else {
+        button.disabled = false;
+        button.innerText = "SKIP";
+      }
+    });
+}
 
   function loadSong() {
     fetch("/current-song")
@@ -64,36 +94,9 @@
 
   loadSong();
   setInterval(loadSong, 10000);
-  function refreshVotes() {
-  fetch("/votes")
-    .then(res => res.json())
-    .then(data => {
+  refreshVotes();
+setInterval(refreshVotes, 3000);
 
-      // Update vote counter
-      document.getElementById("result").innerText =
-        `Votes: ${data.count}/${data.needed}`;
-
-      // Update voter list
-      const voterList = document.getElementById("voters");
-      voterList.innerHTML = "";
-
-      data.voters.forEach(v => {
-        const li = document.createElement("li");
-        li.innerText = v;
-        voterList.appendChild(li);
-      });
-
-      // Optional: Disable button during cooldown
-      const button = document.querySelector("button");
-      if (data.cooldown) {
-        button.disabled = true;
-        button.innerText = "Cooldown...";
-      } else {
-        button.disabled = false;
-        button.innerText = "SKIP";
-      }
-    });
-}
 </script>
 
 </body>
