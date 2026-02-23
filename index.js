@@ -58,7 +58,6 @@ const name = req.body.name;
     });
   }
 
-  const name = req.body.name;
 votes.set(userId, name);
 
   if (votes.size >= majority()) {
@@ -82,6 +81,7 @@ app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 
 );
+
 
 
 
