@@ -49,6 +49,7 @@ async function skipTrack() {
 
 app.post("/vote", async (req, res) => {
   const userId = req.body.userId;
+const name = req.body.name;
 
   if (cooldown) {
     return res.json({
@@ -57,7 +58,8 @@ app.post("/vote", async (req, res) => {
     });
   }
 
-  votes.set(userId, userId);
+  const name = req.body.name;
+votes.set(userId, name);
 
   if (votes.size >= majority()) {
     await skipTrack();
@@ -80,5 +82,6 @@ app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 
 );
+
 
 
