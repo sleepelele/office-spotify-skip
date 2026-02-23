@@ -11,7 +11,11 @@
 
   <h1>Office Skip Vote</h1>
   <h2 id="currentSong">Loading song...</h2>
-
+<div style="margin-bottom:20px;">
+  <input id="totalInput" type="number" placeholder="Number of people"
+    style="padding:10px;border-radius:10px;border:1px solid #ccc;">
+  <button onclick="setTotal()">Set</button>
+</div>
   <button id="skipBtn" onclick="vote()"
   style="
     font-size:30px;
@@ -24,6 +28,7 @@
     transition:all 0.2s ease;
   ">
   SKIP
+    
 </button>
 
   <p id="result"></p>
@@ -88,7 +93,21 @@ setTimeout(() => {
         document.getElementById("currentSong").innerText = data.title;
       });
   }
+function setTotal() {
+  const value = document.getElementById("totalInput").value;
 
+  fetch("/set-total", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ total: value })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("Updated total people");
+    }
+  });
+}
   function vote() {
     fetch("/vote", {
       method: "POST",
