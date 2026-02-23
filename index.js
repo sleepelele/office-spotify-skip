@@ -102,10 +102,19 @@ app.get("/current-song", async (req, res) => {
     res.json({ title: "Error getting song" });
   }
 });
+app.get("/votes", (req, res) => {
+  res.json({
+    count: votes.size,
+    needed: majority(),
+    voters: Array.from(votes.values()),
+    cooldown
+  });
+});
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 
 );
+
 
 
 
