@@ -76,11 +76,37 @@ votes.set(userId, name);
     voters: Array.from(votes.values())
   });
 });
+app.get("/current-song", async (req, res) => {
+  try {
+    const token = await getAccessToken();
 
+    const response = await axios.get(
+      "https://api.spotify.com/v1/me/player/currently-playing",
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+
+    if (!response.data || !response.data.item) {
+      return res.json({ title: "Nothing playing" });
+    }
+
+    const song = response.data.item.name;
+    const artist = response.data.item.artists
+      .map(a => a.name)
+      .join(", ");
+
+    res.json({ title: `${song} - ${artist}` });
+
+  } catch (err) {
+    res.json({ title: "Error getting song" });
+  }
+});
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 
 );
+
 
 
 
