@@ -1,31 +1,52 @@
-<script>
-  let userId = localStorage.getItem("userId");
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Office Skip Vote</title>
+</head>
+<body style="text-align:center;font-family:sans-serif;margin-top:100px;">
 
-  if (!userId) {
-    userId = crypto.randomUUID();
-    localStorage.setItem("userId", userId);
-  }
+  <h1>Office Skip Vote</h1>
 
-  function vote() {
-    fetch("/vote", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ userId })
-    })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("result").innerText = data.message;
+  <button onclick="vote()" style="font-size:30px;padding:20px;">
+    SKIP
+  </button>
 
-      const voterList = document.getElementById("voters");
-      voterList.innerHTML = "";
+  <p id="result"></p>
 
-      if (data.voters && data.voters.length > 0) {
-        data.voters.forEach(v => {
-          const li = document.createElement("li");
-          li.innerText = v;
-          voterList.appendChild(li);
-        });
-      }
-    });
-  }
-</script>
+  <h3>Voters:</h3>
+  <ul id="voters"></ul>
+
+  <script>
+    let userId = localStorage.getItem("userId");
+
+    if (!userId) {
+      userId = crypto.randomUUID();
+      localStorage.setItem("userId", userId);
+    }
+
+    function vote() {
+      fetch("/vote", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ userId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("result").innerText = data.message;
+
+        const voterList = document.getElementById("voters");
+        voterList.innerHTML = "";
+
+        if (data.voters && data.voters.length > 0) {
+          data.voters.forEach(v => {
+            const li = document.createElement("li");
+            li.innerText = v;
+            voterList.appendChild(li);
+          });
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
