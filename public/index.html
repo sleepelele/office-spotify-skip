@@ -4,37 +4,41 @@
   <title>Office Skip Vote</title>
 </head>
 <body style="text-align:center;font-family:sans-serif;margin-top:100px;">
-  <ul id="voters"></ul>
-  <div style="width:60%;margin:20px auto;background:#ddd;height:25px;border-radius:20px;overflow:hidden;">
-  <div id="progressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4caf50,#81c784);transition:width 0.5s ease;"></div>
-</div>
 
   <h1>Office Skip Vote</h1>
   <h2 id="currentSong">Loading song...</h2>
-<div style="margin-bottom:20px;">
-  <input id="totalInput" type="number" placeholder="Number of people"
-    style="padding:10px;border-radius:10px;border:1px solid #ccc;">
-  <button onclick="setTotal()">Set</button>
-</div>
+
+  <div style="margin-bottom:20px;">
+    <input id="totalInput" type="number" placeholder="Number of people"
+      style="padding:10px;border-radius:10px;border:1px solid #ccc;">
+    <button onclick="setTotal()">Set</button>
+  </div>
+
   <button id="skipBtn" onclick="vote()"
-  style="
-    font-size:30px;
-    padding:20px 40px;
-    border:none;
-    border-radius:40px;
-    background:linear-gradient(135deg,#ff4081,#f50057);
-    color:white;
-    cursor:pointer;
-    transition:all 0.2s ease;
-  ">
-  SKIP
-    
-</button>
+    style="
+      font-size:30px;
+      padding:20px 40px;
+      border:none;
+      border-radius:40px;
+      background:linear-gradient(135deg,#ff4081,#f50057);
+      color:white;
+      cursor:pointer;
+      transition:all 0.2s ease;
+    ">
+    SKIP
+  </button>
 
   <p id="result"></p>
 
   <h3>Voters:</h3>
   <ul id="voters"></ul>
+
+  <!-- Progress Bar -->
+  <div style="width:60%;margin:20px auto;background:#ddd;height:25px;border-radius:20px;overflow:hidden;">
+    <div id="progressBar"
+      style="height:100%;width:0%;background:linear-gradient(90deg,#4caf50,#81c784);transition:width 0.5s ease;">
+    </div>
+  </div>
 
 <script>
   let userId = localStorage.getItem("userId");
@@ -49,42 +53,56 @@
     userName = prompt("Enter your name (only once):");
     localStorage.setItem("userName", userName);
   }
+
+  function vote() {
+    const btn = document.getElementById("skipBtn");
+    btn.style.transform = "scale(0.95)";
+    setTimeout(() => btn.style.transform = "scale(1)", 150);
+
+    fetch("/vote", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ userId, name: userName })
+    })
+    .then(res => res.json())
+    .then(updateUI);
+  }
+
   function refreshVotes() {
-    const li = document.createElement("li");
-li.innerText = v;
-li.style.opacity = "0";
-li.style.transition = "opacity 0.5s";
-voterList.appendChild(li);
+    fetch("/votes")
+      .then(res => res.json())
+      .then(updateUI);
+  }
 
-setTimeout(() => {
-  li.style.opacity = "1";
-}, 50);
+  function updateUI(data) {
+    document.getElementById("result").innerText =
+      `Votes: ${data.count}/${data.needed}`;
 
-      // Update vote counter
-      document.getElementById("result").innerText =
-        `Votes: ${data.count}/${data.needed}`;
+    const voterList = document.getElementById("voters");
+    voterList.innerHTML = "";
 
-      // Update voter list
-      const voterList = document.getElementById("voters");
-      voterList.innerHTML = "";
-
-      data.voters.forEach(v => {
-        const li = document.createElement("li");
-        li.innerText = v;
-        voterList.appendChild(li);
-      });
-
-      // Optional: Disable button during cooldown
-      const button = document.querySelector("button");
-      if (data.cooldown) {
-        button.disabled = true;
-        button.innerText = "Cooldown...";
-      } else {
-        button.disabled = false;
-        button.innerText = "SKIP";
-      }
+    data.voters.forEach(v => {
+      const li = document.createElement("li");
+      li.innerText = v;
+      li.style.opacity = "0";
+      li.style.transition = "opacity 0.5s";
+      voterList.appendChild(li);
+      setTimeout(() => li.style.opacity = "1", 50);
     });
-}
+
+    const percentage = (data.count / data.needed) * 100;
+    document.getElementById("progressBar").style.width =
+      Math.min(percentage, 100) + "%";
+
+    const button = document.getElementById("skipBtn");
+    if (data.cooldown) {
+      button.disabled = true;
+      button.innerText = "Cooldown...";
+    } else {
+      button.disabled = false;
+      button.innerText = "SKIP";
+    }
+  }
 
   function loadSong() {
     fetch("/current-song")
@@ -93,52 +111,28 @@ setTimeout(() => {
         document.getElementById("currentSong").innerText = data.title;
       });
   }
-function setTotal() {
-  const value = document.getElementById("totalInput").value;
 
-  fetch("/set-total", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ total: value })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      alert("Updated total people");
-    }
-  });
-}
-  function vote() {
-    fetch("/vote", {
+  function setTotal() {
+    const value = document.getElementById("totalInput").value;
+
+    fetch("/set-total", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ userId, name: userName })
+      body: JSON.stringify({ total: value })
     })
     .then(res => res.json())
     .then(data => {
-      document.getElementById("result").innerText = data.message;
-const btn = document.getElementById("skipBtn");
-btn.style.transform = "scale(0.95)";
-setTimeout(() => {
-  btn.style.transform = "scale(1)";
-}, 150);
-      const voterList = document.getElementById("voters");
-      voterList.innerHTML = "";
-
-      if (data.voters && data.voters.length > 0) {
-        data.voters.forEach(v => {
-          const li = document.createElement("li");
-          li.innerText = v;
-          voterList.appendChild(li);
-        });
+      if (data.success) {
+        alert("Updated total people");
       }
     });
   }
 
   loadSong();
-  setInterval(loadSong, 10000);
   refreshVotes();
-setInterval(refreshVotes, 3000);
+
+  setInterval(loadSong, 10000);
+  setInterval(refreshVotes, 3000);
 
 </script>
 
