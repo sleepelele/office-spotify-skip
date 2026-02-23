@@ -17,48 +17,54 @@
   <h3>Voters:</h3>
   <ul id="voters"></ul>
 
-  <script>
-    let userId = localStorage.getItem("userId");
-let userName = localStorage.getItem("userName");
+<script>
+  let userId = localStorage.getItem("userId");
+  let userName = localStorage.getItem("userName");
 
-if (!userId) {
-  userId = crypto.randomUUID();
-  localStorage.setItem("userId", userId);
-}
+  if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem("userId", userId);
+  }
 
-if (!userName) {
-  userName = prompt("Enter your name (only once):");
-  localStorage.setItem("userName", userName);
-}
+  if (!userName) {
+    userName = prompt("Enter your name (only once):");
+    localStorage.setItem("userName", userName);
+  }
 
-    if (!userId) {
-      userId = crypto.randomUUID();
-      localStorage.setItem("userId", userId);
-    }
-
-    function vote() {
-      fetch("/vote", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ userId, name: userName })
-      })
+  function loadSong() {
+    fetch("/current-song")
       .then(res => res.json())
       .then(data => {
-        document.getElementById("result").innerText = data.message;
-
-        const voterList = document.getElementById("voters");
-        voterList.innerHTML = "";
-
-        if (data.voters && data.voters.length > 0) {
-          data.voters.forEach(v => {
-            const li = document.createElement("li");
-            li.innerText = v;
-            voterList.appendChild(li);
-          });
-        }
+        document.getElementById("currentSong").innerText = data.title;
       });
-    }
-  </script>
+  }
+
+  function vote() {
+    fetch("/vote", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ userId, name: userName })
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("result").innerText = data.message;
+
+      const voterList = document.getElementById("voters");
+      voterList.innerHTML = "";
+
+      if (data.voters && data.voters.length > 0) {
+        data.voters.forEach(v => {
+          const li = document.createElement("li");
+          li.innerText = v;
+          voterList.appendChild(li);
+        });
+      }
+    });
+  }
+
+  loadSong();
+  setInterval(loadSong, 10000);
+</script>
 
 </body>
 </html>
