@@ -12,6 +12,7 @@ let cooldown = false;
 const TOTAL_PEOPLE = process.env.TOTAL_PEOPLE || 5;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
+let lastSongId = null;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
 function majority() {
@@ -90,7 +91,13 @@ app.get("/current-song", async (req, res) => {
     if (!response.data || !response.data.item) {
       return res.json({ title: "Nothing playing" });
     }
+const songId = response.data.item.id;
+    if (lastSongId && lastSongId !== songId) {
+  votes.clear();
+  cooldown = false;
+}
 
+lastSongId = songId;
     const song = response.data.item.name;
     const artist = response.data.item.artists
       .map(a => a.name)
@@ -114,6 +121,7 @@ app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 
 );
+
 
 
 
