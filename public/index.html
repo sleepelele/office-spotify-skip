@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Office Skip Vote</title>
+</head>
+<body style="text-align:center;font-family:sans-serif;margin-top:100px;">
+  <h1>Office Skip Vote</h1>
+  <button onclick="vote()" style="font-size:30px;padding:20px;">SKIP</button>
+  <p id="result"></p>
+
+  <script>
+    function vote() {
+      const user = prompt("Enter your name:");
+      fetch("/vote", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ user })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("result").innerText = data.message;
+      });
+    }
+  </script>
+</body>
+</html>
