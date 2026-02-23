@@ -1,3 +1,4 @@
+console.log("CLIENT_ID:", process.env.CLIENT_ID);
 const express = require("express");
 const axios = require("axios");
 const app = express();
@@ -108,3 +109,4 @@ app.get("/callback", async (req, res) => {
 
   res.send("Your Refresh Token is: " + response.data.refresh_token);
 });
+
