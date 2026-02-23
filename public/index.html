@@ -4,6 +4,10 @@
   <title>Office Skip Vote</title>
 </head>
 <body style="text-align:center;font-family:sans-serif;margin-top:100px;">
+  <ul id="voters"></ul>
+  <div style="width:60%;margin:20px auto;background:#ddd;height:25px;border-radius:20px;overflow:hidden;">
+  <div id="progressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4caf50,#81c784);transition:width 0.5s ease;"></div>
+</div>
 
   <h1>Office Skip Vote</h1>
   <h2 id="currentSong">Loading song...</h2>
@@ -31,6 +35,9 @@
     localStorage.setItem("userName", userName);
   }
   function refreshVotes() {
+    const percentage = (data.count / data.needed) * 100;
+document.getElementById("progressBar").style.width =
+  Math.min(percentage, 100) + "%";
   fetch("/votes")
     .then(res => res.json())
     .then(data => {
