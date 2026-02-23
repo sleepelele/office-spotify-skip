@@ -115,12 +115,25 @@ lastVoteCount = data.count;
     }
   }
 
-  function loadSong() {
-    fetch("/current-song")
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("currentSong").innerText = data.title;
-      });
+ function loadSong() {
+  fetch("/current-song")
+    .then(res => res.json())
+    .then(data => {
+
+      document.getElementById("currentSong").innerText = data.title;
+
+      const album = document.getElementById("albumCover");
+
+      if (data.image) {
+        album.src = data.image;
+
+        // small animation when song changes
+        album.style.transform = "scale(0.95)";
+        setTimeout(() => {
+          album.style.transform = "scale(1)";
+        }, 150);
+      }
+    });
   }
 
   function setTotal() {
