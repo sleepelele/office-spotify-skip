@@ -66,4 +66,45 @@ app.post("/vote", async (req, res) => {
 
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
+
 );
+const querystring = require("querystring");
+
+app.get("/login", (req, res) => {
+  const scope = "user-modify-playback-state user-read-playback-state";
+  const redirect_uri = "https://office-spotify-skip-production.up.railway.app/callback";
+
+  const authUrl =
+    "https://accounts.spotify.com/authorize?" +
+    querystring.stringify({
+      response_type: "code",
+      client_id: CLIENT_ID,
+      scope: scope,
+      redirect_uri: redirect_uri,
+    });
+
+  res.redirect(authUrl);
+});
+
+app.get("/callback", async (req, res) => {
+  const code = req.query.code;
+
+  const response = await axios.post(
+    "https://accounts.spotify.com/api/token",
+    querystring.stringify({
+      grant_type: "authorization_code",
+      code: code,
+      redirect_uri: "https://office-spotify-skip-production.up.railway.app/callback",
+    }),
+    {
+      headers: {
+        Authorization:
+          "Basic " +
+          Buffer.from(CLIENT_ID + ":" + CLIENT_SECRET).toString("base64"),
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+
+  res.send("Your Refresh Token is: " + response.data.refresh_token);
+});
