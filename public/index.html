@@ -12,9 +12,19 @@
   <h1>Office Skip Vote</h1>
   <h2 id="currentSong">Loading song...</h2>
 
-  <button onclick="vote()" style="font-size:30px;padding:20px;">
-    SKIP
-  </button>
+  <button id="skipBtn" onclick="vote()"
+  style="
+    font-size:30px;
+    padding:20px 40px;
+    border:none;
+    border-radius:40px;
+    background:linear-gradient(135deg,#ff4081,#f50057);
+    color:white;
+    cursor:pointer;
+    transition:all 0.2s ease;
+  ">
+  SKIP
+</button>
 
   <p id="result"></p>
 
@@ -35,12 +45,15 @@
     localStorage.setItem("userName", userName);
   }
   function refreshVotes() {
-    const percentage = (data.count / data.needed) * 100;
-document.getElementById("progressBar").style.width =
-  Math.min(percentage, 100) + "%";
-  fetch("/votes")
-    .then(res => res.json())
-    .then(data => {
+    const li = document.createElement("li");
+li.innerText = v;
+li.style.opacity = "0";
+li.style.transition = "opacity 0.5s";
+voterList.appendChild(li);
+
+setTimeout(() => {
+  li.style.opacity = "1";
+}, 50);
 
       // Update vote counter
       document.getElementById("result").innerText =
@@ -85,7 +98,11 @@ document.getElementById("progressBar").style.width =
     .then(res => res.json())
     .then(data => {
       document.getElementById("result").innerText = data.message;
-
+const btn = document.getElementById("skipBtn");
+btn.style.transform = "scale(0.95)";
+setTimeout(() => {
+  btn.style.transform = "scale(1)";
+}, 150);
       const voterList = document.getElementById("voters");
       voterList.innerHTML = "";
 
