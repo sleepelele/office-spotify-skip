@@ -58,7 +58,7 @@ app.post("/vote", async (req, res) => {
     await skipTrack();
     votes.clear();
     cooldown = true;
-    setTimeout(() => (cooldown = false), 180000);
+    setTimeout(() => (cooldown = false), 5000);
     return res.json({ message: "Song skipped!" });
   }
 
@@ -69,3 +69,4 @@ app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 
 );
+
