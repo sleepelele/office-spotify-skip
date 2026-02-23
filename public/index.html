@@ -41,6 +41,8 @@
   </div>
 
 <script>
+  const pingSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+  let lastVoteCount = 0;
   let userId = localStorage.getItem("userId");
   let userName = localStorage.getItem("userName");
 
@@ -75,6 +77,10 @@
   }
 
   function updateUI(data) {
+    if (data.count > lastVoteCount) {
+  pingSound.play().catch(() => {});
+}
+lastVoteCount = data.count;
     document.getElementById("result").innerText =
       `Votes: ${data.count}/${data.needed}`;
 
