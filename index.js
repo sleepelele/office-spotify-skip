@@ -9,14 +9,14 @@ app.use(express.static("public"));
 let votes = new Map();
 let cooldown = false;
 
-const TOTAL_PEOPLE = process.env.TOTAL_PEOPLE || 5;
+let totalPeople = process.env.TOTAL_PEOPLE || 5;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 let lastSongId = null;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
 function majority() {
-  return Math.floor(TOTAL_PEOPLE / 2) + 1;
+  return Math.floor(totalPeople / 2) + 1;
 }
 
 async function getAccessToken() {
@@ -117,10 +117,22 @@ app.get("/votes", (req, res) => {
     cooldown
   });
 });
+app.post("/set-total", (req, res) => {
+  const newTotal = parseInt(req.body.total);
+
+  if (!isNaN(newTotal) && newTotal > 0) {
+    totalPeople = newTotal;
+    votes.clear();
+    return res.json({ success: true });
+  }
+
+  res.json({ success: false });
+});
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 
 );
+
 
 
 
