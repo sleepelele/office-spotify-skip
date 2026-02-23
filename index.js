@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-let votes = new Set();
+let votes = new Map();
 let cooldown = false;
 
 const TOTAL_PEOPLE = process.env.TOTAL_PEOPLE || 5;
@@ -48,25 +48,37 @@ async function skipTrack() {
 }
 
 app.post("/vote", async (req, res) => {
-  const user = req.body.user;
+  const userId = req.body.userId;
 
-  if (cooldown) return res.json({ message: "Cooldown active." });
+  if (cooldown) {
+    return res.json({
+      message: "Cooldown active.",
+      voters: Array.from(votes.values())
+    });
+  }
 
-  votes.add(user);
+  votes.set(userId, userId);
 
   if (votes.size >= majority()) {
     await skipTrack();
     votes.clear();
     cooldown = true;
-    setTimeout(() => (cooldown = false), 5000);
-    return res.json({ message: "Song skipped!" });
+    setTimeout(() => (cooldown = false), 60000); // 1 min cooldown
+    return res.json({
+      message: "Song skipped!",
+      voters: []
+    });
   }
 
-  res.json({ message: `Votes: ${votes.size}/${majority()}` });
+  res.json({
+    message: `Votes: ${votes.size}/${majority()}`,
+    voters: Array.from(votes.values())
+  });
 });
 
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 
 );
+
 
