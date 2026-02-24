@@ -164,7 +164,17 @@ ul { list-style: none; padding: 0; }
 <div class="progress-container">
 <div id="progressBar"></div>
 </div>
-
+<img id="cornerGif"
+     src="/dancer.gif"
+     style="
+       position: fixed;
+       bottom: 20px;
+       left: 20px;
+       width: 140px;
+       pointer-events: none;
+       z-index: 5;
+       opacity: 0.9;
+     ">
 <div id="voteCounter">0 / 0 votes</div>
 
 <button id="skipBtn" onclick="vote()">SKIP</button>
