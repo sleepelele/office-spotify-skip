@@ -93,7 +93,7 @@ app.post("/vote", async (req, res) => {
 
     lastSkipInfo = {
       song: songName,
-      skippedBy: name,
+      skippedBy: Array.from(votes.values()),
       time: new Date().toLocaleTimeString()
     };
 
@@ -208,6 +208,7 @@ app.post("/toggle-voting", (req, res) => {
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 );
+
 
 
 
