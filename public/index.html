@@ -4,10 +4,22 @@
   <title>Office Spotify Skip</title>
   <style>
     body {
-      background: #121212;
-      color: white;
-      font-family: Arial, sans-serif;
       margin: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+
+    #bg {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      filter: blur(40px) brightness(0.4);
+      transform: scale(1.2);
+      z-index: -1;
+      transition: background-image 0.6s ease;
     }
 
     .layout {
@@ -16,23 +28,23 @@
 
     .side-panel {
       width: 300px;
-      background: #181818;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(20px);
       padding: 20px;
       height: 100vh;
-      box-shadow: 5px 0 20px rgba(0,0,0,0.6);
     }
 
     .card {
       flex: 1;
       text-align: center;
-      padding: 60px 20px;
+      padding-top: 60px;
     }
 
     #albumCover {
       width: 250px;
       height: 250px;
       border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
       transition: transform 0.3s ease;
     }
 
@@ -43,15 +55,14 @@
     }
 
     #artistName {
-      color: #b3b3b3;
+      color: #ccc;
       margin-bottom: 20px;
     }
 
     .progress-container {
-      background: #333;
+      background: rgba(255,255,255,0.2);
       height: 8px;
       border-radius: 10px;
-      overflow: hidden;
       width: 300px;
       margin: 15px auto;
     }
@@ -60,7 +71,8 @@
       height: 100%;
       width: 0%;
       background: #1DB954;
-      transition: width 0.5s ease;
+      border-radius: 10px;
+      transition: width 0.4s ease;
     }
 
     #skipBtn {
@@ -70,12 +82,11 @@
       border-radius: 50px;
       font-size: 18px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: 0.2s ease;
     }
 
     #skipBtn:hover {
       transform: scale(1.05);
-      background: #1ed760;
     }
 
     #skipBtn:disabled {
@@ -85,31 +96,30 @@
     ul {
       list-style: none;
       padding: 0;
-      color: #b3b3b3;
     }
 
     .admin {
       margin-top: 40px;
-      font-size: 12px;
-      color: #888;
     }
 
     input {
       padding: 6px;
-      margin: 4px;
       border-radius: 6px;
       border: none;
+      margin: 4px;
     }
 
     button.small {
       padding: 6px 12px;
-      font-size: 12px;
       border-radius: 6px;
+      font-size: 12px;
     }
   </style>
 </head>
 
 <body>
+
+<div id="bg"></div>
 
 <div class="layout">
 
@@ -138,10 +148,18 @@
     <ul id="voters"></ul>
 
     <div class="admin">
-      <input id="adminPassword" type="password" placeholder="Admin password">
-      <input id="totalInput" type="number" placeholder="People">
-      <button class="small" onclick="setTotal()">Set</button>
-      <button class="small" onclick="toggleVoting()">Toggle</button>
+
+      <div id="adminLogin">
+        <input id="adminPassword" type="password" placeholder="Admin password">
+        <button class="small" onclick="unlockAdmin()">Login</button>
+      </div>
+
+      <div id="adminControls" style="display:none;">
+        <input id="totalInput" type="number" placeholder="People">
+        <button class="small" onclick="setTotal()">Set</button>
+        <button class="small" onclick="toggleVoting()">Toggle</button>
+      </div>
+
     </div>
 
   </div>
@@ -149,151 +167,182 @@
 </div>
 
 <script>
-  const pingSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
-  let lastVoteCount = 0;
+const pingSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+let lastVoteCount = 0;
+let userId = localStorage.getItem("userId");
+let userName = localStorage.getItem("userName");
 
-  let userId = localStorage.getItem("userId");
-  let userName = localStorage.getItem("userName");
+if (!userId) {
+  userId = crypto.randomUUID();
+  localStorage.setItem("userId", userId);
+}
 
-  if (!userId) {
-    userId = crypto.randomUUID();
-    localStorage.setItem("userId", userId);
-  }
+if (!userName) {
+  userName = prompt("Enter your name:");
+  localStorage.setItem("userName", userName);
+}
 
-  if (!userName) {
-    userName = prompt("Enter your name:");
-    localStorage.setItem("userName", userName);
-  }
+function vote() {
+  fetch("/vote", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ userId, name: userName })
+  })
+  .then(res => res.json())
+  .then(updateUI);
+}
 
-  function vote() {
-    fetch("/vote", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ userId, name: userName })
-    })
+function refreshVotes() {
+  fetch("/votes")
     .then(res => res.json())
     .then(updateUI);
+}
+
+function updateUI(data) {
+
+  if (data.count > lastVoteCount) {
+    pingSound.play().catch(()=>{});
+  }
+  lastVoteCount = data.count;
+
+  document.getElementById("result").innerText =
+    `${data.count} / ${data.needed} votes`;
+
+  document.getElementById("progressBar").style.width =
+    (data.count / data.needed) * 100 + "%";
+
+  const voters = document.getElementById("voters");
+  voters.innerHTML = "";
+  data.voters.forEach(v => {
+    const li = document.createElement("li");
+    li.innerText = v;
+    voters.appendChild(li);
+  });
+
+  const btn = document.getElementById("skipBtn");
+
+  if (!data.votingEnabled) {
+    btn.disabled = true;
+    btn.innerText = "Voting Disabled";
+    return;
   }
 
-  function refreshVotes() {
-    fetch("/votes")
-      .then(res => res.json())
-      .then(updateUI);
+  if (data.cooldown) {
+    btn.disabled = true;
+    btn.innerText = "Cooldown...";
+  } else {
+    btn.disabled = false;
+    btn.innerText = "SKIP";
   }
 
-  function loadLastSkip() {
-    fetch("/last-skip")
-      .then(res => res.json())
-      .then(data => {
-        const panel = document.getElementById("lastSkipPanel");
-        if (!data) {
-          panel.innerHTML = "<p>No skips yet</p>";
-          return;
-        }
+  loadLastSkip();
+}
 
-        panel.innerHTML = `
-          <p><strong>Song:</strong><br>${data.song}</p>
-          <p><strong>Skipped By:</strong><br>${data.skippedBy}</p>
-          <p><strong>Time:</strong><br>${data.time}</p>
-        `;
-      });
-  }
-
-  function updateUI(data) {
-
-    if (data.count > lastVoteCount) {
-      pingSound.play().catch(() => {});
-    }
-    lastVoteCount = data.count;
-
-    document.getElementById("result").innerText =
-      `${data.count} / ${data.needed} votes`;
-
-    document.getElementById("progressBar").style.width =
-      (data.count / data.needed) * 100 + "%";
-
-    const voters = document.getElementById("voters");
-    voters.innerHTML = "";
-    data.voters.forEach(v => {
-      const li = document.createElement("li");
-      li.innerText = v;
-      voters.appendChild(li);
-    });
-
-    const btn = document.getElementById("skipBtn");
-
-    if (!data.votingEnabled) {
-      btn.disabled = true;
-      btn.innerText = "Voting Disabled";
-      return;
-    }
-
-    if (data.cooldown) {
-      btn.disabled = true;
-      btn.innerText = "Cooldown...";
-    } else {
-      btn.disabled = false;
-      btn.innerText = "SKIP";
-    }
-
-    loadLastSkip();
-  }
-
-  function loadSong() {
-    fetch("/current-song")
-      .then(res => res.json())
-      .then(data => {
-        if (!data.title) return;
-
-        const parts = data.title.split(" - ");
-        document.getElementById("songTitle").innerText = parts[0];
-        document.getElementById("artistName").innerText = parts[1] || "";
-
-        if (data.image) {
-          const album = document.getElementById("albumCover");
-          album.src = data.image;
-          album.style.transform = "scale(0.95)";
-          setTimeout(() => album.style.transform = "scale(1)", 150);
-        }
-      });
-  }
-
-  function setTotal() {
-    const total = document.getElementById("totalInput").value;
-    const password = document.getElementById("adminPassword").value;
-
-    fetch("/set-total", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ total, password })
-    })
+function loadSong() {
+  fetch("/current-song")
     .then(res => res.json())
     .then(data => {
-      if (!data.success) alert("Wrong password");
-    });
-  }
 
-  function toggleVoting() {
-    const password = document.getElementById("adminPassword").value;
+      if (!data.title) return;
+
+      const parts = data.title.split(" - ");
+      document.getElementById("songTitle").innerText = parts[0];
+      document.getElementById("artistName").innerText = parts[1] || "";
+
+      if (data.image) {
+        document.getElementById("albumCover").src = data.image;
+        document.getElementById("bg").style.backgroundImage = `url(${data.image})`;
+      }
+    });
+}
+
+function loadLastSkip() {
+  fetch("/last-skip")
+    .then(res => res.json())
+    .then(data => {
+
+      const panel = document.getElementById("lastSkipPanel");
+
+      if (!data) {
+        panel.innerHTML = "<p>No skips yet</p>";
+        return;
+      }
+
+      panel.innerHTML = `
+        <p><strong>Song:</strong><br>${data.song}</p>
+        <p><strong>Skipped By:</strong></p>
+        <ul>
+          ${data.skippedBy.map(name => `<li>${name}</li>`).join("")}
+        </ul>
+        <p><strong>Time:</strong><br>${data.time}</p>
+      `;
+    });
+}
+
+function unlockAdmin() {
+  const password = document.getElementById("adminPassword").value;
+
+  fetch("/toggle-voting", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ password })
+  })
+  .then(res => {
+    if (res.status === 403) {
+      alert("Wrong password");
+      return;
+    }
 
     fetch("/toggle-voting", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({ password })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (!data.success) alert("Wrong password");
     });
-  }
 
-  loadSong();
-  refreshVotes();
-  loadLastSkip();
+    document.getElementById("adminLogin").style.display = "none";
+    document.getElementById("adminControls").style.display = "block";
 
-  setInterval(loadSong, 10000);
-  setInterval(refreshVotes, 3000);
-  setInterval(loadLastSkip, 5000);
+    localStorage.setItem("adminUnlocked", "true");
+  });
+}
+
+function setTotal() {
+  const total = document.getElementById("totalInput").value;
+  const password = document.getElementById("adminPassword").value;
+
+  fetch("/set-total", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ total, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data.success) alert("Wrong password");
+  });
+}
+
+function toggleVoting() {
+  const password = document.getElementById("adminPassword").value;
+
+  fetch("/toggle-voting", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ password })
+  });
+}
+
+if (localStorage.getItem("adminUnlocked") === "true") {
+  document.getElementById("adminLogin").style.display = "none";
+  document.getElementById("adminControls").style.display = "block";
+}
+
+loadSong();
+refreshVotes();
+loadLastSkip();
+
+setInterval(loadSong, 10000);
+setInterval(refreshVotes, 3000);
+setInterval(loadLastSkip, 5000);
 
 </script>
 
