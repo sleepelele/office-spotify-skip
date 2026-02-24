@@ -1,67 +1,152 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Office Skip Vote</title>
+  <title>Office Spotify Skip</title>
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+    }
+
+    .layout {
+      display: flex;
+    }
+
+    .side-panel {
+      width: 300px;
+      background: #181818;
+      padding: 20px;
+      height: 100vh;
+      box-shadow: 5px 0 20px rgba(0,0,0,0.6);
+    }
+
+    .card {
+      flex: 1;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    #albumCover {
+      width: 250px;
+      height: 250px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      transition: transform 0.3s ease;
+    }
+
+    #songTitle {
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    #artistName {
+      color: #b3b3b3;
+      margin-bottom: 20px;
+    }
+
+    .progress-container {
+      background: #333;
+      height: 8px;
+      border-radius: 10px;
+      overflow: hidden;
+      width: 300px;
+      margin: 15px auto;
+    }
+
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background: #1DB954;
+      transition: width 0.5s ease;
+    }
+
+    #skipBtn {
+      background: #1DB954;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 50px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    #skipBtn:hover {
+      transform: scale(1.05);
+      background: #1ed760;
+    }
+
+    #skipBtn:disabled {
+      background: #555;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      color: #b3b3b3;
+    }
+
+    .admin {
+      margin-top: 40px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    input {
+      padding: 6px;
+      margin: 4px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    button.small {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+  </style>
 </head>
-<body style="text-align:center;font-family:sans-serif;margin-top:80px;background:#f4f6f8;">
 
-  <h1>Office Skip Vote</h1>
+<body>
 
-  <h2 id="currentSong">Loading song...</h2>
+<div class="layout">
 
-  <img id="albumCover"
-     src=""
-     style="width:250px;height:250px;border-radius:20px;margin-top:20px;
-            box-shadow:0 10px 30px rgba(0,0,0,0.3);
-            transition:transform 0.3s ease;">
-
-  <br><br>
-
-  <!-- ADMIN PANEL -->
-  <div style="margin-bottom:30px;padding:15px;background:#ffffff;border-radius:15px;display:inline-block;box-shadow:0 5px 15px rgba(0,0,0,0.1);">
-    
-    <input id="adminPassword" type="password" placeholder="Admin password"
-      style="padding:8px;border-radius:8px;border:1px solid #ccc;">
-
-    <br><br>
-
-    <input id="totalInput" type="number" placeholder="Number of people"
-      style="padding:8px;border-radius:8px;border:1px solid #ccc;">
-    <button onclick="setTotal()">Set Total</button>
-
-    <br><br>
-
-    <button onclick="toggleVoting()">Toggle Voting On / Off</button>
-  </div>
-
-  <!-- SKIP BUTTON -->
-  <br>
-
-  <button id="skipBtn" onclick="vote()"
-    style="
-      font-size:28px;
-      padding:18px 40px;
-      border:none;
-      border-radius:40px;
-      background:linear-gradient(135deg,#ff4081,#f50057);
-      color:white;
-      cursor:pointer;
-      transition:all 0.2s ease;
-    ">
-    SKIP
-  </button>
-
-  <p id="result" style="margin-top:20px;font-size:18px;"></p>
-
-  <h3>Voters:</h3>
-  <ul id="voters" style="list-style:none;padding:0;"></ul>
-
-  <!-- Progress Bar -->
-  <div style="width:60%;margin:20px auto;background:#ddd;height:25px;border-radius:20px;overflow:hidden;">
-    <div id="progressBar"
-      style="height:100%;width:0%;background:linear-gradient(90deg,#4caf50,#81c784);transition:width 0.5s ease;">
+  <div class="side-panel">
+    <h3>Last Skip</h3>
+    <div id="lastSkipPanel">
+      <p>No skips yet</p>
     </div>
   </div>
+
+  <div class="card">
+
+    <img id="albumCover" src="">
+
+    <div id="songTitle">Loading...</div>
+    <div id="artistName"></div>
+
+    <div class="progress-container">
+      <div id="progressBar"></div>
+    </div>
+
+    <div id="result"></div>
+
+    <button id="skipBtn" onclick="vote()">SKIP</button>
+
+    <ul id="voters"></ul>
+
+    <div class="admin">
+      <input id="adminPassword" type="password" placeholder="Admin password">
+      <input id="totalInput" type="number" placeholder="People">
+      <button class="small" onclick="setTotal()">Set</button>
+      <button class="small" onclick="toggleVoting()">Toggle</button>
+    </div>
+
+  </div>
+
+</div>
 
 <script>
   const pingSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
@@ -76,15 +161,11 @@
   }
 
   if (!userName) {
-    userName = prompt("Enter your name (only once):");
+    userName = prompt("Enter your name:");
     localStorage.setItem("userName", userName);
   }
 
   function vote() {
-    const btn = document.getElementById("skipBtn");
-    btn.style.transform = "scale(0.95)";
-    setTimeout(() => btn.style.transform = "scale(1)", 150);
-
     fetch("/vote", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
@@ -100,6 +181,24 @@
       .then(updateUI);
   }
 
+  function loadLastSkip() {
+    fetch("/last-skip")
+      .then(res => res.json())
+      .then(data => {
+        const panel = document.getElementById("lastSkipPanel");
+        if (!data) {
+          panel.innerHTML = "<p>No skips yet</p>";
+          return;
+        }
+
+        panel.innerHTML = `
+          <p><strong>Song:</strong><br>${data.song}</p>
+          <p><strong>Skipped By:</strong><br>${data.skippedBy}</p>
+          <p><strong>Time:</strong><br>${data.time}</p>
+        `;
+      });
+  }
+
   function updateUI(data) {
 
     if (data.count > lastVoteCount) {
@@ -108,51 +207,50 @@
     lastVoteCount = data.count;
 
     document.getElementById("result").innerText =
-      `Votes: ${data.count}/${data.needed}`;
+      `${data.count} / ${data.needed} votes`;
 
-    const voterList = document.getElementById("voters");
-    voterList.innerHTML = "";
+    document.getElementById("progressBar").style.width =
+      (data.count / data.needed) * 100 + "%";
 
+    const voters = document.getElementById("voters");
+    voters.innerHTML = "";
     data.voters.forEach(v => {
       const li = document.createElement("li");
       li.innerText = v;
-      li.style.opacity = "0";
-      li.style.transition = "opacity 0.5s";
-      voterList.appendChild(li);
-      setTimeout(() => li.style.opacity = "1", 50);
+      voters.appendChild(li);
     });
 
-    const percentage = (data.count / data.needed) * 100;
-    document.getElementById("progressBar").style.width =
-      Math.min(percentage, 100) + "%";
-
-    const button = document.getElementById("skipBtn");
+    const btn = document.getElementById("skipBtn");
 
     if (!data.votingEnabled) {
-      button.disabled = true;
-      button.innerText = "Voting Disabled";
+      btn.disabled = true;
+      btn.innerText = "Voting Disabled";
       return;
     }
 
     if (data.cooldown) {
-      button.disabled = true;
-      button.innerText = "Cooldown...";
+      btn.disabled = true;
+      btn.innerText = "Cooldown...";
     } else {
-      button.disabled = false;
-      button.innerText = "SKIP";
+      btn.disabled = false;
+      btn.innerText = "SKIP";
     }
+
+    loadLastSkip();
   }
 
   function loadSong() {
     fetch("/current-song")
       .then(res => res.json())
       .then(data => {
+        if (!data.title) return;
 
-        document.getElementById("currentSong").innerText = data.title;
-
-        const album = document.getElementById("albumCover");
+        const parts = data.title.split(" - ");
+        document.getElementById("songTitle").innerText = parts[0];
+        document.getElementById("artistName").innerText = parts[1] || "";
 
         if (data.image) {
+          const album = document.getElementById("albumCover");
           album.src = data.image;
           album.style.transform = "scale(0.95)";
           setTimeout(() => album.style.transform = "scale(1)", 150);
@@ -161,21 +259,17 @@
   }
 
   function setTotal() {
-    const value = document.getElementById("totalInput").value;
+    const total = document.getElementById("totalInput").value;
     const password = document.getElementById("adminPassword").value;
 
     fetch("/set-total", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ total: value, password })
+      body: JSON.stringify({ total, password })
     })
     .then(res => res.json())
     .then(data => {
-      if (data.success) {
-        alert("Total updated");
-      } else {
-        alert("Wrong password");
-      }
+      if (!data.success) alert("Wrong password");
     });
   }
 
@@ -189,19 +283,17 @@
     })
     .then(res => res.json())
     .then(data => {
-      if (!data.success) {
-        alert("Wrong password");
-      } else {
-        alert("Voting is now " + (data.votingEnabled ? "ENABLED" : "DISABLED"));
-      }
+      if (!data.success) alert("Wrong password");
     });
   }
 
   loadSong();
   refreshVotes();
+  loadLastSkip();
 
   setInterval(loadSong, 10000);
   setInterval(refreshVotes, 3000);
+  setInterval(loadLastSkip, 5000);
 
 </script>
 
