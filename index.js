@@ -17,10 +17,21 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
-/* ===================== */
+/* ================= UTIL ================= */
 
 function majority() {
   return Math.floor(totalPeople / 2) + 1;
+}
+
+function buildVoteResponse(message = "") {
+  return {
+    count: votes.size,
+    needed: majority(),
+    voters: Array.from(votes.values()),
+    cooldown,
+    votingEnabled,
+    message
+  };
 }
 
 async function getAccessToken() {
@@ -50,7 +61,7 @@ async function skipTrack() {
   );
 }
 
-/* ===================== VOTE ===================== */
+/* ================= VOTE ================= */
 
 app.post("/vote", async (req, res) => {
 
@@ -99,23 +110,11 @@ app.post("/vote", async (req, res) => {
   res.json(buildVoteResponse("Vote registered"));
 });
 
-function buildVoteResponse(message) {
-  return {
-    count: votes.size,
-    needed: majority(),
-    voters: Array.from(votes.values()),
-    cooldown,
-    votingEnabled,
-    message
-  };
-}
-
-/* ===================== CURRENT SONG ===================== */
+/* ================= SONG ================= */
 
 app.get("/current-song", async (req, res) => {
   try {
     const token = await getAccessToken();
-
     const response = await axios.get(
       "https://api.spotify.com/v1/me/player/currently-playing",
       { headers: { Authorization: `Bearer ${token}` } }
@@ -127,7 +126,6 @@ app.get("/current-song", async (req, res) => {
 
     const songId = response.data.item.id;
 
-    // SONG CHANGED → clear votes + cooldown
     if (lastSongId && lastSongId !== songId) {
       votes.clear();
       cooldown = false;
@@ -149,17 +147,17 @@ app.get("/current-song", async (req, res) => {
   }
 });
 
-/* ===================== STATUS ===================== */
+/* ================= STATUS ================= */
 
 app.get("/votes", (req, res) => {
-  res.json(buildVoteResponse(""));
+  res.json(buildVoteResponse());
 });
 
 app.get("/last-skip", (req, res) => {
   res.json(lastSkipInfo);
 });
 
-/* ===================== ADMIN ===================== */
+/* ================= ADMIN ================= */
 
 app.post("/admin-auth", (req, res) => {
   if (req.body.password === process.env.ADMIN_PASSWORD) {
@@ -195,4 +193,5 @@ app.post("/toggle-voting", (req, res) => {
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 );
+
 
