@@ -9,6 +9,7 @@ app.use(express.static("public"));
 let votes = new Map();
 let cooldown = false;
 let votingEnabled = true;
+let soundEnabled = true; // 🔊 NEW
 let totalPeople = process.env.TOTAL_PEOPLE || 5;
 let lastSongId = null;
 let lastSkipInfo = null;
@@ -30,6 +31,7 @@ function buildVoteResponse(message = "") {
     voters: Array.from(votes.values()),
     cooldown,
     votingEnabled,
+    soundEnabled, // 🔊 included
     message
   };
 }
@@ -61,7 +63,7 @@ async function skipTrack() {
   );
 }
 
-/* ================= VOTING ================= */
+/* ================= VOTE ================= */
 
 app.post("/vote", async (req, res) => {
 
@@ -126,7 +128,6 @@ app.get("/current-song", async (req, res) => {
 
     const songId = response.data.item.id;
 
-    // Song changed → reset votes visually
     if (lastSongId && lastSongId !== songId) {
       votes.clear();
       cooldown = false;
@@ -191,9 +192,15 @@ app.post("/toggle-voting", (req, res) => {
   res.json({ success: true, votingEnabled });
 });
 
+app.post("/toggle-sound", (req, res) => {
+  if (req.body.password !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ success: false });
+  }
+
+  soundEnabled = !soundEnabled;
+  res.json({ success: true, soundEnabled });
+});
+
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 );
-
-
-
