@@ -3,24 +3,148 @@
 <head>
 <title>Office Spotify Skip</title>
 <style>
-/* same styling as before — unchanged */
-body { margin:0;font-family:Arial;background:black;color:white;overflow:hidden;}
-#bg{position:fixed;width:100%;height:100%;background-size:cover;background-position:center;filter:blur(60px) brightness(0.4);transform:scale(1.2);z-index:-1;transition:background-image 0.6s ease;}
-.layout{display:flex;}
-.side-panel{width:280px;background:rgba(0,0,0,0.6);padding:20px;backdrop-filter:blur(20px);height:100vh;}
-.container{flex:1;text-align:center;padding-top:80px;}
-#albumCover{width:250px;border-radius:15px;}
-.progress-container{background:rgba(255,255,255,0.2);height:8px;border-radius:10px;width:300px;margin:15px auto;}
-#progressBar{height:100%;width:0%;background:#1DB954;border-radius:10px;}
-#voteCounter{font-size:20px;margin-top:10px;transition:transform 0.2s ease;}
-#skipBtn{background:#1DB954;border:none;padding:15px 40px;border-radius:50px;font-size:18px;cursor:pointer;}
-#adminBtn{position:fixed;bottom:20px;right:20px;background:#1DB954;border-radius:50%;width:55px;height:55px;border:none;font-size:20px;cursor:pointer;}
-#adminPanel{position:fixed;bottom:90px;right:20px;background:#181818;padding:15px;border-radius:10px;display:none;width:200px;}
-input{width:100%;margin-bottom:8px;padding:6px;}
-button.small{width:100%;margin-top:5px;}
-ul{list-style:none;padding:0;}
+body {
+  margin: 0;
+  font-family: Arial;
+  background: black;
+  color: white;
+  overflow: hidden;
+}
+
+/* Background blur */
+#bg {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(60px) brightness(0.4);
+  transform: scale(1.2);
+  z-index: -1;
+  transition: background-image 0.6s ease;
+}
+
+.layout { display: flex; }
+
+.side-panel {
+  width: 280px;
+  background: rgba(0,0,0,0.6);
+  padding: 20px;
+  backdrop-filter: blur(20px);
+  height: 100vh;
+}
+
+.container {
+  flex: 1;
+  text-align: center;
+  padding-top: 80px;
+}
+
+#albumCover {
+  width: 250px;
+  border-radius: 15px;
+}
+
+.progress-container {
+  background: rgba(255,255,255,0.2);
+  height: 8px;
+  border-radius: 10px;
+  width: 300px;
+  margin: 15px auto;
+}
+
+#progressBar {
+  height: 100%;
+  width: 0%;
+  background: #1DB954;
+  border-radius: 10px;
+}
+
+#voteCounter {
+  font-size: 20px;
+  margin-top: 10px;
+  transition: transform 0.2s ease;
+}
+
+#skipBtn {
+  background: #1DB954;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 50px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Admin Button */
+#adminBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #1DB954;
+  border-radius: 50%;
+  width: 55px;
+  height: 55px;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Admin Panel */
+#adminPanel {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  background: #181818;
+  padding: 15px;
+  border-radius: 10px;
+  display: none;
+  width: 220px;
+}
+
+input { width: 100%; margin-bottom: 10px; padding: 6px; }
+
+.switch-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+}
+
+/* Switch style */
+.switch {
+  width: 50px;
+  height: 24px;
+  background: red;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.switch::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s;
+}
+
+.switch.on {
+  background: #1DB954;
+}
+
+.switch.on::after {
+  transform: translateX(26px);
+}
+
+ul { list-style: none; padding: 0; }
 </style>
 </head>
+
 <body>
 
 <div id="bg"></div>
@@ -47,22 +171,35 @@ ul{list-style:none;padding:0;}
 
 <ul id="voters"></ul>
 </div>
+
 </div>
 
-<button id="adminBtn" onclick="adminButtonClick()">⚙</button>
+<button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
 
 <div id="adminPanel">
+
 <div id="loginSection">
 <input type="password" id="adminPasswordInput" placeholder="Admin password">
-<button class="small" onclick="adminLogin()">Login</button>
+<button onclick="adminLogin()">Login</button>
 </div>
 
 <div id="adminControls" style="display:none;">
+
 <input id="totalInput" type="number" placeholder="People">
-<button class="small" onclick="setTotal()">Set People</button>
-<button class="small" onclick="toggleVoting()">Toggle Voting</button>
-<button class="small" onclick="toggleSound()">Toggle Ping Sound</button>
+<button onclick="setTotal()">Set People</button>
+
+<div class="switch-row">
+<span>Voting</span>
+<div id="votingSwitch" class="switch" onclick="toggleVoting()"></div>
 </div>
+
+<div class="switch-row">
+<span>Ping Sound</span>
+<div id="soundSwitch" class="switch" onclick="toggleSound()"></div>
+</div>
+
+</div>
+
 </div>
 
 <script>
@@ -72,7 +209,6 @@ let userId = localStorage.getItem("userId");
 let userName = localStorage.getItem("userName");
 let adminLoggedIn = false;
 let lastCount = 0;
-let soundEnabled = true;
 
 if (!userId) {
   userId = crypto.randomUUID();
@@ -99,14 +235,18 @@ updateUI(data);
 }
 
 function updateUI(data){
+
+if(data.count !== lastCount){
+document.getElementById("voteCounter").style.transform="scale(1.3)";
+setTimeout(()=>document.getElementById("voteCounter").style.transform="scale(1)",200);
+}
 lastCount=data.count;
-soundEnabled=data.soundEnabled;
 
 document.getElementById("voteCounter").innerText =
 `${data.count} / ${data.needed} votes`;
 
 const percent=data.needed>0?(data.count/data.needed)*100:0;
-document.getElementById("progressBar").style.width=
+document.getElementById("progressBar").style.width =
 Math.min(percent,100)+"%";
 
 const list=document.getElementById("voters");
@@ -116,6 +256,18 @@ const li=document.createElement("li");
 li.innerText=v;
 list.appendChild(li);
 });
+
+updateSwitch("votingSwitch", data.votingEnabled);
+updateSwitch("soundSwitch", data.soundEnabled);
+}
+
+function updateSwitch(id, state){
+const el = document.getElementById(id);
+if(state){
+el.classList.add("on");
+}else{
+el.classList.remove("on");
+}
 }
 
 function loadVotes(){
@@ -153,7 +305,7 @@ panel.innerHTML=`
 });
 }
 
-function adminButtonClick(){
+function toggleAdminPanel(){
 const panel=document.getElementById("adminPanel");
 panel.style.display = panel.style.display==="none"?"block":"none";
 }
@@ -183,7 +335,8 @@ fetch("/set-total",{method:"POST",headers:{"Content-Type":"application/json"},bo
 
 function toggleVoting(){
 const password=document.getElementById("adminPasswordInput").value;
-fetch("/toggle-voting",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password})});
+fetch("/toggle-voting",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password})})
+.then(()=>loadVotes());
 }
 
 function toggleSound(){
