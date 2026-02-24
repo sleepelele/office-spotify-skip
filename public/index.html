@@ -3,26 +3,44 @@
 <head>
   <title>Office Skip Vote</title>
 </head>
-<body style="text-align:center;font-family:sans-serif;margin-top:100px;">
+<body style="text-align:center;font-family:sans-serif;margin-top:80px;background:#f4f6f8;">
 
   <h1>Office Skip Vote</h1>
+
   <h2 id="currentSong">Loading song...</h2>
+
   <img id="albumCover"
      src=""
      style="width:250px;height:250px;border-radius:20px;margin-top:20px;
             box-shadow:0 10px 30px rgba(0,0,0,0.3);
             transition:transform 0.3s ease;">
 
-  <div style="margin-bottom:20px;">
+  <br><br>
+
+  <!-- ADMIN PANEL -->
+  <div style="margin-bottom:30px;padding:15px;background:#ffffff;border-radius:15px;display:inline-block;box-shadow:0 5px 15px rgba(0,0,0,0.1);">
+    
+    <input id="adminPassword" type="password" placeholder="Admin password"
+      style="padding:8px;border-radius:8px;border:1px solid #ccc;">
+
+    <br><br>
+
     <input id="totalInput" type="number" placeholder="Number of people"
-      style="padding:10px;border-radius:10px;border:1px solid #ccc;">
-    <button onclick="setTotal()">Set</button>
+      style="padding:8px;border-radius:8px;border:1px solid #ccc;">
+    <button onclick="setTotal()">Set Total</button>
+
+    <br><br>
+
+    <button onclick="toggleVoting()">Toggle Voting On / Off</button>
   </div>
+
+  <!-- SKIP BUTTON -->
+  <br>
 
   <button id="skipBtn" onclick="vote()"
     style="
-      font-size:30px;
-      padding:20px 40px;
+      font-size:28px;
+      padding:18px 40px;
       border:none;
       border-radius:40px;
       background:linear-gradient(135deg,#ff4081,#f50057);
@@ -33,10 +51,10 @@
     SKIP
   </button>
 
-  <p id="result"></p>
+  <p id="result" style="margin-top:20px;font-size:18px;"></p>
 
   <h3>Voters:</h3>
-  <ul id="voters"></ul>
+  <ul id="voters" style="list-style:none;padding:0;"></ul>
 
   <!-- Progress Bar -->
   <div style="width:60%;margin:20px auto;background:#ddd;height:25px;border-radius:20px;overflow:hidden;">
@@ -48,6 +66,7 @@
 <script>
   const pingSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
   let lastVoteCount = 0;
+
   let userId = localStorage.getItem("userId");
   let userName = localStorage.getItem("userName");
 
@@ -82,10 +101,12 @@
   }
 
   function updateUI(data) {
+
     if (data.count > lastVoteCount) {
-  pingSound.play().catch(() => {});
-}
-lastVoteCount = data.count;
+      pingSound.play().catch(() => {});
+    }
+    lastVoteCount = data.count;
+
     document.getElementById("result").innerText =
       `Votes: ${data.count}/${data.needed}`;
 
@@ -106,6 +127,13 @@ lastVoteCount = data.count;
       Math.min(percentage, 100) + "%";
 
     const button = document.getElementById("skipBtn");
+
+    if (!data.votingEnabled) {
+      button.disabled = true;
+      button.innerText = "Voting Disabled";
+      return;
+    }
+
     if (data.cooldown) {
       button.disabled = true;
       button.innerText = "Cooldown...";
@@ -115,39 +143,56 @@ lastVoteCount = data.count;
     }
   }
 
- function loadSong() {
-  fetch("/current-song")
-    .then(res => res.json())
-    .then(data => {
+  function loadSong() {
+    fetch("/current-song")
+      .then(res => res.json())
+      .then(data => {
 
-      document.getElementById("currentSong").innerText = data.title;
+        document.getElementById("currentSong").innerText = data.title;
 
-      const album = document.getElementById("albumCover");
+        const album = document.getElementById("albumCover");
 
-      if (data.image) {
-        album.src = data.image;
-
-        // small animation when song changes
-        album.style.transform = "scale(0.95)";
-        setTimeout(() => {
-          album.style.transform = "scale(1)";
-        }, 150);
-      }
-    });
+        if (data.image) {
+          album.src = data.image;
+          album.style.transform = "scale(0.95)";
+          setTimeout(() => album.style.transform = "scale(1)", 150);
+        }
+      });
   }
 
   function setTotal() {
     const value = document.getElementById("totalInput").value;
+    const password = document.getElementById("adminPassword").value;
 
     fetch("/set-total", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ total: value })
+      body: JSON.stringify({ total: value, password })
     })
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        alert("Updated total people");
+        alert("Total updated");
+      } else {
+        alert("Wrong password");
+      }
+    });
+  }
+
+  function toggleVoting() {
+    const password = document.getElementById("adminPassword").value;
+
+    fetch("/toggle-voting", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ password })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) {
+        alert("Wrong password");
+      } else {
+        alert("Voting is now " + (data.votingEnabled ? "ENABLED" : "DISABLED"));
       }
     });
   }
