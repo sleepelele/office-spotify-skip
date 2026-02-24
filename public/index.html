@@ -6,12 +6,11 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  color: white;
   background: black;
+  color: white;
   overflow: hidden;
 }
 
-/* Blurred album background */
 #bg {
   position: fixed;
   width: 100%;
@@ -24,7 +23,20 @@ body {
   transition: background-image 0.6s ease;
 }
 
+.layout {
+  display: flex;
+}
+
+.side-panel {
+  width: 280px;
+  background: rgba(0,0,0,0.6);
+  padding: 20px;
+  backdrop-filter: blur(20px);
+  height: 100vh;
+}
+
 .container {
+  flex: 1;
   text-align: center;
   padding-top: 80px;
 }
@@ -34,12 +46,6 @@ body {
   border-radius: 15px;
 }
 
-.vote-counter {
-  font-size: 22px;
-  margin-top: 10px;
-  transition: transform 0.3s ease;
-}
-
 .progress-container {
   background: rgba(255,255,255,0.2);
   height: 8px;
@@ -47,11 +53,18 @@ body {
   width: 300px;
   margin: 15px auto;
 }
+
 #progressBar {
   height: 100%;
   width: 0%;
   background: #1DB954;
   border-radius: 10px;
+}
+
+#voteCounter {
+  font-size: 20px;
+  margin-top: 10px;
+  transition: transform 0.2s ease;
 }
 
 #skipBtn {
@@ -63,30 +76,6 @@ body {
   cursor: pointer;
 }
 
-/* Sound wave visualizer */
-.wave {
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-  margin-top: 15px;
-}
-.bar {
-  width: 4px;
-  height: 10px;
-  background: #1DB954;
-  animation: bounce 1s infinite ease-in-out;
-}
-.bar:nth-child(2){animation-delay:0.1s;}
-.bar:nth-child(3){animation-delay:0.2s;}
-.bar:nth-child(4){animation-delay:0.3s;}
-.bar:nth-child(5){animation-delay:0.4s;}
-
-@keyframes bounce {
-  0%,100%{height:10px;}
-  50%{height:30px;}
-}
-
-/* Admin */
 #adminBtn {
   position: fixed;
   bottom: 20px;
@@ -110,8 +99,10 @@ body {
   display: none;
   width: 200px;
 }
+
 input { width: 100%; margin-bottom: 8px; padding: 6px; }
 button.small { width: 100%; margin-top: 5px; }
+ul { list-style: none; padding: 0; }
 </style>
 </head>
 
@@ -119,31 +110,32 @@ button.small { width: 100%; margin-top: 5px; }
 
 <div id="bg"></div>
 
+<div class="layout">
+
+<div class="side-panel">
+<h3>Last Skip</h3>
+<div id="lastSkipPanel">No skips yet</div>
+</div>
+
 <div class="container">
 <img id="albumCover">
 <h2 id="songTitle">Loading...</h2>
 <div id="artistName"></div>
 
-<div class="wave">
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-<div class="bar"></div>
-</div>
-
 <div class="progress-container">
 <div id="progressBar"></div>
 </div>
 
-<div id="voteCounter" class="vote-counter">0 / 0 votes</div>
+<div id="voteCounter">0 / 0 votes</div>
 
 <button id="skipBtn" onclick="vote()">SKIP</button>
 
 <ul id="voters"></ul>
 </div>
 
-<button id="adminBtn" onclick="showLogin()">⚙</button>
+</div>
+
+<button id="adminBtn" onclick="adminButtonClick()">⚙</button>
 
 <div id="adminPanel">
 <div id="loginSection">
@@ -161,6 +153,7 @@ button.small { width: 100%; margin-top: 5px; }
 <script>
 let userId = localStorage.getItem("userId");
 let userName = localStorage.getItem("userName");
+let adminLoggedIn = false;
 let lastCount = 0;
 
 if (!userId) {
@@ -183,7 +176,6 @@ body:JSON.stringify({userId,name:userName})
 }
 
 function updateUI(data){
-
 if(data.count !== lastCount){
 document.getElementById("voteCounter").style.transform="scale(1.3)";
 setTimeout(()=>document.getElementById("voteCounter").style.transform="scale(1)",200);
@@ -207,9 +199,7 @@ list.appendChild(li);
 }
 
 function loadVotes(){
-fetch("/votes")
-.then(res=>res.json())
-.then(updateUI);
+fetch("/votes").then(res=>res.json()).then(updateUI);
 }
 
 function loadSong(){
@@ -228,8 +218,31 @@ loadVotes();
 });
 }
 
-function showLogin(){
+function loadLastSkip(){
+fetch("/last-skip")
+.then(res=>res.json())
+.then(data=>{
+const panel=document.getElementById("lastSkipPanel");
+if(!data){
+panel.innerHTML="No skips yet";
+return;
+}
+panel.innerHTML=`
+<p><strong>Song:</strong><br>${data.song}</p>
+<p><strong>Skipped By:</strong></p>
+<ul>${data.skippedBy.map(n=>`<li>${n}</li>`).join("")}</ul>
+<p><strong>Time:</strong><br>${data.time}</p>
+`;
+});
+}
+
+function adminButtonClick(){
+if(!adminLoggedIn){
 document.getElementById("adminPanel").style.display="block";
+} else {
+const panel=document.getElementById("adminPanel");
+panel.style.display = panel.style.display==="none"?"block":"none";
+}
 }
 
 function adminLogin(){
@@ -242,29 +255,30 @@ body:JSON.stringify({password})
 })
 .then(res=>{
 if(res.status===403){alert("Wrong password");return;}
+adminLoggedIn=true;
 document.getElementById("loginSection").style.display="none";
 document.getElementById("adminControls").style.display="block";
-document.getElementById("adminBtn").style.display="none";
-localStorage.setItem("adminPassword",password);
 });
 }
 
 function setTotal(){
 const total=document.getElementById("totalInput").value;
-const password=localStorage.getItem("adminPassword");
+const password=document.getElementById("adminPasswordInput").value;
 fetch("/set-total",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({total,password})})
 .then(()=>loadVotes());
 }
 
 function toggleVoting(){
-const password=localStorage.getItem("adminPassword");
+const password=document.getElementById("adminPasswordInput").value;
 fetch("/toggle-voting",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({password})});
 }
 
 loadSong();
 loadVotes();
+loadLastSkip();
 
 setInterval(loadSong,10000);
+setInterval(loadLastSkip,5000);
 </script>
 
 </body>
