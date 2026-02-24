@@ -55,27 +55,13 @@ async function skipTrack() {
 app.post("/vote", async (req, res) => {
 
   if (!votingEnabled) {
-    return res.json({
-      count: votes.size,
-      needed: majority(),
-      voters: Array.from(votes.values()),
-      cooldown,
-      votingEnabled,
-      message: "Voting disabled"
-    });
+    return res.json(buildVoteResponse("Voting disabled"));
   }
 
   const { userId, name } = req.body;
 
   if (cooldown) {
-    return res.json({
-      count: votes.size,
-      needed: majority(),
-      voters: Array.from(votes.values()),
-      cooldown,
-      votingEnabled,
-      message: "Cooldown active"
-    });
+    return res.json(buildVoteResponse("Cooldown active"));
   }
 
   votes.set(userId, name);
@@ -89,7 +75,7 @@ app.post("/vote", async (req, res) => {
     );
 
     let songName = "Unknown";
-    if (response.data && response.data.item) {
+    if (response.data?.item) {
       songName =
         response.data.item.name +
         " - " +
@@ -107,25 +93,22 @@ app.post("/vote", async (req, res) => {
     cooldown = true;
     setTimeout(() => (cooldown = false), 60000);
 
-    return res.json({
-      count: 0,
-      needed: majority(),
-      voters: [],
-      cooldown,
-      votingEnabled,
-      message: "Song skipped!"
-    });
+    return res.json(buildVoteResponse("Song skipped!"));
   }
 
-  res.json({
+  res.json(buildVoteResponse("Vote registered"));
+});
+
+function buildVoteResponse(message) {
+  return {
     count: votes.size,
     needed: majority(),
     voters: Array.from(votes.values()),
     cooldown,
     votingEnabled,
-    message: "Vote registered"
-  });
-});
+    message
+  };
+}
 
 /* ===================== CURRENT SONG ===================== */
 
@@ -138,12 +121,13 @@ app.get("/current-song", async (req, res) => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    if (!response.data || !response.data.item) {
+    if (!response.data?.item) {
       return res.json({ title: "Nothing playing", image: null });
     }
 
     const songId = response.data.item.id;
 
+    // SONG CHANGED → clear votes + cooldown
     if (lastSongId && lastSongId !== songId) {
       votes.clear();
       cooldown = false;
@@ -168,13 +152,7 @@ app.get("/current-song", async (req, res) => {
 /* ===================== STATUS ===================== */
 
 app.get("/votes", (req, res) => {
-  res.json({
-    count: votes.size,
-    needed: majority(),
-    voters: Array.from(votes.values()),
-    cooldown,
-    votingEnabled
-  });
+  res.json(buildVoteResponse(""));
 });
 
 app.get("/last-skip", (req, res) => {
@@ -184,22 +162,18 @@ app.get("/last-skip", (req, res) => {
 /* ===================== ADMIN ===================== */
 
 app.post("/admin-auth", (req, res) => {
-  const { password } = req.body;
-  if (password === process.env.ADMIN_PASSWORD) {
+  if (req.body.password === process.env.ADMIN_PASSWORD) {
     return res.json({ success: true });
   }
   res.status(403).json({ success: false });
 });
 
 app.post("/set-total", (req, res) => {
-  const { total, password } = req.body;
-
-  if (password !== process.env.ADMIN_PASSWORD) {
+  if (req.body.password !== process.env.ADMIN_PASSWORD) {
     return res.status(403).json({ success: false });
   }
 
-  const newTotal = parseInt(total);
-
+  const newTotal = parseInt(req.body.total);
   if (!isNaN(newTotal) && newTotal > 0) {
     totalPeople = newTotal;
     votes.clear();
@@ -210,20 +184,15 @@ app.post("/set-total", (req, res) => {
 });
 
 app.post("/toggle-voting", (req, res) => {
-  const { password } = req.body;
-
-  if (password !== process.env.ADMIN_PASSWORD) {
+  if (req.body.password !== process.env.ADMIN_PASSWORD) {
     return res.status(403).json({ success: false });
   }
 
   votingEnabled = !votingEnabled;
-
-  res.json({
-    success: true,
-    votingEnabled
-  });
+  res.json({ success: true, votingEnabled });
 });
 
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 );
+
