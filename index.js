@@ -8,11 +8,13 @@ app.use(express.static("public"));
 
 let votes = new Map();
 let cooldown = false;
+let votingEnabled = true;
 
 let totalPeople = process.env.TOTAL_PEOPLE || 5;
+let lastSongId = null;
+
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-let lastSongId = null;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
 function majority() {
@@ -48,9 +50,21 @@ async function skipTrack() {
   );
 }
 
+/* =========================
+   VOTE ROUTE
+========================= */
+
 app.post("/vote", async (req, res) => {
+
+  if (!votingEnabled) {
+    return res.json({
+      message: "Voting is currently disabled by admin.",
+      voters: Array.from(votes.values())
+    });
+  }
+
   const userId = req.body.userId;
-const name = req.body.name;
+  const name = req.body.name;
 
   if (cooldown) {
     return res.json({
@@ -59,13 +73,14 @@ const name = req.body.name;
     });
   }
 
-votes.set(userId, name);
+  votes.set(userId, name);
 
   if (votes.size >= majority()) {
     await skipTrack();
     votes.clear();
     cooldown = true;
-    setTimeout(() => (cooldown = false), 60000); // 1 min cooldown
+    setTimeout(() => (cooldown = false), 60000);
+
     return res.json({
       message: "Song skipped!",
       voters: []
@@ -77,6 +92,11 @@ votes.set(userId, name);
     voters: Array.from(votes.values())
   });
 });
+
+/* =========================
+   CURRENT SONG
+========================= */
+
 app.get("/current-song", async (req, res) => {
   try {
     const token = await getAccessToken();
@@ -89,41 +109,61 @@ app.get("/current-song", async (req, res) => {
     );
 
     if (!response.data || !response.data.item) {
-      return res.json({ title: "Nothing playing" });
+      return res.json({ title: "Nothing playing", image: null });
     }
-const songId = response.data.item.id;
+
+    const songId = response.data.item.id;
+
     if (lastSongId && lastSongId !== songId) {
-  votes.clear();
-  cooldown = false;
-}
+      votes.clear();
+      cooldown = false;
+    }
 
-lastSongId = songId;
-const song = response.data.item.name;
-const artist = response.data.item.artists
-  .map(a => a.name)
-  .join(", ");
+    lastSongId = songId;
 
-const albumImage = response.data.item.album.images[0]?.url || null;
+    const song = response.data.item.name;
+    const artist = response.data.item.artists
+      .map(a => a.name)
+      .join(", ");
 
-res.json({
-  title: `${song} - ${artist}`,
-  image: albumImage
-});
+    const albumImage = response.data.item.album.images[0]?.url || null;
+
+    res.json({
+      title: `${song} - ${artist}`,
+      image: albumImage
+    });
 
   } catch (err) {
-    res.json({ title: "Error getting song" });
+    res.json({ title: "Error getting song", image: null });
   }
 });
+
+/* =========================
+   VOTE STATUS
+========================= */
+
 app.get("/votes", (req, res) => {
   res.json({
     count: votes.size,
     needed: majority(),
     voters: Array.from(votes.values()),
-    cooldown
+    cooldown,
+    votingEnabled
   });
 });
+
+/* =========================
+   ADMIN - SET TOTAL
+========================= */
+
 app.post("/set-total", (req, res) => {
-  const newTotal = parseInt(req.body.total);
+  const { total, password } = req.body;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  const newTotal = parseInt(total);
 
   if (!isNaN(newTotal) && newTotal > 0) {
     totalPeople = newTotal;
@@ -133,9 +173,28 @@ app.post("/set-total", (req, res) => {
 
   res.json({ success: false });
 });
+
+/* =========================
+   ADMIN - TOGGLE VOTING
+========================= */
+
+app.post("/toggle-voting", (req, res) => {
+  const { password } = req.body;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ success: false });
+  }
+
+  votingEnabled = !votingEnabled;
+
+  res.json({
+    success: true,
+    votingEnabled
+  });
+});
+
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
-
 );
 
 
