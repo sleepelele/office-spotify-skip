@@ -9,13 +9,15 @@ app.use(express.static("public"));
 let votes = new Map();
 let cooldown = false;
 let votingEnabled = true;
-
 let totalPeople = process.env.TOTAL_PEOPLE || 5;
 let lastSongId = null;
+let lastSkipInfo = null;
 
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+
+/* ===================== */
 
 function majority() {
   return Math.floor(totalPeople / 2) + 1;
@@ -32,7 +34,7 @@ async function getAccessToken() {
       headers: {
         Authorization:
           "Basic " +
-          Buffer.from(process.env.CLIENT_ID + ":" + process.env.CLIENT_SECRET).toString("base64"),
+          Buffer.from(CLIENT_ID + ":" + CLIENT_SECRET).toString("base64"),
       },
     }
   );
@@ -50,15 +52,13 @@ async function skipTrack() {
   );
 }
 
-/* =========================
-   VOTE ROUTE
-========================= */
+/* ===================== VOTE ===================== */
 
 app.post("/vote", async (req, res) => {
 
   if (!votingEnabled) {
     return res.json({
-      message: "Voting is currently disabled by admin.",
+      message: "Voting disabled by admin.",
       voters: Array.from(votes.values())
     });
   }
@@ -76,6 +76,27 @@ app.post("/vote", async (req, res) => {
   votes.set(userId, name);
 
   if (votes.size >= majority()) {
+
+    const token = await getAccessToken();
+    const response = await axios.get(
+      "https://api.spotify.com/v1/me/player/currently-playing",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    let songName = "Unknown";
+    if (response.data && response.data.item) {
+      songName =
+        response.data.item.name +
+        " - " +
+        response.data.item.artists.map(a => a.name).join(", ");
+    }
+
+    lastSkipInfo = {
+      song: songName,
+      skippedBy: name,
+      time: new Date().toLocaleTimeString()
+    };
+
     await skipTrack();
     votes.clear();
     cooldown = true;
@@ -93,9 +114,7 @@ app.post("/vote", async (req, res) => {
   });
 });
 
-/* =========================
-   CURRENT SONG
-========================= */
+/* ===================== CURRENT SONG ===================== */
 
 app.get("/current-song", async (req, res) => {
   try {
@@ -103,9 +122,7 @@ app.get("/current-song", async (req, res) => {
 
     const response = await axios.get(
       "https://api.spotify.com/v1/me/player/currently-playing",
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
 
     if (!response.data || !response.data.item) {
@@ -122,10 +139,7 @@ app.get("/current-song", async (req, res) => {
     lastSongId = songId;
 
     const song = response.data.item.name;
-    const artist = response.data.item.artists
-      .map(a => a.name)
-      .join(", ");
-
+    const artist = response.data.item.artists.map(a => a.name).join(", ");
     const albumImage = response.data.item.album.images[0]?.url || null;
 
     res.json({
@@ -138,9 +152,7 @@ app.get("/current-song", async (req, res) => {
   }
 });
 
-/* =========================
-   VOTE STATUS
-========================= */
+/* ===================== VOTES STATUS ===================== */
 
 app.get("/votes", (req, res) => {
   res.json({
@@ -152,15 +164,19 @@ app.get("/votes", (req, res) => {
   });
 });
 
-/* =========================
-   ADMIN - SET TOTAL
-========================= */
+/* ===================== LAST SKIP ===================== */
+
+app.get("/last-skip", (req, res) => {
+  res.json(lastSkipInfo);
+});
+
+/* ===================== ADMIN ===================== */
 
 app.post("/set-total", (req, res) => {
   const { total, password } = req.body;
 
   if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(403).json({ success: false, message: "Unauthorized" });
+    return res.status(403).json({ success: false });
   }
 
   const newTotal = parseInt(total);
@@ -173,10 +189,6 @@ app.post("/set-total", (req, res) => {
 
   res.json({ success: false });
 });
-
-/* =========================
-   ADMIN - TOGGLE VOTING
-========================= */
 
 app.post("/toggle-voting", (req, res) => {
   const { password } = req.body;
@@ -196,6 +208,7 @@ app.post("/toggle-voting", (req, res) => {
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 );
+
 
 
 
