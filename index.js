@@ -61,7 +61,7 @@ async function skipTrack() {
   );
 }
 
-/* ================= VOTE ================= */
+/* ================= VOTING ================= */
 
 app.post("/vote", async (req, res) => {
 
@@ -110,7 +110,7 @@ app.post("/vote", async (req, res) => {
   res.json(buildVoteResponse("Vote registered"));
 });
 
-/* ================= SONG ================= */
+/* ================= CURRENT SONG ================= */
 
 app.get("/current-song", async (req, res) => {
   try {
@@ -126,6 +126,7 @@ app.get("/current-song", async (req, res) => {
 
     const songId = response.data.item.id;
 
+    // Song changed → reset votes visually
     if (lastSongId && lastSongId !== songId) {
       votes.clear();
       cooldown = false;
@@ -193,5 +194,6 @@ app.post("/toggle-voting", (req, res) => {
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 );
+
 
 
