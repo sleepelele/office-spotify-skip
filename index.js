@@ -46,9 +46,7 @@ async function skipTrack() {
   await axios.post(
     "https://api.spotify.com/v1/me/player/next",
     {},
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
+    { headers: { Authorization: `Bearer ${token}` } }
   );
 }
 
@@ -63,8 +61,7 @@ app.post("/vote", async (req, res) => {
     });
   }
 
-  const userId = req.body.userId;
-  const name = req.body.name;
+  const { userId, name } = req.body;
 
   if (cooldown) {
     return res.json({
@@ -152,7 +149,7 @@ app.get("/current-song", async (req, res) => {
   }
 });
 
-/* ===================== VOTES STATUS ===================== */
+/* ===================== STATUS ===================== */
 
 app.get("/votes", (req, res) => {
   res.json({
@@ -163,8 +160,6 @@ app.get("/votes", (req, res) => {
     votingEnabled
   });
 });
-
-/* ===================== LAST SKIP ===================== */
 
 app.get("/last-skip", (req, res) => {
   res.json(lastSkipInfo);
