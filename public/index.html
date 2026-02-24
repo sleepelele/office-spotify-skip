@@ -7,57 +7,38 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   color: white;
+  background: black;
   overflow: hidden;
-  background: #000;
 }
 
-/* Animated gradient pulse */
-body::before {
-  content: "";
-  position: fixed;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg,#1db954,#191414,#ff0080,#1db954);
-  background-size: 400% 400%;
-  animation: gradientMove 12s ease infinite;
-  opacity: 0.15;
-  z-index: -3;
-}
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
+/* Blurred album background */
 #bg {
   position: fixed;
   width: 100%;
   height: 100%;
   background-size: cover;
   background-position: center;
-  filter: blur(50px) brightness(0.4);
+  filter: blur(60px) brightness(0.4);
   transform: scale(1.2);
-  z-index: -2;
+  z-index: -1;
   transition: background-image 0.6s ease;
 }
 
-.layout { display: flex; }
-
-.side-panel {
-  width: 280px;
-  padding: 20px;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(20px);
-  height: 100vh;
-}
-
 .container {
-  flex: 1;
   text-align: center;
   padding-top: 80px;
 }
 
-#albumCover { width: 250px; border-radius: 15px; }
+#albumCover {
+  width: 250px;
+  border-radius: 15px;
+}
+
+.vote-counter {
+  font-size: 22px;
+  margin-top: 10px;
+  transition: transform 0.3s ease;
+}
 
 .progress-container {
   background: rgba(255,255,255,0.2);
@@ -82,16 +63,39 @@ body::before {
   cursor: pointer;
 }
 
+/* Sound wave visualizer */
+.wave {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 15px;
+}
+.bar {
+  width: 4px;
+  height: 10px;
+  background: #1DB954;
+  animation: bounce 1s infinite ease-in-out;
+}
+.bar:nth-child(2){animation-delay:0.1s;}
+.bar:nth-child(3){animation-delay:0.2s;}
+.bar:nth-child(4){animation-delay:0.3s;}
+.bar:nth-child(5){animation-delay:0.4s;}
+
+@keyframes bounce {
+  0%,100%{height:10px;}
+  50%{height:30px;}
+}
+
+/* Admin */
 #adminBtn {
   position: fixed;
   bottom: 20px;
   right: 20px;
   background: #1DB954;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 55px;
+  height: 55px;
   border: none;
-  color: white;
   font-size: 20px;
   cursor: pointer;
 }
@@ -106,8 +110,6 @@ body::before {
   display: none;
   width: 200px;
 }
-
-ul { list-style: none; padding: 0; }
 input { width: 100%; margin-bottom: 8px; padding: 6px; }
 button.small { width: 100%; margin-top: 5px; }
 </style>
@@ -117,34 +119,38 @@ button.small { width: 100%; margin-top: 5px; }
 
 <div id="bg"></div>
 
-<div class="layout">
-
-<div class="side-panel">
-<h3>Last Skip</h3>
-<div id="lastSkipPanel"><p>No skips yet</p></div>
-</div>
-
 <div class="container">
 <img id="albumCover">
-<div id="songTitle">Loading...</div>
+<h2 id="songTitle">Loading...</h2>
 <div id="artistName"></div>
+
+<div class="wave">
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+<div class="bar"></div>
+</div>
 
 <div class="progress-container">
 <div id="progressBar"></div>
 </div>
 
-<div id="result">0 / 0 votes</div>
+<div id="voteCounter" class="vote-counter">0 / 0 votes</div>
 
 <button id="skipBtn" onclick="vote()">SKIP</button>
 
 <ul id="voters"></ul>
 </div>
 
-</div>
-
-<button id="adminBtn" onclick="adminLogin()">⚙</button>
+<button id="adminBtn" onclick="showLogin()">⚙</button>
 
 <div id="adminPanel">
+<div id="loginSection">
+<input type="password" id="adminPasswordInput" placeholder="Admin password">
+<button class="small" onclick="adminLogin()">Login</button>
+</div>
+
 <div id="adminControls" style="display:none;">
 <input id="totalInput" type="number" placeholder="People">
 <button class="small" onclick="setTotal()">Set People</button>
@@ -155,6 +161,7 @@ button.small { width: 100%; margin-top: 5px; }
 <script>
 let userId = localStorage.getItem("userId");
 let userName = localStorage.getItem("userName");
+let lastCount = 0;
 
 if (!userId) {
   userId = crypto.randomUUID();
@@ -176,7 +183,14 @@ body:JSON.stringify({userId,name:userName})
 }
 
 function updateUI(data){
-document.getElementById("result").innerText =
+
+if(data.count !== lastCount){
+document.getElementById("voteCounter").style.transform="scale(1.3)";
+setTimeout(()=>document.getElementById("voteCounter").style.transform="scale(1)",200);
+}
+lastCount=data.count;
+
+document.getElementById("voteCounter").innerText =
 `${data.count} / ${data.needed} votes`;
 
 const percent=data.needed>0?(data.count/data.needed)*100:0;
@@ -210,31 +224,16 @@ if(data.image){
 document.getElementById("albumCover").src=data.image;
 document.getElementById("bg").style.backgroundImage=`url(${data.image})`;
 }
-loadVotes(); // 🔥 ensures votes reset visually when song changes
+loadVotes();
 });
 }
 
-function loadLastSkip(){
-fetch("/last-skip")
-.then(res=>res.json())
-.then(data=>{
-const panel=document.getElementById("lastSkipPanel");
-if(!data){
-panel.innerHTML="<p>No skips yet</p>";
-return;
-}
-panel.innerHTML=`
-<p><strong>Song:</strong><br>${data.song}</p>
-<p><strong>Skipped By:</strong></p>
-<ul>${data.skippedBy.map(n=>`<li>${n}</li>`).join("")}</ul>
-<p><strong>Time:</strong><br>${data.time}</p>
-`;
-});
+function showLogin(){
+document.getElementById("adminPanel").style.display="block";
 }
 
 function adminLogin(){
-const password=prompt("Enter admin password:");
-if(!password)return;
+const password=document.getElementById("adminPasswordInput").value;
 
 fetch("/admin-auth",{
 method:"POST",
@@ -243,8 +242,9 @@ body:JSON.stringify({password})
 })
 .then(res=>{
 if(res.status===403){alert("Wrong password");return;}
-document.getElementById("adminPanel").style.display="block";
+document.getElementById("loginSection").style.display="none";
 document.getElementById("adminControls").style.display="block";
+document.getElementById("adminBtn").style.display="none";
 localStorage.setItem("adminPassword",password);
 });
 }
@@ -262,11 +262,9 @@ fetch("/toggle-voting",{method:"POST",headers:{"Content-Type":"application/json"
 }
 
 loadSong();
-loadVotes(); // 🔥 shows 0 / needed immediately
-loadLastSkip();
+loadVotes();
 
 setInterval(loadSong,10000);
-setInterval(loadLastSkip,5000);
 </script>
 
 </body>
