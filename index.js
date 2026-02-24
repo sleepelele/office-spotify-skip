@@ -56,8 +56,12 @@ app.post("/vote", async (req, res) => {
 
   if (!votingEnabled) {
     return res.json({
-      message: "Voting disabled by admin.",
-      voters: Array.from(votes.values())
+      count: votes.size,
+      needed: majority(),
+      voters: Array.from(votes.values()),
+      cooldown,
+      votingEnabled,
+      message: "Voting disabled"
     });
   }
 
@@ -65,8 +69,12 @@ app.post("/vote", async (req, res) => {
 
   if (cooldown) {
     return res.json({
-      message: "Cooldown active.",
-      voters: Array.from(votes.values())
+      count: votes.size,
+      needed: majority(),
+      voters: Array.from(votes.values()),
+      cooldown,
+      votingEnabled,
+      message: "Cooldown active"
     });
   }
 
@@ -100,14 +108,22 @@ app.post("/vote", async (req, res) => {
     setTimeout(() => (cooldown = false), 60000);
 
     return res.json({
-      message: "Song skipped!",
-      voters: []
+      count: 0,
+      needed: majority(),
+      voters: [],
+      cooldown,
+      votingEnabled,
+      message: "Song skipped!"
     });
   }
 
   res.json({
-    message: `Votes: ${votes.size}/${majority()}`,
-    voters: Array.from(votes.values())
+    count: votes.size,
+    needed: majority(),
+    voters: Array.from(votes.values()),
+    cooldown,
+    votingEnabled,
+    message: "Vote registered"
   });
 });
 
@@ -144,7 +160,7 @@ app.get("/current-song", async (req, res) => {
       image: albumImage
     });
 
-  } catch (err) {
+  } catch {
     res.json({ title: "Error getting song", image: null });
   }
 });
@@ -166,6 +182,14 @@ app.get("/last-skip", (req, res) => {
 });
 
 /* ===================== ADMIN ===================== */
+
+app.post("/admin-auth", (req, res) => {
+  const { password } = req.body;
+  if (password === process.env.ADMIN_PASSWORD) {
+    return res.json({ success: true });
+  }
+  res.status(403).json({ success: false });
+});
 
 app.post("/set-total", (req, res) => {
   const { total, password } = req.body;
@@ -203,14 +227,3 @@ app.post("/toggle-voting", (req, res) => {
 app.listen(process.env.PORT || 3000, () =>
   console.log("Server started")
 );
-
-
-
-
-
-
-
-
-
-
-
