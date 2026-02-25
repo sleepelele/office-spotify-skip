@@ -222,8 +222,12 @@ ul { list-style: none; padding: 0; }
 </div>
 
 </div>
-
+<script src="/socket.io/socket.io.js"></script>
 <script>
+  const socket = io();
+  socket.on("voteUpdate", (data) => {
+  updateUI(data);
+});
 const pingSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
 
 let userId = localStorage.getItem("userId");
