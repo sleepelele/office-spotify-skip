@@ -229,6 +229,17 @@ ul { list-style: none; padding: 0; }
   updateUI(data);
 });
 const pingSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+  let audioUnlocked = false;
+
+document.addEventListener("click", () => {
+  if (!audioUnlocked) {
+    pingSound.play().then(() => {
+      pingSound.pause();
+      pingSound.currentTime = 0;
+      audioUnlocked = true;
+    }).catch(() => {});
+  }
+});
 
 let userId = localStorage.getItem("userId");
 let userName = localStorage.getItem("userName");
@@ -252,14 +263,14 @@ body:JSON.stringify({userId,name:userName})
 })
 .then(res=>res.json())
 .then(data=>{
-if(data.soundEnabled && data.count > lastCount){
-pingSound.play().catch(()=>{});
-}
 updateUI(data);
 });
 }
 
 function updateUI(data){
+  if(data.count > lastCount && data.soundEnabled){
+  pingSound.play().catch(()=>{});
+}
 
 if(data.count !== lastCount){
 document.getElementById("voteCounter").style.transform="scale(1.3)";
