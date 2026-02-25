@@ -1,7 +1,12 @@
 console.log("CLIENT_ID:", process.env.CLIENT_ID);
 const express = require("express");
 const axios = require("axios");
+const http = require("http");
+const { Server } = require("socket.io");
+
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
 app.use(express.json());
 app.use(express.static("public"));
@@ -78,6 +83,7 @@ app.post("/vote", async (req, res) => {
   }
 
   votes.set(userId, name);
+  io.emit("voteUpdate", buildVoteResponse());
 
   if (votes.size >= majority()) {
 
@@ -103,6 +109,7 @@ app.post("/vote", async (req, res) => {
 
     await skipTrack();
     votes.clear();
+    io.emit("voteUpdate", buildVoteResponse("Song skipped!"));
     cooldown = true;
     setTimeout(() => (cooldown = false), 60000);
 
@@ -131,6 +138,7 @@ app.get("/current-song", async (req, res) => {
     if (lastSongId && lastSongId !== songId) {
       votes.clear();
       cooldown = false;
+      io.emit("voteUpdate", buildVoteResponse());
     }
 
     lastSongId = songId;
@@ -201,6 +209,7 @@ app.post("/toggle-sound", (req, res) => {
   res.json({ success: true, soundEnabled });
 });
 
-app.listen(process.env.PORT || 3000, () =>
-  console.log("Server started")
+server.listen(process.env.PORT || 3000, () =>
+  console.log("Server with WebSockets started")
 );
+
