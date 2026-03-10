@@ -14,6 +14,8 @@ color:white;
 overflow:hidden;
 }
 
+/* blurred background */
+
 #bg{
 position:fixed;
 width:100%;
@@ -24,6 +26,8 @@ filter:blur(60px) brightness(0.4);
 transform:scale(1.2);
 z-index:-1;
 }
+
+/* layout */
 
 .layout{display:flex;}
 
@@ -41,15 +45,17 @@ padding-top:80px;
 }
 
 #albumCover{
-width:250px;
+width:260px;
 border-radius:15px;
 }
 
+/* progress */
+
 .progress-container{
 background:rgba(255,255,255,0.2);
-height:8px;
+height:10px;
 border-radius:10px;
-width:300px;
+width:320px;
 margin:15px auto;
 }
 
@@ -57,6 +63,61 @@ margin:15px auto;
 height:100%;
 width:0%;
 background:#1DB954;
+border-radius:10px;
+}
+
+/* SKIP BUTTON */
+
+#skipBtn{
+
+background:#1DB954;
+border:none;
+padding:18px 55px;
+border-radius:60px;
+font-size:22px;
+font-weight:bold;
+color:white;
+cursor:pointer;
+margin-top:20px;
+
+box-shadow:0 0 15px rgba(29,185,84,0.6);
+
+transition:all .2s;
+
+}
+
+#skipBtn:hover{
+
+transform:scale(1.08);
+
+box-shadow:0 0 25px rgba(29,185,84,0.9);
+
+}
+
+/* admin */
+
+#adminBtn{
+position:fixed;
+bottom:20px;
+right:20px;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#1DB954;
+border:none;
+font-size:20px;
+cursor:pointer;
+}
+
+#adminPanel{
+position:fixed;
+bottom:90px;
+right:20px;
+background:#181818;
+padding:15px;
+border-radius:10px;
+display:none;
+width:220px;
 }
 
 .switch{
@@ -90,34 +151,32 @@ align-items:center;
 margin:8px 0;
 }
 
-#adminBtn{
-position:fixed;
-bottom:20px;
-right:20px;
-width:55px;
-height:55px;
-border-radius:50%;
-background:#1DB954;
-border:none;
-font-size:20px;
-cursor:pointer;
-}
-
-#adminPanel{
-position:fixed;
-bottom:90px;
-right:20px;
-background:#181818;
-padding:15px;
-border-radius:10px;
-display:none;
-width:220px;
-}
-
 #adminMessage{
 margin-top:10px;
 font-size:13px;
 color:#1DB954;
+}
+
+/* GIFS */
+
+#cornerGif{
+position:fixed;
+bottom:20px;
+left:20px;
+width:140px;
+pointer-events:none;
+z-index:5;
+opacity:.9;
+}
+
+#topRightGif{
+position:fixed;
+top:20px;
+right:20px;
+width:120px;
+pointer-events:none;
+z-index:5;
+opacity:.95;
 }
 
 </style>
@@ -126,6 +185,9 @@ color:#1DB954;
 <body>
 
 <div id="bg"></div>
+
+<img id="cornerGif" src="/dancer.gif">
+<img id="topRightGif" src="/penguin.gif">
 
 <div class="layout">
 
@@ -148,7 +210,7 @@ color:#1DB954;
 
 <div id="voteCounter">0 / 0 votes</div>
 
-<button onclick="vote()">SKIP</button>
+<button id="skipBtn" onclick="vote()">SKIP</button>
 
 <ul id="voters"></ul>
 
@@ -157,11 +219,14 @@ color:#1DB954;
 
 <button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
 
+<!-- ADMIN PANEL -->
+
 <div id="adminPanel">
 
 <div id="loginSection">
 
 <input type="password" id="adminPasswordInput" placeholder="Admin password">
+
 <button onclick="adminLogin()">Login</button>
 
 </div>
@@ -198,25 +263,25 @@ color:#1DB954;
 
 <script>
 
-const socket = io();
+const socket=io();
 
-const pingSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+const pingSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
 
-let userId = localStorage.getItem("userId");
-let userName = localStorage.getItem("userName");
-let lastCount = 0;
+let userId=localStorage.getItem("userId");
+let userName=localStorage.getItem("userName");
+let lastCount=0;
 
 if(!userId){
-userId = crypto.randomUUID();
-localStorage.setItem("userId", userId);
+userId=crypto.randomUUID();
+localStorage.setItem("userId",userId);
 }
 
 if(!userName){
-userName = prompt("Enter your name:");
-localStorage.setItem("userName", userName);
+userName=prompt("Enter your name:");
+localStorage.setItem("userName",userName);
 }
 
-socket.on("voteUpdate", data => updateUI(data));
+socket.on("voteUpdate",data=>updateUI(data));
 
 function vote(){
 
@@ -323,7 +388,7 @@ panel.innerHTML=`
 
 function toggleAdminPanel(){
 const panel=document.getElementById("adminPanel");
-panel.style.display = panel.style.display==="none"?"block":"none";
+panel.style.display=panel.style.display==="none"?"block":"none";
 }
 
 function adminLogin(){
