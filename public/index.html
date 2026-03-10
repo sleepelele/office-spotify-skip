@@ -14,7 +14,7 @@ color:white;
 overflow:hidden;
 }
 
-/* BACKGROUND */
+/* blurred background */
 
 #bg{
 position:fixed;
@@ -27,7 +27,7 @@ transform:scale(1.2);
 z-index:-1;
 }
 
-/* LAYOUT */
+/* layout */
 
 .layout{display:flex;}
 
@@ -36,7 +36,6 @@ width:280px;
 background:rgba(0,0,0,0.6);
 padding:20px;
 height:100vh;
-overflow:auto;
 }
 
 .container{
@@ -50,7 +49,7 @@ width:260px;
 border-radius:15px;
 }
 
-/* PROGRESS */
+/* progress */
 
 .progress-container{
 background:rgba(255,255,255,0.2);
@@ -73,7 +72,7 @@ border-radius:10px;
 
 background:#1DB954;
 border:none;
-padding:20px 60px;
+padding:18px 55px;
 border-radius:60px;
 font-size:22px;
 font-weight:bold;
@@ -90,11 +89,12 @@ transition:all .2s;
 #skipBtn:hover{
 
 transform:scale(1.08);
+
 box-shadow:0 0 25px rgba(29,185,84,0.9);
 
 }
 
-/* ADMIN */
+/* admin */
 
 #adminBtn{
 position:fixed;
@@ -117,7 +117,7 @@ background:#181818;
 padding:15px;
 border-radius:10px;
 display:none;
-width:250px;
+width:220px;
 }
 
 .switch{
@@ -179,16 +179,6 @@ z-index:5;
 opacity:.95;
 }
 
-ul{
-list-style:none;
-padding:0;
-}
-
-button.small{
-margin-left:6px;
-font-size:12px;
-}
-
 </style>
 </head>
 
@@ -202,20 +192,8 @@ font-size:12px;
 <div class="layout">
 
 <div class="side-panel">
-
 <h3>Last Skip</h3>
 <div id="lastSkipPanel">No skips yet</div>
-
-<hr>
-
-<h3>Connected Users</h3>
-<ul id="userList"></ul>
-
-<hr>
-
-<h3>Top Skippers</h3>
-<ul id="leaderboard"></ul>
-
 </div>
 
 <div class="container">
@@ -241,16 +219,22 @@ font-size:12px;
 
 <button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
 
+<!-- ADMIN PANEL -->
+
 <div id="adminPanel">
 
 <div id="loginSection">
 
 <input type="password" id="adminPasswordInput" placeholder="Admin password">
+
 <button onclick="adminLogin()">Login</button>
 
 </div>
 
 <div id="adminControls" style="display:none">
+
+<input id="totalInput" type="number" placeholder="People">
+<button onclick="setTotal()">Set People</button>
 
 <div class="switch-row">
 <span>Voting</span>
@@ -267,6 +251,7 @@ font-size:12px;
 <input id="banName" placeholder="Name">
 
 <button onclick="banUser()">Ban</button>
+<button onclick="clearVotes()">Clear Votes</button>
 
 <div id="adminMessage"></div>
 
@@ -326,8 +311,6 @@ const percent=data.needed>0?(data.count/data.needed)*100:0;
 document.getElementById("progressBar").style.width =
 Math.min(percent,100)+"%";
 
-/* VOTERS */
-
 const list=document.getElementById("voters");
 list.innerHTML="";
 
@@ -337,54 +320,23 @@ li.innerText=v;
 list.appendChild(li);
 });
 
-/* SWITCHES */
-
 updateSwitch("votingSwitch",data.votingEnabled);
 updateSwitch("soundSwitch",data.soundEnabled);
-
-/* ADMIN MESSAGE */
 
 if(data.message){
 document.getElementById("adminMessage").innerText=data.message;
 }
 
-/* USERS */
-
-const userList=document.getElementById("userList");
-userList.innerHTML="";
-
-data.users.forEach(u=>{
-const li=document.createElement("li");
-li.innerHTML=`${u} <button class="small" onclick="banUser('${u}')">🚫</button>`;
-userList.appendChild(li);
-});
-
-/* LEADERBOARD */
-
-const lb=document.getElementById("leaderboard");
-lb.innerHTML="";
-
-data.leaderboard.forEach(p=>{
-const li=document.createElement("li");
-li.innerText=`${p.name} — ${p.count}`;
-lb.appendChild(li);
-});
-
 }
 
 function updateSwitch(id,state){
-
 const el=document.getElementById(id);
-
-if(state){
-el.classList.add("on");
-}else{
-el.classList.remove("on");
+state?el.classList.add("on"):el.classList.remove("on");
 }
 
+function loadVotes(){
+fetch("/votes").then(res=>res.json()).then(updateUI);
 }
-
-/* SONG */
 
 function loadSong(){
 
@@ -404,11 +356,11 @@ document.getElementById("albumCover").src=data.image;
 document.getElementById("bg").style.backgroundImage=`url(${data.image})`;
 }
 
+loadVotes();
+
 });
 
 }
-
-/* LAST SKIP */
 
 function loadLastSkip(){
 
@@ -434,13 +386,9 @@ panel.innerHTML=`
 
 }
 
-/* ADMIN */
-
 function toggleAdminPanel(){
-
 const panel=document.getElementById("adminPanel");
 panel.style.display=panel.style.display==="none"?"block":"none";
-
 }
 
 function adminLogin(){
@@ -453,15 +401,22 @@ headers:{"Content-Type":"application/json"},
 body:JSON.stringify({password})
 })
 .then(res=>{
-
-if(res.status===403){
-alert("Wrong password");
-return;
-}
-
+if(res.status===403){alert("Wrong password");return;}
 document.getElementById("loginSection").style.display="none";
 document.getElementById("adminControls").style.display="block";
+});
 
+}
+
+function setTotal(){
+
+const total=document.getElementById("totalInput").value;
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/set-total",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({total,password})
 });
 
 }
@@ -490,12 +445,9 @@ body:JSON.stringify({password})
 
 }
 
-function banUser(name){
+function banUser(){
 
-if(!name){
-name=document.getElementById("banName").value;
-}
-
+const name=document.getElementById("banName").value;
 const password=document.getElementById("adminPasswordInput").value;
 
 fetch("/ban-user",{
@@ -506,9 +458,20 @@ body:JSON.stringify({name,password})
 
 }
 
-/* LOADERS */
+function clearVotes(){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/clear-votes",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
+});
+
+}
 
 loadSong();
+loadVotes();
 loadLastSkip();
 
 setInterval(loadSong,10000);
@@ -517,4 +480,4 @@ setInterval(loadLastSkip,5000);
 </script>
 
 </body>
-</html>
+</html>l>
