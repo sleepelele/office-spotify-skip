@@ -226,7 +226,6 @@ opacity:.95;
 <div id="loginSection">
 
 <input type="password" id="adminPasswordInput" placeholder="Admin password">
-
 <button onclick="adminLogin()">Login</button>
 
 </div>
@@ -245,6 +244,9 @@ opacity:.95;
 <span>Ping Sound</span>
 <div id="soundSwitch" class="switch" onclick="toggleSound()"></div>
 </div>
+
+<h4>Connected Users</h4>
+<ul id="userList"></ul>
 
 <h4>Ban User</h4>
 
@@ -325,6 +327,18 @@ updateSwitch("soundSwitch",data.soundEnabled);
 
 if(data.message){
 document.getElementById("adminMessage").innerText=data.message;
+}
+
+/* CONNECTED USERS */
+
+if(data.users){
+const list=document.getElementById("userList");
+list.innerHTML="";
+data.users.forEach(u=>{
+const li=document.createElement("li");
+li.innerText=u;
+list.appendChild(li);
+});
 }
 
 }
@@ -480,4 +494,4 @@ setInterval(loadLastSkip,5000);
 </script>
 
 </body>
-</html>l>
+</html>
