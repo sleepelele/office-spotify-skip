@@ -284,6 +284,7 @@ localStorage.setItem("userName",userName);
 }
 
 socket.on("voteUpdate",data=>updateUI(data));
+  socket.emit("registerUser", userName);
 
 function vote(){
 
