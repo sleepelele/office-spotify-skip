@@ -12,7 +12,7 @@ app.use(express.static("public"));
 
 let votes = new Map();
 let bannedNames = new Set();
-let connectedUsers = new Map(); // socketId → name
+let connectedUsers = new Map(); // key: userId
 let cooldown = false;
 let votingEnabled = true;
 let soundEnabled = true;
@@ -30,7 +30,17 @@ io.on("connection", (socket) => {
 
  socket.on("registerUser", (name) => {
 
-  connectedUsers.set(socket.id, name);
+socket.userId = null;
+
+socket.on("registerUser", ({userId,name}) => {
+
+ socket.userId = userId;
+
+ connectedUsers.set(userId,name);
+
+ io.emit("voteUpdate", buildVoteResponse());
+
+});
 
   io.emit("voteUpdate", buildVoteResponse());
 
@@ -38,7 +48,9 @@ io.on("connection", (socket) => {
 
  socket.on("disconnect", () => {
 
-  connectedUsers.delete(socket.id);
+if(socket.userId){
+ connectedUsers.delete(socket.userId);
+}
 
   io.emit("voteUpdate", buildVoteResponse());
 
@@ -106,6 +118,7 @@ app.post("/vote", async (req, res) => {
  }
 
  const { userId, name } = req.body;
+ connectedUsers.set(userId, name);
 
  if (bannedNames.has(name)) {
   return res.json(buildVoteResponse(`User ${name} is banned`));
@@ -297,3 +310,4 @@ app.post("/ban-user", (req, res) => {
 server.listen(process.env.PORT || 3000, () => {
  console.log("Server running");
 });
+
