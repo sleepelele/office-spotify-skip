@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <title>Office Spotify Skip</title>
 
 <style>
@@ -31,7 +32,6 @@ width:280px;
 background:rgba(0,0,0,0.6);
 padding:20px;
 height:100vh;
-backdrop-filter:blur(20px);
 }
 
 .container{
@@ -57,32 +57,53 @@ margin:15px auto;
 height:100%;
 width:0%;
 background:#1DB954;
-border-radius:10px;
 }
 
-#voteCounter{
-font-size:20px;
-margin-top:10px;
-transition:transform 0.2s ease;
-}
-
-#skipBtn{
-background:#1DB954;
-border:none;
-padding:15px 40px;
-border-radius:50px;
-font-size:18px;
+.switch{
+width:50px;
+height:24px;
+background:red;
+border-radius:12px;
+position:relative;
 cursor:pointer;
+margin-left:10px;
+}
+
+.switch::after{
+content:"";
+width:20px;
+height:20px;
+background:white;
+border-radius:50%;
+position:absolute;
+top:2px;
+left:2px;
+transition:transform .3s;
+}
+
+.switch.on{
+background:#1DB954;
+}
+
+.switch.on::after{
+transform:translateX(26px);
+}
+
+.switch-row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin:8px 0;
 }
 
 #adminBtn{
 position:fixed;
 bottom:20px;
 right:20px;
-background:#1DB954;
-border-radius:50%;
 width:55px;
 height:55px;
+border-radius:50%;
+background:#1DB954;
 border:none;
 font-size:20px;
 cursor:pointer;
@@ -99,39 +120,13 @@ display:none;
 width:220px;
 }
 
-input{width:100%;margin-bottom:10px;padding:6px;}
-
-.switch{
-width:50px;
-height:24px;
-background:red;
-border-radius:12px;
-position:relative;
-cursor:pointer;
-}
-
-.switch::after{
-content:"";
-width:20px;
-height:20px;
-background:white;
-border-radius:50%;
-position:absolute;
-top:2px;
-left:2px;
-transition:transform 0.3s;
-}
-
-.switch.on{
-background:#1DB954;
-}
-
-.switch.on::after{
-transform:translateX(26px);
+#adminMessage{
+margin-top:10px;
+font-size:13px;
+color:#1DB954;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -159,7 +154,7 @@ transform:translateX(26px);
 
 <div id="voteCounter">0 / 0 votes</div>
 
-<button id="skipBtn" onclick="vote()">SKIP</button>
+<button onclick="vote()">SKIP</button>
 
 <ul id="voters"></ul>
 
@@ -171,18 +166,24 @@ transform:translateX(26px);
 <div id="adminPanel">
 
 <div id="loginSection">
-
 <input type="password" id="adminPasswordInput" placeholder="Admin password">
-
 <button onclick="adminLogin()">Login</button>
-
 </div>
 
 <div id="adminControls" style="display:none">
 
 <input id="totalInput" type="number" placeholder="People">
-
 <button onclick="setTotal()">Set People</button>
+
+<div class="switch-row">
+<span>Voting</span>
+<div id="votingSwitch" class="switch" onclick="toggleVoting()"></div>
+</div>
+
+<div class="switch-row">
+<span>Ping Sound</span>
+<div id="soundSwitch" class="switch" onclick="toggleSound()"></div>
+</div>
 
 <h4>Ban User</h4>
 
@@ -191,6 +192,8 @@ transform:translateX(26px);
 <button onclick="banUser()">Ban</button>
 
 <button onclick="clearVotes()">Clear Votes</button>
+
+<div id="adminMessage"></div>
 
 </div>
 
@@ -251,44 +254,32 @@ document.getElementById("progressBar").style.width=
 Math.min(percent,100)+"%";
 
 const list=document.getElementById("voters");
-
 list.innerHTML="";
 
 data.voters.forEach(v=>{
-
 const li=document.createElement("li");
-
 li.innerText=v;
-
 list.appendChild(li);
-
 });
+
+updateSwitch("votingSwitch",data.votingEnabled);
+updateSwitch("soundSwitch",data.soundEnabled);
+
+if(data.message){
+document.getElementById("adminMessage").innerText=data.message;
+}
 
 }
 
-function loadSong(){
+function updateSwitch(id,state){
 
-fetch("/current-song")
-.then(res=>res.json())
-.then(data=>{
+const el=document.getElementById(id);
 
-if(!data.title)return;
-
-const parts=data.title.split(" - ");
-
-document.getElementById("songTitle").innerText=parts[0];
-
-document.getElementById("artistName").innerText=parts[1]||"";
-
-if(data.image){
-
-document.getElementById("albumCover").src=data.image;
-
-document.getElementById("bg").style.backgroundImage=`url(${data.image})`;
-
+if(state){
+el.classList.add("on");
+}else{
+el.classList.remove("on");
 }
-
-});
 
 }
 
@@ -312,15 +303,11 @@ body:JSON.stringify({password})
 .then(res=>{
 
 if(res.status===403){
-
 alert("Wrong password");
-
 return;
-
 }
 
 document.getElementById("loginSection").style.display="none";
-
 document.getElementById("adminControls").style.display="block";
 
 });
@@ -330,7 +317,6 @@ document.getElementById("adminControls").style.display="block";
 function setTotal(){
 
 const total=document.getElementById("totalInput").value;
-
 const password=document.getElementById("adminPasswordInput").value;
 
 fetch("/set-total",{
@@ -341,10 +327,33 @@ body:JSON.stringify({total,password})
 
 }
 
+function toggleVoting(){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/toggle-voting",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
+});
+
+}
+
+function toggleSound(){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/toggle-sound",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
+});
+
+}
+
 function banUser(){
 
 const name=document.getElementById("banName").value;
-
 const password=document.getElementById("adminPasswordInput").value;
 
 fetch("/ban-user",{
@@ -366,10 +375,6 @@ body:JSON.stringify({password})
 });
 
 }
-
-setInterval(loadSong,10000);
-
-loadSong();
 
 </script>
 
