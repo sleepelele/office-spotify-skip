@@ -12,7 +12,7 @@ app.use(express.static("public"));
 
 let votes = new Map();
 let bannedNames = new Set();
-let knownUsers = new Set(); // NEW
+let connectedUsers = new Map(); // socketId → name
 let cooldown = false;
 let votingEnabled = true;
 let soundEnabled = true;
@@ -23,6 +23,28 @@ let lastSkipInfo = null;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+
+/* ---------------- SOCKET CONNECTION ---------------- */
+
+io.on("connection", (socket) => {
+
+ socket.on("registerUser", (name) => {
+
+  connectedUsers.set(socket.id, name);
+
+  io.emit("voteUpdate", buildVoteResponse());
+
+ });
+
+ socket.on("disconnect", () => {
+
+  connectedUsers.delete(socket.id);
+
+  io.emit("voteUpdate", buildVoteResponse());
+
+ });
+
+});
 
 /* ---------------- UTIL ---------------- */
 
@@ -35,7 +57,7 @@ function buildVoteResponse(message = "") {
   count: votes.size,
   needed: majority(),
   voters: Array.from(votes.values()),
-  users: Array.from(knownUsers), // NEW
+  users: Array.from(connectedUsers.values()), // LIVE USERS
   cooldown,
   votingEnabled,
   soundEnabled,
@@ -84,8 +106,6 @@ app.post("/vote", async (req, res) => {
  }
 
  const { userId, name } = req.body;
-
- knownUsers.add(name); // NEW
 
  if (bannedNames.has(name)) {
   return res.json(buildVoteResponse(`User ${name} is banned`));
@@ -252,8 +272,6 @@ app.post("/toggle-sound", (req, res) => {
 
 });
 
-/* ---------------- BAN ---------------- */
-
 app.post("/ban-user", (req, res) => {
 
  if (req.body.password !== process.env.ADMIN_PASSWORD) {
@@ -274,23 +292,8 @@ app.post("/ban-user", (req, res) => {
 
 });
 
-app.post("/clear-votes", (req, res) => {
-
- if (req.body.password !== process.env.ADMIN_PASSWORD) {
-  return res.status(403).json({ success: false });
- }
-
- votes.clear();
-
- io.emit("voteUpdate", buildVoteResponse("Votes cleared"));
-
- res.json({ success: true });
-
-});
-
 /* ---------------- START SERVER ---------------- */
 
 server.listen(process.env.PORT || 3000, () => {
  console.log("Server running");
 });
-
