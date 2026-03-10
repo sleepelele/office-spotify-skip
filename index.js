@@ -12,6 +12,7 @@ app.use(express.static("public"));
 
 let votes = new Map();
 let bannedNames = new Set();
+let knownUsers = new Set(); // NEW
 let cooldown = false;
 let votingEnabled = true;
 let soundEnabled = true;
@@ -34,6 +35,7 @@ function buildVoteResponse(message = "") {
   count: votes.size,
   needed: majority(),
   voters: Array.from(votes.values()),
+  users: Array.from(knownUsers), // NEW
   cooldown,
   votingEnabled,
   soundEnabled,
@@ -82,6 +84,8 @@ app.post("/vote", async (req, res) => {
  }
 
  const { userId, name } = req.body;
+
+ knownUsers.add(name); // NEW
 
  if (bannedNames.has(name)) {
   return res.json(buildVoteResponse(`User ${name} is banned`));
