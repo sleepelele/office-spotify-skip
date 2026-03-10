@@ -23,7 +23,7 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
-/* UTIL */
+/* ---------------- UTIL ---------------- */
 
 function majority() {
  return Math.floor(totalPeople / 2) + 1;
@@ -37,7 +37,6 @@ function buildVoteResponse(message = "") {
   cooldown,
   votingEnabled,
   soundEnabled,
-  banned: Array.from(bannedNames),
   message
  };
 }
@@ -71,9 +70,10 @@ async function skipTrack() {
   {},
   { headers: { Authorization: `Bearer ${token}` } }
  );
+
 }
 
-/* VOTING */
+/* ---------------- VOTE ---------------- */
 
 app.post("/vote", async (req, res) => {
 
@@ -84,7 +84,7 @@ app.post("/vote", async (req, res) => {
  const { userId, name } = req.body;
 
  if (bannedNames.has(name)) {
-  return res.json(buildVoteResponse("You are banned from voting"));
+  return res.json(buildVoteResponse(`User ${name} is banned`));
  }
 
  if (cooldown) {
@@ -138,7 +138,7 @@ app.post("/vote", async (req, res) => {
 
 });
 
-/* SONG */
+/* ---------------- CURRENT SONG ---------------- */
 
 app.get("/current-song", async (req, res) => {
 
@@ -180,7 +180,7 @@ app.get("/current-song", async (req, res) => {
 
 });
 
-/* STATUS */
+/* ---------------- STATUS ---------------- */
 
 app.get("/votes", (req, res) => {
  res.json(buildVoteResponse());
@@ -190,7 +190,7 @@ app.get("/last-skip", (req, res) => {
  res.json(lastSkipInfo);
 });
 
-/* ADMIN */
+/* ---------------- ADMIN ---------------- */
 
 app.post("/admin-auth", (req, res) => {
 
@@ -199,6 +199,7 @@ app.post("/admin-auth", (req, res) => {
  }
 
  res.status(403).json({ success: false });
+
 });
 
 app.post("/set-total", (req, res) => {
@@ -216,6 +217,7 @@ app.post("/set-total", (req, res) => {
  }
 
  res.json({ success: true });
+
 });
 
 app.post("/toggle-voting", (req, res) => {
@@ -229,6 +231,7 @@ app.post("/toggle-voting", (req, res) => {
  io.emit("voteUpdate", buildVoteResponse());
 
  res.json({ success: true });
+
 });
 
 app.post("/toggle-sound", (req, res) => {
@@ -242,9 +245,10 @@ app.post("/toggle-sound", (req, res) => {
  io.emit("voteUpdate", buildVoteResponse());
 
  res.json({ success: true });
+
 });
 
-/* BAN */
+/* ---------------- BAN ---------------- */
 
 app.post("/ban-user", (req, res) => {
 
@@ -260,9 +264,10 @@ app.post("/ban-user", (req, res) => {
   if (value === name) votes.delete(key);
  });
 
- io.emit("voteUpdate", buildVoteResponse(`User ${name} is now banned`));
+ io.emit("voteUpdate", buildVoteResponse(`User ${name} banned`));
 
  res.json({ success: true });
+
 });
 
 app.post("/clear-votes", (req, res) => {
@@ -276,8 +281,11 @@ app.post("/clear-votes", (req, res) => {
  io.emit("voteUpdate", buildVoteResponse("Votes cleared"));
 
  res.json({ success: true });
+
 });
 
+/* ---------------- START SERVER ---------------- */
+
 server.listen(process.env.PORT || 3000, () => {
- console.log("Server started");
+ console.log("Server running");
 });
