@@ -66,7 +66,6 @@ background:red;
 border-radius:12px;
 position:relative;
 cursor:pointer;
-margin-left:10px;
 }
 
 .switch::after{
@@ -81,18 +80,13 @@ left:2px;
 transition:transform .3s;
 }
 
-.switch.on{
-background:#1DB954;
-}
-
-.switch.on::after{
-transform:translateX(26px);
-}
+.switch.on{background:#1DB954;}
+.switch.on::after{transform:translateX(26px);}
 
 .switch-row{
 display:flex;
-align-items:center;
 justify-content:space-between;
+align-items:center;
 margin:8px 0;
 }
 
@@ -166,8 +160,10 @@ color:#1DB954;
 <div id="adminPanel">
 
 <div id="loginSection">
+
 <input type="password" id="adminPasswordInput" placeholder="Admin password">
 <button onclick="adminLogin()">Login</button>
+
 </div>
 
 <div id="adminControls" style="display:none">
@@ -190,7 +186,6 @@ color:#1DB954;
 <input id="banName" placeholder="Name">
 
 <button onclick="banUser()">Ban</button>
-
 <button onclick="clearVotes()">Clear Votes</button>
 
 <div id="adminMessage"></div>
@@ -203,27 +198,25 @@ color:#1DB954;
 
 <script>
 
-const socket=io();
+const socket = io();
 
-const pingSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+const pingSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
 
-let userId=localStorage.getItem("userId");
-let userName=localStorage.getItem("userName");
-let lastCount=0;
+let userId = localStorage.getItem("userId");
+let userName = localStorage.getItem("userName");
+let lastCount = 0;
 
 if(!userId){
-userId=crypto.randomUUID();
-localStorage.setItem("userId",userId);
+userId = crypto.randomUUID();
+localStorage.setItem("userId", userId);
 }
 
 if(!userName){
-userName=prompt("Enter your name:");
-localStorage.setItem("userName",userName);
+userName = prompt("Enter your name:");
+localStorage.setItem("userName", userName);
 }
 
-socket.on("voteUpdate",(data)=>{
-updateUI(data);
-});
+socket.on("voteUpdate", data => updateUI(data));
 
 function vote(){
 
@@ -245,12 +238,12 @@ pingSound.play().catch(()=>{});
 
 lastCount=data.count;
 
-document.getElementById("voteCounter").innerText=
+document.getElementById("voteCounter").innerText =
 data.count+" / "+data.needed+" votes";
 
 const percent=data.needed>0?(data.count/data.needed)*100:0;
 
-document.getElementById("progressBar").style.width=
+document.getElementById("progressBar").style.width =
 Math.min(percent,100)+"%";
 
 const list=document.getElementById("voters");
@@ -272,23 +265,65 @@ document.getElementById("adminMessage").innerText=data.message;
 }
 
 function updateSwitch(id,state){
-
 const el=document.getElementById(id);
-
-if(state){
-el.classList.add("on");
-}else{
-el.classList.remove("on");
+state?el.classList.add("on"):el.classList.remove("on");
 }
+
+function loadVotes(){
+fetch("/votes").then(res=>res.json()).then(updateUI);
+}
+
+function loadSong(){
+
+fetch("/current-song")
+.then(res=>res.json())
+.then(data=>{
+
+if(!data.title)return;
+
+const parts=data.title.split(" - ");
+
+document.getElementById("songTitle").innerText=parts[0];
+document.getElementById("artistName").innerText=parts[1]||"";
+
+if(data.image){
+document.getElementById("albumCover").src=data.image;
+document.getElementById("bg").style.backgroundImage=`url(${data.image})`;
+}
+
+loadVotes();
+
+});
+
+}
+
+function loadLastSkip(){
+
+fetch("/last-skip")
+.then(res=>res.json())
+.then(data=>{
+
+const panel=document.getElementById("lastSkipPanel");
+
+if(!data){
+panel.innerHTML="No skips yet";
+return;
+}
+
+panel.innerHTML=`
+<p><strong>Song:</strong><br>${data.song}</p>
+<p><strong>Skipped By:</strong></p>
+<ul>${data.skippedBy.map(n=>`<li>${n}</li>`).join("")}</ul>
+<p><strong>Time:</strong><br>${data.time}</p>
+`;
+
+});
 
 }
 
 function toggleAdminPanel(){
-
 const panel=document.getElementById("adminPanel");
-
-panel.style.display=panel.style.display==="none"?"block":"none";
-
+panel.style.display = panel.style.display==="none"?"block":"none";
 }
 
 function adminLogin(){
@@ -301,15 +336,9 @@ headers:{"Content-Type":"application/json"},
 body:JSON.stringify({password})
 })
 .then(res=>{
-
-if(res.status===403){
-alert("Wrong password");
-return;
-}
-
+if(res.status===403){alert("Wrong password");return;}
 document.getElementById("loginSection").style.display="none";
 document.getElementById("adminControls").style.display="block";
-
 });
 
 }
@@ -375,6 +404,13 @@ body:JSON.stringify({password})
 });
 
 }
+
+loadSong();
+loadVotes();
+loadLastSkip();
+
+setInterval(loadSong,10000);
+setInterval(loadLastSkip,5000);
 
 </script>
 
