@@ -2,63 +2,17 @@ const express = require("express");
 const axios = require("axios");
 const http = require("http");
 const { Server } = require("socket.io");
-const WebSocket = require("ws");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-
-/* ---------------- AIS STREAM SERVER ---------------- */
-
-const wss = new WebSocket.Server({ server, path: "/ais" });
-
-const aisStream = new WebSocket("wss://stream.aisstream.io/v0/stream");
-
-aisStream.on("open", () => {
-
- aisStream.send(JSON.stringify({
-  APIKey: process.env.AISSTREAM_KEY,
-  BoundingBoxes: [[[-90,-180],[90,180]]]
- }));
-
-});
-
-aisStream.on("message", (data) => {
-
- try{
-
- const msg = JSON.parse(data);
-
- if(!msg.Message || !msg.Message.PositionReport) return;
-
- const ship = msg.Message.PositionReport;
-
- const vessel = {
-  mmsi: ship.UserID,
-  lat: ship.Latitude,
-  lon: ship.Longitude,
-  speed: ship.Sog,
-  course: ship.Cog
- };
-
- wss.clients.forEach(client=>{
-  if(client.readyState === WebSocket.OPEN){
-   client.send(JSON.stringify(vessel));
-  }
- });
-
- }catch{}
-
-});
-
-/* ---------------- EXPRESS ---------------- */
 
 app.use(express.json());
 app.use(express.static("public"));
 
 let votes = new Map();
 let bannedNames = new Set();
-let connectedUsers = new Map();
+let connectedUsers = new Map(); // key: userId
 let cooldown = false;
 let votingEnabled = true;
 let soundEnabled = true;
@@ -115,7 +69,7 @@ function buildVoteResponse(message = "") {
   count: votes.size,
   needed: majority(),
   voters: Array.from(votes.values()),
-  users: Array.from(connectedUsers.values()),
+  users: Array.from(connectedUsers.values()), // LIVE USERS
   cooldown,
   votingEnabled,
   soundEnabled,
@@ -272,7 +226,6 @@ app.get("/votes", (req, res) => {
 app.get("/last-skip", (req, res) => {
  res.json(lastSkipInfo);
 });
-
 app.get("/weather", async (req,res)=>{
 
  try{
@@ -303,7 +256,6 @@ app.get("/weather", async (req,res)=>{
  }
 
 });
-
 app.get("/currency", async (req,res)=>{
 
  try{
@@ -337,7 +289,6 @@ app.get("/currency", async (req,res)=>{
  }
 
 });
-
 /* ---------------- ADMIN ---------------- */
 
 app.post("/admin-auth", (req, res) => {
@@ -350,8 +301,75 @@ app.post("/admin-auth", (req, res) => {
 
 });
 
+app.post("/set-total", (req, res) => {
+
+ if (req.body.password !== process.env.ADMIN_PASSWORD) {
+  return res.status(403).json({ success: false });
+ }
+
+ const newTotal = parseInt(req.body.total);
+
+ if (!isNaN(newTotal) && newTotal > 0) {
+  totalPeople = newTotal;
+  votes.clear();
+  io.emit("voteUpdate", buildVoteResponse());
+ }
+
+ res.json({ success: true });
+
+});
+
+app.post("/toggle-voting", (req, res) => {
+
+ if (req.body.password !== process.env.ADMIN_PASSWORD) {
+  return res.status(403).json({ success: false });
+ }
+
+ votingEnabled = !votingEnabled;
+
+ io.emit("voteUpdate", buildVoteResponse());
+
+ res.json({ success: true });
+
+});
+
+app.post("/toggle-sound", (req, res) => {
+
+ if (req.body.password !== process.env.ADMIN_PASSWORD) {
+  return res.status(403).json({ success: false });
+ }
+
+ soundEnabled = !soundEnabled;
+
+ io.emit("voteUpdate", buildVoteResponse());
+
+ res.json({ success: true });
+
+});
+
+app.post("/ban-user", (req, res) => {
+
+ if (req.body.password !== process.env.ADMIN_PASSWORD) {
+  return res.status(403).json({ success: false });
+ }
+
+ const { name } = req.body;
+
+ bannedNames.add(name);
+
+ votes.forEach((value, key) => {
+  if (value === name) votes.delete(key);
+ });
+
+ io.emit("voteUpdate", buildVoteResponse(`User ${name} banned`));
+
+ res.json({ success: true });
+
+});
+
 /* ---------------- START SERVER ---------------- */
 
 server.listen(process.env.PORT || 3000, () => {
  console.log("Server running");
 });
+
