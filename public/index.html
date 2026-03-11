@@ -172,26 +172,27 @@ z-index:5;
 opacity:.95;
 }
 
-/* WEATHER */
+/* WEATHER PANEL */
 
 #weatherPanel{
 position:fixed;
 top:20px;
-left:20px;
-background:rgba(0,0,0,0.6);
-padding:10px 14px;
+right:120px;
+background:rgba(0,0,0,0.65);
+padding:14px 16px;
 border-radius:10px;
 font-size:14px;
+text-align:left;
+min-width:170px;
 }
 
-/* CURRENCY */
+/* CURRENCY PANEL */
 
 #currencyPanel{
 position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-background:rgba(0,0,0,0.6);
+bottom:40px;
+left:20px;
+background:rgba(0,0,0,0.65);
 padding:12px 16px;
 border-radius:10px;
 font-size:14px;
@@ -244,10 +245,8 @@ line-height:1.6;
 <div id="adminPanel">
 
 <div id="loginSection">
-
 <input type="password" id="adminPasswordInput" placeholder="Admin password">
 <button onclick="adminLogin()">Login</button>
-
 </div>
 
 <div id="adminControls" style="display:none">
@@ -268,7 +267,6 @@ line-height:1.6;
 <h4>Ban User</h4>
 
 <input id="banName" placeholder="Name">
-
 <button onclick="banUser()">Ban</button>
 <button onclick="clearVotes()">Clear Votes</button>
 
@@ -352,21 +350,51 @@ const el=document.getElementById(id);
 state?el.classList.add("on"):el.classList.remove("on");
 }
 
+/* WEATHER ICON LOGIC */
+
+function weatherIcon(code){
+
+if(code===0) return "☀️ Clear";
+if(code<=3) return "⛅ Cloudy";
+if(code<=48) return "🌫 Fog";
+if(code<=67) return "🌧 Rain";
+if(code<=77) return "❄️ Snow";
+if(code>=95) return "⛈ Storm";
+
+return "🌤";
+
+}
+
 /* WEATHER */
 
 async function loadWeather(){
 
 try{
 
-const res=await fetch("https://api.open-meteo.com/v1/forecast?latitude=56.95&longitude=24.1&current_weather=true");
+const res = await fetch(
+"https://api.open-meteo.com/v1/forecast?latitude=56.95&longitude=24.1&daily=weathercode,temperature_2m_max&current_weather=true&timezone=auto"
+);
 
-const data=await res.json();
+const data = await res.json();
 
-document.getElementById("weatherPanel").innerText=
-"🌤 Riga "+data.current_weather.temperature+"°C";
+const current = data.current_weather;
+
+const d = data.daily;
+
+document.getElementById("weatherPanel").innerHTML=`
+<b>Riga, Latvia</b><br>
+${weatherIcon(current.weathercode)}<br>
+${current.temperature}°C
+<br><br>
+Wed ${d.temperature_2m_max[0]}° ${weatherIcon(d.weathercode[0])}<br>
+Thu ${d.temperature_2m_max[1]}° ${weatherIcon(d.weathercode[1])}<br>
+Fri ${d.temperature_2m_max[2]}° ${weatherIcon(d.weathercode[2])}
+`;
 
 }catch{
+
 document.getElementById("weatherPanel").innerText="Weather unavailable";
+
 }
 
 }
@@ -377,23 +405,26 @@ async function loadCurrency(){
 
 try{
 
-const res=await fetch("https://api.exchangerate.host/latest?base=EUR");
-const data=await res.json();
-const r=data.rates;
+const res = await fetch("https://open.er-api.com/v6/latest/EUR");
 
-document.getElementById("currencyPanel").innerHTML=
-`
-💱 EUR rates<br>
-🇬🇧 GBP → EUR ${(1/r.GBP).toFixed(3)}<br>
-🇺🇸 USD → EUR ${(1/r.USD).toFixed(3)}<br>
-🇵🇱 PLN → EUR ${(1/r.PLN).toFixed(3)}<br>
-🇸🇪 SEK → EUR ${(1/r.SEK).toFixed(3)}<br>
-🇳🇴 NOK → EUR ${(1/r.NOK).toFixed(3)}<br>
-🇩🇰 DKK → EUR ${(1/r.DKK).toFixed(3)}
+const data = await res.json();
+
+const r = data.rates;
+
+document.getElementById("currencyPanel").innerHTML=`
+<b>EUR Rates</b><br>
+🇬🇧 GBP → ${(1/r.GBP).toFixed(3)}<br>
+🇺🇸 USD → ${(1/r.USD).toFixed(3)}<br>
+🇵🇱 PLN → ${(1/r.PLN).toFixed(3)}<br>
+🇸🇪 SEK → ${(1/r.SEK).toFixed(3)}<br>
+🇳🇴 NOK → ${(1/r.NOK).toFixed(3)}<br>
+🇩🇰 DKK → ${(1/r.DKK).toFixed(3)}
 `;
 
 }catch{
+
 document.getElementById("currencyPanel").innerText="Currency unavailable";
+
 }
 
 }
@@ -455,7 +486,7 @@ const panel=document.getElementById("adminPanel");
 panel.style.display=panel.style.display==="none"?"block":"none";
 }
 
-/* LOADERS */
+/* LOAD */
 
 loadSong();
 loadVotes();
@@ -466,7 +497,7 @@ loadCurrency();
 setInterval(loadSong,10000);
 setInterval(loadLastSkip,5000);
 
-/* refresh external data every 15 minutes */
+/* refresh every 15 minutes */
 
 setInterval(loadWeather,900000);
 setInterval(loadCurrency,900000);
