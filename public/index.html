@@ -395,6 +395,21 @@ updateSwitch("soundSwitch",data.soundEnabled);
 if(data.message){
 document.getElementById("adminMessage").innerText=data.message;
 }
+  
+/* CONNECTED USERS */
+
+if(data.users){
+const list=document.getElementById("userList");
+list.innerHTML="";
+data.users.forEach(u=>{
+const li=document.createElement("li");
+li.innerText=u;
+list.appendChild(li);
+});
+}
+
+}
+}
 
 function loadWeather(){
 
@@ -411,11 +426,9 @@ const f=document.getElementById("weatherForecast");
 f.innerHTML="";
 
 data.forecast.forEach(d=>{
-
 const line=document.createElement("div");
 line.innerText=d.date+" "+d.temp+"°C";
 f.appendChild(line);
-
 });
 
 });
@@ -442,21 +455,6 @@ DK DKK → ${data.DKK}
 });
 
 }
-  
-/* CONNECTED USERS */
-
-if(data.users){
-const list=document.getElementById("userList");
-list.innerHTML="";
-data.users.forEach(u=>{
-const li=document.createElement("li");
-li.innerText=u;
-list.appendChild(li);
-});
-}
-
-}
-
 function updateSwitch(id,state){
 const el=document.getElementById(id);
 state?el.classList.add("on"):el.classList.remove("on");
