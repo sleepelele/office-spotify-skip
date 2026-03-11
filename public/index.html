@@ -149,7 +149,35 @@ margin-top:10px;
 font-size:13px;
 color:#1DB954;
 }
+function adminLogin() {
 
+const password = document.getElementById("adminPasswordInput").value;
+
+fetch("/admin-login", {
+method: "POST",
+headers: {
+"Content-Type": "application/json"
+},
+body: JSON.stringify({ password })
+})
+.then(res => res.json())
+.then(data => {
+
+if (data.success) {
+
+document.getElementById("loginSection").style.display = "none";
+document.getElementById("adminControls").style.display = "block";
+
+} else {
+
+alert("Wrong password");
+
+}
+
+});
+
+}
+  
 /* GIFS */
 
 #cornerGif{
