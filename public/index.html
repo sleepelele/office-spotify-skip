@@ -93,7 +93,58 @@ transform:scale(1.08);
 box-shadow:0 0 25px rgba(29,185,84,0.9);
 
 }
+/* WEATHER WIDGET */
 
+#weatherWidget{
+
+position:fixed;
+top:20px;
+left:320px;
+
+background:rgba(0,0,0,0.85);
+padding:14px;
+border-radius:12px;
+
+font-size:14px;
+
+width:170px;
+
+}
+
+#weatherCity{
+font-weight:bold;
+margin-bottom:6px;
+}
+
+#weatherForecast{
+margin-top:6px;
+font-size:12px;
+opacity:0.9;
+}
+
+
+/* CURRENCY WIDGET */
+
+#currencyWidget{
+
+position:fixed;
+bottom:20px;
+left:20px;
+
+background:rgba(0,0,0,0.85);
+padding:14px;
+border-radius:12px;
+
+font-size:13px;
+
+width:150px;
+
+}
+
+.currencyTitle{
+font-weight:bold;
+margin-bottom:6px;
+}
 /* admin */
 
 #adminBtn{
@@ -179,6 +230,14 @@ z-index:5;
 opacity:.95;
 }
 
+  <div id="currencyWidget">
+
+<div class="currencyTitle">EUR Rates</div>
+
+<div id="currencyRates">Loading...</div>
+
+</div>
+  
 </style>
 </head>
 
@@ -186,6 +245,14 @@ opacity:.95;
 
 <div id="bg"></div>
 
+<div id="weatherWidget">
+
+<div id="weatherCity"></div>
+<div id="weatherNow"></div>
+<div id="weatherForecast"></div>
+
+</div>
+  
 <img id="cornerGif" src="/dancer.gif">
 <img id="topRightGif" src="/penguin.gif">
 
@@ -330,6 +397,53 @@ if(data.message){
 document.getElementById("adminMessage").innerText=data.message;
 }
 
+function loadWeather(){
+
+fetch("/weather")
+.then(res=>res.json())
+.then(data=>{
+
+document.getElementById("weatherCity").innerText=data.city;
+
+document.getElementById("weatherNow").innerText=
+data.temp+"°C • wind "+data.wind+" km/h";
+
+const f=document.getElementById("weatherForecast");
+f.innerHTML="";
+
+data.forecast.forEach(d=>{
+
+const line=document.createElement("div");
+line.innerText=d.date+" "+d.temp+"°C";
+f.appendChild(line);
+
+});
+
+});
+
+}
+
+function loadCurrency(){
+
+fetch("/currency")
+.then(res=>res.json())
+.then(data=>{
+
+document.getElementById("currencyRates").innerHTML=`
+
+GB GBP → ${data.GBP}<br>
+US USD → ${data.USD}<br>
+PL PLN → ${data.PLN}<br>
+SE SEK → ${data.SEK}<br>
+NO NOK → ${data.NOK}<br>
+DK DKK → ${data.DKK}
+
+`;
+
+});
+
+}
+  
 /* CONNECTED USERS */
 
 if(data.users){
