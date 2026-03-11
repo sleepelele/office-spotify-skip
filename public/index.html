@@ -126,19 +126,16 @@ opacity:0.9;
 /* CURRENCY WIDGET */
 
 #currencyWidget{
-
 position:fixed;
 bottom:20px;
-left:20px;
+left:320px;
 
 background:rgba(0,0,0,0.85);
 padding:14px;
 border-radius:12px;
 
 font-size:13px;
-
-width:150px;
-
+width:170px;
 }
 
 .currencyTitle{
@@ -419,15 +416,22 @@ fetch("/weather")
 document.getElementById("weatherCity").innerText=data.city;
 
 document.getElementById("weatherNow").innerText=
-data.temp+"°C • wind "+data.wind+" km/h";
+data.temp+"°C • wind "+data.wind+" km/h • rain "+data.rain+"%";
 
 const f=document.getElementById("weatherForecast");
 f.innerHTML="";
 
 data.forecast.forEach(d=>{
+
+const date=new Date(d.date);
+
+const day=date.toLocaleDateString("en-US",{weekday:"short"});
+
 const line=document.createElement("div");
-line.innerText=d.date+" "+d.temp+"°C";
+line.innerText=day+" "+d.temp+"°C";
+
 f.appendChild(line);
+
 });
 
 });
@@ -440,14 +444,16 @@ fetch("/currency")
 .then(res=>res.json())
 .then(data=>{
 
+if(!data) return;
+
 document.getElementById("currencyRates").innerHTML=`
 
-GB GBP → ${data.GBP}<br>
-US USD → ${data.USD}<br>
-PL PLN → ${data.PLN}<br>
-SE SEK → ${data.SEK}<br>
-NO NOK → ${data.NOK}<br>
-DK DKK → ${data.DKK}
+GB GBP → ${data.GBP ?? "-"}<br>
+US USD → ${data.USD ?? "-"}<br>
+PL PLN → ${data.PLN ?? "-"}<br>
+SE SEK → ${data.SEK ?? "-"}<br>
+NO NOK → ${data.NOK ?? "-"}<br>
+DK DKK → ${data.DKK ?? "-"}
 
 `;
 
