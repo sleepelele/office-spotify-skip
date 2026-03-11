@@ -261,7 +261,7 @@ app.get("/currency", async (req,res)=>{
  try{
 
  const response=await axios.get(
- "https://api.exchangerate.host/latest?base=EUR&symbols=GBP,PLN,USD,NOK,SEK,DKK"
+ "https://open.er-api.com/v6/latest/EUR"
  );
 
  const r=response.data.rates;
@@ -277,7 +277,14 @@ app.get("/currency", async (req,res)=>{
 
  }catch{
 
- res.json({});
+ res.json({
+  GBP:null,
+  PLN:null,
+  USD:null,
+  NOK:null,
+  SEK:null,
+  DKK:null
+ });
 
  }
 
@@ -365,6 +372,7 @@ app.post("/ban-user", (req, res) => {
 server.listen(process.env.PORT || 3000, () => {
  console.log("Server running");
 });
+
 
 
 
