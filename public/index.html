@@ -415,8 +415,12 @@ fetch("/weather")
 
 document.getElementById("weatherCity").innerText=data.city;
 
-document.getElementById("weatherNow").innerText=
-data.temp+"°C • wind "+data.wind+" km/h • rain "+data.rain+"%";
+document.getElementById("weatherNow").innerHTML=
+`
+<div>${data.temp}°C</div>
+<div>Wind ${data.wind} km/h</div>
+<div>Rain ${data.rain}%</div>
+`;
 
 const f=document.getElementById("weatherForecast");
 f.innerHTML="";
@@ -424,7 +428,6 @@ f.innerHTML="";
 data.forecast.forEach(d=>{
 
 const date=new Date(d.date);
-
 const day=date.toLocaleDateString("en-US",{weekday:"short"});
 
 const line=document.createElement("div");
