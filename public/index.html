@@ -36,7 +36,6 @@ width:280px;
 background:rgba(0,0,0,0.6);
 padding:20px;
 height:100vh;
-overflow-y:auto;
 }
 
 .container{
@@ -70,6 +69,7 @@ border-radius:10px;
 /* SKIP BUTTON */
 
 #skipBtn{
+
 background:#1DB954;
 border:none;
 padding:18px 55px;
@@ -79,32 +79,19 @@ font-weight:bold;
 color:white;
 cursor:pointer;
 margin-top:20px;
+
 box-shadow:0 0 15px rgba(29,185,84,0.6);
+
 transition:all .2s;
+
 }
 
 #skipBtn:hover{
+
 transform:scale(1.08);
+
 box-shadow:0 0 25px rgba(29,185,84,0.9);
-}
 
-/* widgets */
-
-.widget{
-margin-top:20px;
-padding:10px;
-background:rgba(0,0,0,0.4);
-border-radius:10px;
-}
-
-.widget h4{
-margin:0 0 8px 0;
-color:#1DB954;
-}
-
-.forecast-day{
-font-size:13px;
-margin:3px 0;
 }
 
 /* admin */
@@ -205,21 +192,8 @@ opacity:.95;
 <div class="layout">
 
 <div class="side-panel">
-
 <h3>Last Skip</h3>
 <div id="lastSkipPanel">No skips yet</div>
-
-<div class="widget">
-<h4>Weather</h4>
-<div id="weatherNow">Loading...</div>
-<div id="weatherForecast"></div>
-</div>
-
-<div class="widget">
-<h4>Currency → EUR</h4>
-<div id="currencyWidget">Loading...</div>
-</div>
-
 </div>
 
 <div class="container">
@@ -244,6 +218,8 @@ opacity:.95;
 </div>
 
 <button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
+
+<!-- ADMIN PANEL -->
 
 <div id="adminPanel">
 
@@ -289,8 +265,6 @@ opacity:.95;
 
 <script>
 
-/* EXISTING CODE UNCHANGED */
-
 const socket=io();
 
 const pingSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
@@ -312,53 +286,68 @@ localStorage.setItem("userName",userName);
 socket.on("voteUpdate",data=>updateUI(data));
 socket.emit("registerUser", {userId, name:userName});
 
-/* WEATHER */
+function vote(){
 
-function loadWeather(){
-
-fetch("/weather")
+fetch("/vote",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId,name:userName})
+})
 .then(res=>res.json())
-.then(data=>{
-
-document.getElementById("weatherNow").innerText =
-data.temp+"°C • wind "+data.wind+" km/h";
-
-const forecast=document.getElementById("weatherForecast");
-forecast.innerHTML="";
-
-data.forecast.forEach(day=>{
-const div=document.createElement("div");
-div.className="forecast-day";
-div.innerText=day.date+"  "+day.temp+"°C";
-forecast.appendChild(div);
-});
-
-});
+.then(updateUI);
 
 }
 
-/* CURRENCY */
+function updateUI(data){
 
-function loadCurrency(){
+if(data.count>lastCount && data.soundEnabled){
+pingSound.play().catch(()=>{});
+}
 
-fetch("/currency")
-.then(res=>res.json())
-.then(data=>{
+lastCount=data.count;
 
-document.getElementById("currencyWidget").innerHTML=`
-GBP → EUR: ${data.GBP}<br>
-PLN → EUR: ${data.PLN}<br>
-USD → EUR: ${data.USD}<br>
-NOK → EUR: ${data.NOK}<br>
-SEK → EUR: ${data.SEK}<br>
-DKK → EUR: ${data.DKK}
-`;
+document.getElementById("voteCounter").innerText =
+data.count+" / "+data.needed+" votes";
 
+const percent=data.needed>0?(data.count/data.needed)*100:0;
+
+document.getElementById("progressBar").style.width =
+Math.min(percent,100)+"%";
+
+const list=document.getElementById("voters");
+list.innerHTML="";
+
+data.voters.forEach(v=>{
+const li=document.createElement("li");
+li.innerText=v;
+list.appendChild(li);
 });
+
+updateSwitch("votingSwitch",data.votingEnabled);
+updateSwitch("soundSwitch",data.soundEnabled);
+
+if(data.message){
+document.getElementById("adminMessage").innerText=data.message;
+}
+
+/* CONNECTED USERS */
+
+if(data.users){
+const list=document.getElementById("userList");
+list.innerHTML="";
+data.users.forEach(u=>{
+const li=document.createElement("li");
+li.innerText=u;
+list.appendChild(li);
+});
+}
 
 }
 
-/* existing loaders */
+function updateSwitch(id,state){
+const el=document.getElementById(id);
+state?el.classList.add("on"):el.classList.remove("on");
+}
 
 function loadVotes(){
 fetch("/votes").then(res=>res.json()).then(updateUI);
@@ -388,18 +377,120 @@ loadVotes();
 
 }
 
-/* intervals */
+function loadLastSkip(){
+
+fetch("/last-skip")
+.then(res=>res.json())
+.then(data=>{
+
+const panel=document.getElementById("lastSkipPanel");
+
+if(!data){
+panel.innerHTML="No skips yet";
+return;
+}
+
+panel.innerHTML=`
+<p><strong>Song:</strong><br>${data.song}</p>
+<p><strong>Skipped By:</strong></p>
+<ul>${data.skippedBy.map(n=>`<li>${n}</li>`).join("")}</ul>
+<p><strong>Time:</strong><br>${data.time}</p>
+`;
+
+});
+
+}
+
+function toggleAdminPanel(){
+const panel=document.getElementById("adminPanel");
+panel.style.display=panel.style.display==="none"?"block":"none";
+}
+
+function adminLogin(){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/admin-auth",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
+})
+.then(res=>{
+if(res.status===403){alert("Wrong password");return;}
+document.getElementById("loginSection").style.display="none";
+document.getElementById("adminControls").style.display="block";
+});
+
+}
+
+function setTotal(){
+
+const total=document.getElementById("totalInput").value;
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/set-total",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({total,password})
+});
+
+}
+
+function toggleVoting(){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/toggle-voting",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
+});
+
+}
+
+function toggleSound(){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/toggle-sound",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
+});
+
+}
+
+function banUser(){
+
+const name=document.getElementById("banName").value;
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/ban-user",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({name,password})
+});
+
+}
+
+function clearVotes(){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/clear-votes",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
+});
+
+}
 
 loadSong();
 loadVotes();
 loadLastSkip();
-loadWeather();
-loadCurrency();
 
 setInterval(loadSong,10000);
 setInterval(loadLastSkip,5000);
-setInterval(loadWeather,600000);
-setInterval(loadCurrency,600000);
 
 </script>
 
