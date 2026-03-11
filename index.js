@@ -236,10 +236,10 @@ app.get("/weather", async (req,res)=>{
 
  const w=response.data;
 
- const forecast=w.daily.time.slice(0,3).map((d,i)=>({
-  date:d.slice(5),
-  temp:w.daily.temperature_2m_max[i]
- }));
+ const forecast = w.daily.time.slice(1,4).map((d,i)=>({
+ date:d,
+ temp:w.daily.temperature_2m_max[i+1]
+}));
 
  res.json({
  city:"Riga, Latvia",
@@ -365,6 +365,7 @@ app.post("/ban-user", (req, res) => {
 server.listen(process.env.PORT || 3000, () => {
  console.log("Server running");
 });
+
 
 
 
