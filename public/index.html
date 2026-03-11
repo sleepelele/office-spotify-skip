@@ -69,7 +69,6 @@ border-radius:10px;
 /* SKIP BUTTON */
 
 #skipBtn{
-
 background:#1DB954;
 border:none;
 padding:18px 55px;
@@ -79,19 +78,13 @@ font-weight:bold;
 color:white;
 cursor:pointer;
 margin-top:20px;
-
 box-shadow:0 0 15px rgba(29,185,84,0.6);
-
 transition:all .2s;
-
 }
 
 #skipBtn:hover{
-
 transform:scale(1.08);
-
 box-shadow:0 0 25px rgba(29,185,84,0.9);
-
 }
 
 /* admin */
@@ -179,6 +172,32 @@ z-index:5;
 opacity:.95;
 }
 
+/* WEATHER */
+
+#weatherPanel{
+position:fixed;
+top:20px;
+left:20px;
+background:rgba(0,0,0,0.6);
+padding:10px 14px;
+border-radius:10px;
+font-size:14px;
+}
+
+/* CURRENCY */
+
+#currencyPanel{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+background:rgba(0,0,0,0.6);
+padding:12px 16px;
+border-radius:10px;
+font-size:14px;
+line-height:1.6;
+}
+
 </style>
 </head>
 
@@ -188,6 +207,9 @@ opacity:.95;
 
 <img id="cornerGif" src="/dancer.gif">
 <img id="topRightGif" src="/penguin.gif">
+
+<div id="weatherPanel">Loading weather...</div>
+<div id="currencyPanel">Loading currency...</div>
 
 <div class="layout">
 
@@ -219,8 +241,6 @@ opacity:.95;
 
 <button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
 
-<!-- ADMIN PANEL -->
-
 <div id="adminPanel">
 
 <div id="loginSection">
@@ -245,9 +265,6 @@ opacity:.95;
 <div id="soundSwitch" class="switch" onclick="toggleSound()"></div>
 </div>
 
-<h4>Connected Users</h4>
-<ul id="userList"></ul>
-
 <h4>Ban User</h4>
 
 <input id="banName" placeholder="Name">
@@ -266,7 +283,6 @@ opacity:.95;
 <script>
 
 const socket=io();
-
 const pingSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
 
 let userId=localStorage.getItem("userId");
@@ -284,7 +300,6 @@ localStorage.setItem("userName",userName);
 }
 
 socket.on("voteUpdate",data=>updateUI(data));
-socket.emit("registerUser", {userId, name:userName});
 
 function vote(){
 
@@ -330,23 +345,57 @@ if(data.message){
 document.getElementById("adminMessage").innerText=data.message;
 }
 
-/* CONNECTED USERS */
-
-if(data.users){
-const list=document.getElementById("userList");
-list.innerHTML="";
-data.users.forEach(u=>{
-const li=document.createElement("li");
-li.innerText=u;
-list.appendChild(li);
-});
-}
-
 }
 
 function updateSwitch(id,state){
 const el=document.getElementById(id);
 state?el.classList.add("on"):el.classList.remove("on");
+}
+
+/* WEATHER */
+
+async function loadWeather(){
+
+try{
+
+const res=await fetch("https://api.open-meteo.com/v1/forecast?latitude=56.95&longitude=24.1&current_weather=true");
+
+const data=await res.json();
+
+document.getElementById("weatherPanel").innerText=
+"🌤 Riga "+data.current_weather.temperature+"°C";
+
+}catch{
+document.getElementById("weatherPanel").innerText="Weather unavailable";
+}
+
+}
+
+/* CURRENCY */
+
+async function loadCurrency(){
+
+try{
+
+const res=await fetch("https://api.exchangerate.host/latest?base=EUR");
+const data=await res.json();
+const r=data.rates;
+
+document.getElementById("currencyPanel").innerHTML=
+`
+💱 EUR rates<br>
+🇬🇧 GBP → EUR ${(1/r.GBP).toFixed(3)}<br>
+🇺🇸 USD → EUR ${(1/r.USD).toFixed(3)}<br>
+🇵🇱 PLN → EUR ${(1/r.PLN).toFixed(3)}<br>
+🇸🇪 SEK → EUR ${(1/r.SEK).toFixed(3)}<br>
+🇳🇴 NOK → EUR ${(1/r.NOK).toFixed(3)}<br>
+🇩🇰 DKK → EUR ${(1/r.DKK).toFixed(3)}
+`;
+
+}catch{
+document.getElementById("currencyPanel").innerText="Currency unavailable";
+}
+
 }
 
 function loadVotes(){
@@ -406,91 +455,21 @@ const panel=document.getElementById("adminPanel");
 panel.style.display=panel.style.display==="none"?"block":"none";
 }
 
-function adminLogin(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/admin-auth",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-})
-.then(res=>{
-if(res.status===403){alert("Wrong password");return;}
-document.getElementById("loginSection").style.display="none";
-document.getElementById("adminControls").style.display="block";
-});
-
-}
-
-function setTotal(){
-
-const total=document.getElementById("totalInput").value;
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/set-total",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({total,password})
-});
-
-}
-
-function toggleVoting(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/toggle-voting",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-});
-
-}
-
-function toggleSound(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/toggle-sound",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-});
-
-}
-
-function banUser(){
-
-const name=document.getElementById("banName").value;
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/ban-user",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({name,password})
-});
-
-}
-
-function clearVotes(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/clear-votes",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-});
-
-}
+/* LOADERS */
 
 loadSong();
 loadVotes();
 loadLastSkip();
+loadWeather();
+loadCurrency();
 
 setInterval(loadSong,10000);
 setInterval(loadLastSkip,5000);
+
+/* refresh external data every 15 minutes */
+
+setInterval(loadWeather,900000);
+setInterval(loadCurrency,900000);
 
 </script>
 
