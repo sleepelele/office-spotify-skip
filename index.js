@@ -231,8 +231,8 @@ app.get("/weather", async (req,res)=>{
  try{
 
  const response=await axios.get(
- "https://api.open-meteo.com/v1/forecast?latitude=56.95&longitude=24.1&current_weather=true&daily=temperature_2m_max&timezone=auto"
- );
+"https://api.open-meteo.com/v1/forecast?latitude=56.95&longitude=24.1&current_weather=true&hourly=precipitation_probability&daily=temperature_2m_max&timezone=auto"
+);
 
  const w=response.data;
 
@@ -242,11 +242,12 @@ app.get("/weather", async (req,res)=>{
  }));
 
  res.json({
-  city:"Riga, Latvia",
-  temp:w.current_weather.temperature,
-  wind:w.current_weather.windspeed,
-  forecast
- });
+ city:"Riga, Latvia",
+ temp:w.current_weather.temperature,
+ wind:w.current_weather.windspeed,
+ rain:w.hourly.precipitation_probability[0] || 0,
+ forecast
+});
 
  }catch{
 
@@ -364,5 +365,6 @@ app.post("/ban-user", (req, res) => {
 server.listen(process.env.PORT || 3000, () => {
  console.log("Server running");
 });
+
 
 
