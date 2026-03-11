@@ -69,6 +69,7 @@ border-radius:10px;
 /* SKIP BUTTON */
 
 #skipBtn{
+
 background:#1DB954;
 border:none;
 padding:18px 55px;
@@ -78,13 +79,19 @@ font-weight:bold;
 color:white;
 cursor:pointer;
 margin-top:20px;
+
 box-shadow:0 0 15px rgba(29,185,84,0.6);
+
 transition:all .2s;
+
 }
 
 #skipBtn:hover{
+
 transform:scale(1.08);
+
 box-shadow:0 0 25px rgba(29,185,84,0.9);
+
 }
 
 /* admin */
@@ -150,10 +157,6 @@ font-size:13px;
 color:#1DB954;
 }
 
-});
-
-}
-  
 /* GIFS */
 
 #cornerGif{
@@ -176,37 +179,6 @@ z-index:5;
 opacity:.95;
 }
 
-/* WEATHER PANEL */
-
-#weatherPanel{
-position:fixed;
-top:20px;
-left:340px;
-background:rgba(0,0,0,0.65);
-padding:14px 16px;
-border-radius:10px;
-font-size:14px;
-text-align:left;
-min-width:170px;
-  backdrop-filter: blur(10px);
-box-shadow:0 0 15px rgba(0,0,0,0.4);
-}
-
-/* CURRENCY PANEL */
-
-#currencyPanel{
-position:fixed;
-bottom:40px;
-left:340px;
-background:rgba(0,0,0,0.65);
-padding:12px 16px;
-border-radius:10px;
-font-size:14px;
-line-height:1.6;
-  backdrop-filter: blur(10px);
-box-shadow:0 0 15px rgba(0,0,0,0.4);
-}
-
 </style>
 </head>
 
@@ -216,9 +188,6 @@ box-shadow:0 0 15px rgba(0,0,0,0.4);
 
 <img id="cornerGif" src="/dancer.gif">
 <img id="topRightGif" src="/penguin.gif">
-
-<div id="weatherPanel">Loading weather...</div>
-<div id="currencyPanel">Loading currency...</div>
 
 <div class="layout">
 
@@ -250,11 +219,15 @@ box-shadow:0 0 15px rgba(0,0,0,0.4);
 
 <button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
 
+<!-- ADMIN PANEL -->
+
 <div id="adminPanel">
 
 <div id="loginSection">
+
 <input type="password" id="adminPasswordInput" placeholder="Admin password">
 <button onclick="adminLogin()">Login</button>
+
 </div>
 
 <div id="adminControls" style="display:none">
@@ -272,9 +245,13 @@ box-shadow:0 0 15px rgba(0,0,0,0.4);
 <div id="soundSwitch" class="switch" onclick="toggleSound()"></div>
 </div>
 
+<h4>Connected Users</h4>
+<ul id="userList"></ul>
+
 <h4>Ban User</h4>
 
 <input id="banName" placeholder="Name">
+
 <button onclick="banUser()">Ban</button>
 <button onclick="clearVotes()">Clear Votes</button>
 
@@ -289,6 +266,7 @@ box-shadow:0 0 15px rgba(0,0,0,0.4);
 <script>
 
 const socket=io();
+
 const pingSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
 
 let userId=localStorage.getItem("userId");
@@ -306,6 +284,7 @@ localStorage.setItem("userName",userName);
 }
 
 socket.on("voteUpdate",data=>updateUI(data));
+socket.emit("registerUser", {userId, name:userName});
 
 function vote(){
 
@@ -351,96 +330,23 @@ if(data.message){
 document.getElementById("adminMessage").innerText=data.message;
 }
 
+/* CONNECTED USERS */
+
+if(data.users){
+const list=document.getElementById("userList");
+list.innerHTML="";
+data.users.forEach(u=>{
+const li=document.createElement("li");
+li.innerText=u;
+list.appendChild(li);
+});
+}
+
 }
 
 function updateSwitch(id,state){
 const el=document.getElementById(id);
 state?el.classList.add("on"):el.classList.remove("on");
-}
-
-/* WEATHER ICON LOGIC */
-
-function weatherIcon(code){
-
-if(code===0) return "☀️ Clear";
-if(code<=3) return "⛅ Cloudy";
-if(code<=48) return "🌫 Fog";
-if(code<=67) return "🌧 Rain";
-if(code<=77) return "❄️ Snow";
-if(code>=95) return "⛈ Storm";
-
-return "🌤";
-
-}
-
-/* WEATHER */
-
-async function loadWeather(){
-
-try{
-
-const res = await fetch(
-"https://api.open-meteo.com/v1/forecast?latitude=56.95&longitude=24.1&daily=weathercode,temperature_2m_max&hourly=precipitation_probability&current_weather=true&windspeed_unit=kmh&timezone=auto"
-);
-
-const data = await res.json();
-
-const current = data.current_weather;
-const d = data.daily;
-
-/* rain probability (current hour) */
-
-const rainChance = data.hourly.precipitation_probability[0] || 0;
-
-document.getElementById("weatherPanel").innerHTML=`
-<b>Riga, Latvia</b><br>
-${weatherIcon(current.weathercode)}<br>
-${current.temperature}°C
-<br>
-Wind ${current.windspeed} km/h<br>
-Rain ${rainChance}%
-<br><br>
-Wed ${d.temperature_2m_max[0]}° ${weatherIcon(d.weathercode[0])}<br>
-Thu ${d.temperature_2m_max[1]}° ${weatherIcon(d.weathercode[1])}<br>
-Fri ${d.temperature_2m_max[2]}° ${weatherIcon(d.weathercode[2])}
-`;
-
-}catch{
-
-document.getElementById("weatherPanel").innerText="Weather unavailable";
-
-}
-
-}
-
-/* CURRENCY */
-
-async function loadCurrency(){
-
-try{
-
-const res = await fetch("https://open.er-api.com/v6/latest/EUR");
-
-const data = await res.json();
-
-const r = data.rates;
-
-document.getElementById("currencyPanel").innerHTML=`
-<b>EUR Rates</b><br>
-🇬🇧 GBP → ${(1/r.GBP).toFixed(3)}<br>
-🇺🇸 USD → ${(1/r.USD).toFixed(3)}<br>
-🇵🇱 PLN → ${(1/r.PLN).toFixed(3)}<br>
-🇸🇪 SEK → ${(1/r.SEK).toFixed(3)}<br>
-🇳🇴 NOK → ${(1/r.NOK).toFixed(3)}<br>
-🇩🇰 DKK → ${(1/r.DKK).toFixed(3)}
-`;
-
-}catch{
-
-document.getElementById("currencyPanel").innerText="Currency unavailable";
-
-}
-
 }
 
 function loadVotes(){
@@ -499,51 +405,92 @@ function toggleAdminPanel(){
 const panel=document.getElementById("adminPanel");
 panel.style.display=panel.style.display==="none"?"block":"none";
 }
-function adminLogin() {
 
-const password = document.getElementById("adminPasswordInput").value;
+function adminLogin(){
 
-fetch("/admin-login", {
-method: "POST",
-headers: {
-"Content-Type": "application/json"
-},
-body: JSON.stringify({ password })
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/admin-auth",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
 })
-.then(res => res.json())
-.then(data => {
-
-if (data.success) {
-
-document.getElementById("loginSection").style.display = "none";
-document.getElementById("adminControls").style.display = "block";
-
-} else {
-
-alert("Wrong password");
-
-}
-
+.then(res=>{
+if(res.status===403){alert("Wrong password");return;}
+document.getElementById("loginSection").style.display="none";
+document.getElementById("adminControls").style.display="block";
 });
 
 }
 
-  
-/* LOAD */
+function setTotal(){
+
+const total=document.getElementById("totalInput").value;
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/set-total",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({total,password})
+});
+
+}
+
+function toggleVoting(){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/toggle-voting",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
+});
+
+}
+
+function toggleSound(){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/toggle-sound",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
+});
+
+}
+
+function banUser(){
+
+const name=document.getElementById("banName").value;
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/ban-user",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({name,password})
+});
+
+}
+
+function clearVotes(){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/clear-votes",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({password})
+});
+
+}
 
 loadSong();
 loadVotes();
 loadLastSkip();
-loadWeather();
-loadCurrency();
 
 setInterval(loadSong,10000);
 setInterval(loadLastSkip,5000);
-
-/* refresh every 15 minutes */
-
-setInterval(loadWeather,900000);
-setInterval(loadCurrency,900000);
 
 </script>
 
