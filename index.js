@@ -227,7 +227,78 @@ app.get("/last-skip", (req, res) => {
  res.json(lastSkipInfo);
 });
 
+/* ---------------- WEATHER ---------------- */
+
+app.get("/weather", async (req,res)=>{
+
+ try{
+
+ const response = await axios.get(
+ "https://api.open-meteo.com/v1/forecast?latitude=51.5&longitude=-0.12&current_weather=true&daily=temperature_2m_max&timezone=auto"
+ );
+
+ const w=response.data;
+
+ const forecast=w.daily.time.slice(0,3).map((d,i)=>({
+  date:d.slice(5),
+  temp:w.daily.temperature_2m_max[i]
+ }));
+
+ res.json({
+  temp:w.current_weather.temperature,
+  wind:w.current_weather.windspeed,
+  forecast
+ });
+
+ }catch{
+
+ res.json({
+  temp:"?",
+  wind:"?",
+  forecast:[]
+ });
+
+ }
+
+});
+
+/* ---------------- CURRENCY ---------------- */
+
+app.get("/currency", async (req,res)=>{
+
+ try{
+
+ const response=await axios.get(
+ "https://api.exchangerate.host/latest?base=EUR&symbols=GBP,PLN,USD,NOK,SEK,DKK"
+ );
+
+ const r=response.data.rates;
+
+ res.json({
+  GBP:(1/r.GBP).toFixed(3),
+  PLN:(1/r.PLN).toFixed(3),
+  USD:(1/r.USD).toFixed(3),
+  NOK:(1/r.NOK).toFixed(3),
+  SEK:(1/r.SEK).toFixed(3),
+  DKK:(1/r.DKK).toFixed(3)
+ });
+
+ }catch{
+
+ res.json({
+  GBP:"?",
+  PLN:"?",
+  USD:"?",
+  NOK:"?",
+  SEK:"?",
+  DKK:"?"
+ });
+
+ }
+
+});
 /* ---------------- ADMIN ---------------- */
+
 
 app.post("/admin-auth", (req, res) => {
 
@@ -310,3 +381,4 @@ app.post("/ban-user", (req, res) => {
 server.listen(process.env.PORT || 3000, () => {
  console.log("Server running");
 });
+
