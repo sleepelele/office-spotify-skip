@@ -372,19 +372,25 @@ async function loadWeather(){
 try{
 
 const res = await fetch(
-"https://api.open-meteo.com/v1/forecast?latitude=56.95&longitude=24.1&daily=weathercode,temperature_2m_max&current_weather=true&timezone=auto"
+"https://api.open-meteo.com/v1/forecast?latitude=56.95&longitude=24.1&daily=weathercode,temperature_2m_max&hourly=precipitation_probability&current_weather=true&windspeed_unit=kmh&timezone=auto"
 );
 
 const data = await res.json();
 
 const current = data.current_weather;
-
 const d = data.daily;
+
+/* rain probability (current hour) */
+
+const rainChance = data.hourly.precipitation_probability[0] || 0;
 
 document.getElementById("weatherPanel").innerHTML=`
 <b>Riga, Latvia</b><br>
 ${weatherIcon(current.weathercode)}<br>
 ${current.temperature}°C
+<br>
+Wind ${current.windspeed} km/h<br>
+Rain ${rainChance}%
 <br><br>
 Wed ${d.temperature_2m_max[0]}° ${weatherIcon(d.weathercode[0])}<br>
 Thu ${d.temperature_2m_max[1]}° ${weatherIcon(d.weathercode[1])}<br>
