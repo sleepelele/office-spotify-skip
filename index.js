@@ -28,19 +28,11 @@ const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
 io.on("connection", (socket) => {
 
- socket.on("registerUser", (name) => {
+ socket.on("registerUser", ({ userId, name }) => {
 
-socket.userId = null;
+  socket.userId = userId;
 
-socket.on("registerUser", ({userId,name}) => {
-
- socket.userId = userId;
-
- connectedUsers.set(userId,name);
-
- io.emit("voteUpdate", buildVoteResponse());
-
-});
+  connectedUsers.set(userId, name);
 
   io.emit("voteUpdate", buildVoteResponse());
 
@@ -48,9 +40,9 @@ socket.on("registerUser", ({userId,name}) => {
 
  socket.on("disconnect", () => {
 
-if(socket.userId){
- connectedUsers.delete(socket.userId);
-}
+  if (socket.userId) {
+   connectedUsers.delete(socket.userId);
+  }
 
   io.emit("voteUpdate", buildVoteResponse());
 
