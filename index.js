@@ -1,3 +1,4 @@
+console.log("App started");
 const express = require("express");
 const axios = require("axios");
 const http = require("http");
@@ -10,6 +11,7 @@ const io = new Server(server);
 app.use(express.json());
 app.use(express.static("public"));
 app.get("/", (req, res) => {
+  console.log("Root route hit");
   res.sendFile(__dirname + "/index.html");
 });
 
@@ -396,7 +398,7 @@ app.post("/ban-user", (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, "0.0.0.0", () => {
- console.log("Server running on port " + PORT);
+  console.log("Server running on port " + PORT);
 });
 
 
