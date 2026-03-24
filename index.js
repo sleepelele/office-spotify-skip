@@ -398,8 +398,10 @@ app.post("/ban-user", (req, res) => {
 
 /* ---------------- START SERVER ---------------- */
 
-server.listen(process.env.PORT || 3000, () => {
- console.log("Server running");
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, "0.0.0.0", () => {
+ console.log("Server running on port " + PORT);
 });
 
 
