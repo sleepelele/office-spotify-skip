@@ -76,31 +76,40 @@ function buildVoteResponse(message = "") {
 
 async function getAccessToken() {
  try {
- const response = await axios.post(
-  "https://accounts.spotify.com/api/token",
-  new URLSearchParams({
-   grant_type: "refresh_token",
-   refresh_token: REFRESH_TOKEN
-  }),
-  {
-   headers: {
-    Authorization:
-     "Basic " +
-     Buffer.from(CLIENT_ID + ":" + CLIENT_SECRET).toString("base64")
+  const response = await axios.post(
+   "https://accounts.spotify.com/api/token",
+   new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: REFRESH_TOKEN
+   }),
+   {
+    headers: {
+     Authorization:
+      "Basic " +
+      Buffer.from((CLIENT_ID || "") + ":" + (CLIENT_SECRET || "")).toString("base64")
+    }
    }
-  }
- );
+  );
 
- return response.data.access_token;
+  return response.data.access_token;
+
+ } catch (err) {
+  console.error("Spotify auth error:", err.response?.data || err.message);
+  return null;
+ }
 }
+
+// 🚫 NOTHING ELSE HERE
 
 async function skipTrack() {
 
  const token = await getAccessToken();
-if (!token) {
-  console.log("Spotify token missing, skipping track aborted");
+
+ if (!token) {
+  console.log("Spotify token missing, skip aborted");
   return;
-}
+ }
+
  await axios.post(
   "https://api.spotify.com/v1/me/player/next",
   {},
