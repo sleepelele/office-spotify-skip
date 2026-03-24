@@ -9,6 +9,9 @@ const io = new Server(server);
 
 app.use(express.json());
 app.use(express.static("public"));
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
+});
 
 let votes = new Map();
 let bannedNames = new Set();
