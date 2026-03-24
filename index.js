@@ -78,6 +78,29 @@ function buildVoteResponse(message = "") {
 }
 
 async function getAccessToken() {
+ try {
+  const response = await axios.post(
+   "https://accounts.spotify.com/api/token",
+   new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: REFRESH_TOKEN
+   }),
+   {
+    headers: {
+     Authorization:
+      "Basic " +
+      Buffer.from((CLIENT_ID || "") + ":" + (CLIENT_SECRET || "")).toString("base64")
+    }
+   }
+  );
+
+  return response.data.access_token;
+
+ } catch (err) {
+  console.error("Spotify auth error:", err.response?.data || err.message);
+  return null;
+ }
+}
 
  const response = await axios.post(
   "https://accounts.spotify.com/api/token",
@@ -100,7 +123,9 @@ async function getAccessToken() {
 async function skipTrack() {
 
  const token = await getAccessToken();
-
+if (!token) {
+  return res.json(buildVoteResponse("Spotify error"));
+}
  await axios.post(
   "https://api.spotify.com/v1/me/player/next",
   {},
@@ -134,7 +159,11 @@ app.post("/vote", async (req, res) => {
 
  if (votes.size >= majority()) {
 
-  const token = await getAccessToken();
+const token = await getAccessToken();
+
+if (!token) {
+  return res.json({ title: "Spotify error", image: null });
+}
 
   const response = await axios.get(
    "https://api.spotify.com/v1/me/player/currently-playing",
