@@ -1,4 +1,3 @@
-console.log("App started");
 const express = require("express");
 const axios = require("axios");
 const http = require("http");
@@ -10,10 +9,6 @@ const io = new Server(server);
 
 app.use(express.json());
 app.use(express.static("public"));
-app.get("/", (req, res) => {
-  console.log("Root route hit");
-  res.sendFile(__dirname + "/index.html");
-});
 
 let votes = new Map();
 let bannedNames = new Set();
@@ -33,11 +28,19 @@ const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
 io.on("connection", (socket) => {
 
- socket.on("registerUser", ({ userId, name }) => {
+ socket.on("registerUser", (name) => {
 
-  socket.userId = userId;
+socket.userId = null;
 
-  connectedUsers.set(userId, name);
+socket.on("registerUser", ({userId,name}) => {
+
+ socket.userId = userId;
+
+ connectedUsers.set(userId,name);
+
+ io.emit("voteUpdate", buildVoteResponse());
+
+});
 
   io.emit("voteUpdate", buildVoteResponse());
 
@@ -45,9 +48,9 @@ io.on("connection", (socket) => {
 
  socket.on("disconnect", () => {
 
-  if (socket.userId) {
-   connectedUsers.delete(socket.userId);
-  }
+if(socket.userId){
+ connectedUsers.delete(socket.userId);
+}
 
   io.emit("voteUpdate", buildVoteResponse());
 
@@ -75,40 +78,28 @@ function buildVoteResponse(message = "") {
 }
 
 async function getAccessToken() {
- try {
-  const response = await axios.post(
-   "https://accounts.spotify.com/api/token",
-   new URLSearchParams({
-    grant_type: "refresh_token",
-    refresh_token: REFRESH_TOKEN
-   }),
-   {
-    headers: {
-     Authorization:
-      "Basic " +
-      Buffer.from((CLIENT_ID || "") + ":" + (CLIENT_SECRET || "")).toString("base64")
-    }
+
+ const response = await axios.post(
+  "https://accounts.spotify.com/api/token",
+  new URLSearchParams({
+   grant_type: "refresh_token",
+   refresh_token: REFRESH_TOKEN
+  }),
+  {
+   headers: {
+    Authorization:
+     "Basic " +
+     Buffer.from(CLIENT_ID + ":" + CLIENT_SECRET).toString("base64")
    }
-  );
+  }
+ );
 
-  return response.data.access_token;
-
- } catch (err) {
-  console.error("Spotify auth error:", err.response?.data || err.message);
-  return null;
- }
+ return response.data.access_token;
 }
-
-// 🚫 NOTHING ELSE HERE
 
 async function skipTrack() {
 
  const token = await getAccessToken();
-
- if (!token) {
-  console.log("Spotify token missing, skip aborted");
-  return;
- }
 
  await axios.post(
   "https://api.spotify.com/v1/me/player/next",
@@ -143,11 +134,7 @@ app.post("/vote", async (req, res) => {
 
  if (votes.size >= majority()) {
 
-const token = await getAccessToken();
-
-if (!token) {
-  return res.json({ title: "Spotify error", image: null });
-}
+  const token = await getAccessToken();
 
   const response = await axios.get(
    "https://api.spotify.com/v1/me/player/currently-playing",
@@ -382,12 +369,6 @@ app.post("/ban-user", (req, res) => {
 
 /* ---------------- START SERVER ---------------- */
 
-const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port " + PORT);
+server.listen(process.env.PORT || 3000, () => {
+ console.log("Server running");
 });
-
-
-
-
