@@ -9,10 +9,7 @@ const io = new Server(server);
 
 app.use(express.json());
 app.use(express.static("public"));
-app.get("/", (req, res) => {
-  console.log("ROOT HIT");
-  res.send("OK WORKING");
-});
+
 let votes = new Map();
 let bannedNames = new Set();
 let connectedUsers = new Map(); // key: userId
@@ -28,14 +25,22 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
 /* ---------------- SOCKET CONNECTION ---------------- */
-/*
+
 io.on("connection", (socket) => {
 
- socket.on("registerUser", ({ userId, name }) => {
+ socket.on("registerUser", (name) => {
 
-  socket.userId = userId;
+socket.userId = null;
 
-  connectedUsers.set(userId, name);
+socket.on("registerUser", ({userId,name}) => {
+
+ socket.userId = userId;
+
+ connectedUsers.set(userId,name);
+
+ io.emit("voteUpdate", buildVoteResponse());
+
+});
 
   io.emit("voteUpdate", buildVoteResponse());
 
@@ -43,16 +48,16 @@ io.on("connection", (socket) => {
 
  socket.on("disconnect", () => {
 
-  if (socket.userId) {
-   connectedUsers.delete(socket.userId);
-  }
+if(socket.userId){
+ connectedUsers.delete(socket.userId);
+}
 
   io.emit("voteUpdate", buildVoteResponse());
 
  });
 
 });
-*/
+
 /* ---------------- UTIL ---------------- */
 
 function majority() {
@@ -367,3 +372,8 @@ app.post("/ban-user", (req, res) => {
 server.listen(process.env.PORT || 3000, () => {
  console.log("Server running");
 });
+
+
+
+
+
