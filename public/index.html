@@ -173,6 +173,8 @@ padding:15px;
 border-radius:10px;
 display:none;
 width:220px;
+max-height:70vh;
+overflow-y:auto;
 }
 
 .switch{
@@ -232,6 +234,36 @@ width:120px;
 pointer-events:none;
 z-index:5;
 opacity:.95;
+}
+
+/* user list reset buttons */
+
+#userList{
+list-style:none;
+padding:0;
+margin:0;
+}
+
+#userList li{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:5px;
+font-size:13px;
+}
+
+.resetBtn{
+background:#e74c3c;
+border:none;
+color:white;
+border-radius:4px;
+cursor:pointer;
+padding:2px 7px;
+font-size:11px;
+}
+
+.resetBtn:hover{
+background:#c0392b;
 }
   
 </style>
@@ -403,14 +435,33 @@ document.getElementById("adminMessage").innerText=data.message;
 /* CONNECTED USERS */
 
 if(data.users){
-const list=document.getElementById("userList");
-list.innerHTML="";
-data.users.forEach(u=>{
+const userList=document.getElementById("userList");
+userList.innerHTML="";
+data.users.forEach((u,i)=>{
 const li=document.createElement("li");
-li.innerText=u;
-list.appendChild(li);
+const uid=data.userIds[i];
+li.innerHTML=`<span>${u}</span><button class="resetBtn" onclick="resetUser('${uid}')">Reset</button>`;
+userList.appendChild(li);
 });
 }
+
+}
+
+function resetUser(uid){
+
+const password=document.getElementById("adminPasswordInput").value;
+
+fetch("/reset-user",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:uid, password})
+})
+.then(res=>res.json())
+.then(data=>{
+if(data.success){
+document.getElementById("adminMessage").innerText="User reset — they'll be prompted for a new name on reload.";
+}
+});
 
 }
 
