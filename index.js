@@ -211,9 +211,10 @@ app.get("/current-song", async (req, res) => {
    image: albumImage
   });
 
- } catch {
-  res.json({ title: "Error getting song", image: null });
- }
+} catch (err) {
+  console.error("Spotify error:", err.response?.data || err.message);
+  res.json({ title: err.response?.data?.error?.message || err.message, image: null });
+}
 
 });
 
