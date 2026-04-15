@@ -94,14 +94,16 @@ transform:scale(1);
 position:fixed;
 top:20px;
 left:360px;
-background:rgba(0,0,0,0.25);
+background:rgba(0,0,0,0.65);
 backdrop-filter:blur(10px);
 -webkit-backdrop-filter:blur(10px);
 padding:14px;
 border-radius:12px;
 font-size:14px;
 width:170px;
-border:1px solid rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.15);
+color:white;
+z-index:5;
 }
 
 #weatherCity{
@@ -1349,8 +1351,8 @@ background:#c0392b;
 <div id="rateLabel">loading rate...</div>
 </div>
 
-<img id="cornerGif" src="/dancer.gif">
-<img id="topRightGif" src="/penguin.gif">
+<img id="cornerGif" src="/dancer.gif" onerror="this.style.display='none'">
+<img id="topRightGif" src="/penguin.gif" onerror="this.style.display='none'">
 
 <div class="layout">
 
@@ -1661,6 +1663,9 @@ background:#c0392b;
 <ul id="userList"></ul>
 
 <h4>Give Coins 🪙</h4>
+<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11px;color:#aaa;">
+  <label><input type="checkbox" id="showAllUsers" onchange="toggleAllUsers()"> Show offline users too</label>
+</div>
 <select id="coinTargetSelect" style="width:100%;margin-bottom:6px;background:#222;color:white;border:1px solid #444;border-radius:4px;padding:4px;">
   <option value="">— select user —</option>
 </select>
@@ -1799,6 +1804,25 @@ function updateUI(data) {
     if (prevVal) select.value = prevVal;
   }
 
+}
+
+function toggleAllUsers() {
+  const showAll = document.getElementById("showAllUsers").checked;
+  if (showAll) {
+    const password = document.getElementById("adminPasswordInput").value;
+    fetch("/all-users?password=" + encodeURIComponent(password))
+      .then(r => r.json())
+      .then(users => {
+        const select = document.getElementById("coinTargetSelect");
+        select.innerHTML = "<option value=''>— select user —</option>";
+        users.forEach(u => {
+          const opt = document.createElement("option");
+          opt.value = u.user_id;
+          opt.innerText = u.user_name + " (" + u.balance + "🪙)";
+          select.appendChild(opt);
+        });
+      });
+  }
 }
 
 function giveCoins() {
