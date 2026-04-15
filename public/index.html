@@ -370,11 +370,145 @@ flex:1;
 width:100%;
 }
 
+/* VESSEL TRACKER BUTTON */
+
+#vesselBtn{
+position:fixed;
+bottom:230px;
+right:20px;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#1a5276;
+border:none;
+font-size:22px;
+cursor:pointer;
+box-shadow:0 0 12px rgba(26,82,118,0.6);
+transition:all .2s;
+z-index:10;
+}
+
+#vesselBtn:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px rgba(26,82,118,0.9);
+}
+
+/* VESSEL MODAL */
+
+#vesselModal{
+display:none;
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+background:rgba(0,0,0,0.75);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#vesselModal.open{
+display:flex;
+}
+
+#vesselModalBox{
+background:#0a1628;
+border-radius:16px;
+border:1px solid rgba(26,82,118,0.5);
+box-shadow:0 0 40px rgba(26,82,118,0.4);
+width:88vw;
+height:84vh;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:vesselModalIn .25s ease;
+}
+
+@keyframes vesselModalIn{
+from{transform:scale(0.92);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#vesselModalHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:12px 20px;
+background:rgba(26,82,118,0.2);
+border-bottom:1px solid rgba(26,82,118,0.4);
+flex-shrink:0;
+gap:12px;
+}
+
+#vesselModalHeader h3{
+margin:0;
+font-size:15px;
+color:#7fb3d3;
+letter-spacing:1px;
+white-space:nowrap;
+}
+
+#vesselBtns{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+
+.vesselSelectBtn{
+background:rgba(26,82,118,0.4);
+border:1px solid rgba(26,82,118,0.6);
+color:white;
+border-radius:20px;
+padding:5px 14px;
+font-size:12px;
+cursor:pointer;
+transition:all .2s;
+white-space:nowrap;
+}
+
+.vesselSelectBtn:hover{
+background:rgba(26,82,118,0.8);
+}
+
+.vesselSelectBtn.active{
+background:#1a5276;
+border-color:#5dade2;
+color:#5dade2;
+}
+
+#vesselDetailsLink{
+color:#5dade2;
+font-size:12px;
+text-decoration:none;
+white-space:nowrap;
+opacity:0.8;
+}
+
+#vesselDetailsLink:hover{opacity:1;}
+
+#vesselCloseBtn{
+background:none;
+border:none;
+color:white;
+font-size:22px;
+cursor:pointer;
+opacity:0.7;
+line-height:1;
+flex-shrink:0;
+}
+
+#vesselCloseBtn:hover{opacity:1;}
+
+#vesselMapFrame{
+flex:1;
+border:none;
+width:100%;
+}
+
 /* OIL CHART BUTTON */
 
 #oilBtn{
 position:fixed;
-bottom:90px;
+bottom:160px;
 right:20px;
 width:55px;
 height:55px;
@@ -601,6 +735,26 @@ background:#c0392b;
 </div>
 
 <button id="oilBtn" onclick="toggleOilModal()" title="Brent Crude Oil Price">🛢️</button>
+
+<button id="vesselBtn" onclick="toggleVesselModal()" title="Vessel Tracker">⚓</button>
+
+<!-- VESSEL TRACKER MODAL -->
+<div id="vesselModal" onclick="closeVesselModalOutside(event)">
+  <div id="vesselModalBox">
+    <div id="vesselModalHeader">
+      <h3>⚓ VESSEL TRACKER</h3>
+      <div id="vesselBtns">
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '209659000', '9814014')">Containerships Aurora</button>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '210028000', '9866249')">Containerships Borealis</button>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '256800000', '9961295')">CMA CGM Ermitage</button>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '256883000', '9961312')">CMA CGM Tivoli</button>
+      </div>
+      <a id="vesselDetailsLink" href="#" target="_blank" style="display:none">📋 Full Details ↗</a>
+      <button id="vesselCloseBtn" onclick="toggleVesselModal()">✕</button>
+    </div>
+    <iframe id="vesselMapFrame" src="" loading="lazy" allowfullscreen></iframe>
+  </div>
+</div>
 
 <!-- OIL CHART MODAL -->
 <div id="oilModal" onclick="closeOilModalOutside(event)">
@@ -991,6 +1145,38 @@ function closeOilModalOutside(event) {
   if (event.target === document.getElementById("oilModal")) {
     document.getElementById("oilModal").classList.remove("open");
   }
+}
+
+const vessels = {
+  '209659000': { name: 'Containerships Aurora',  imo: '9814014' },
+  '210028000': { name: 'Containerships Borealis', imo: '9866249' },
+  '256800000': { name: 'CMA CGM Ermitage',        imo: '9961295' }
+};
+
+function toggleVesselModal() {
+  const modal = document.getElementById("vesselModal");
+  modal.classList.toggle("open");
+}
+
+function closeVesselModalOutside(event) {
+  if (event.target === document.getElementById("vesselModal")) {
+    document.getElementById("vesselModal").classList.remove("open");
+  }
+}
+
+function selectVessel(btn, mmsi, imo) {
+  // highlight active button
+  document.querySelectorAll(".vesselSelectBtn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+
+  // load map centered on vessel
+  const frame = document.getElementById("vesselMapFrame");
+  frame.src = "https://www.vesselfinder.com/aismap?mmsi=" + mmsi + "&zoom=8&names=true&fleet=false";
+
+  // show full details link
+  const link = document.getElementById("vesselDetailsLink");
+  link.href = "https://www.vesselfinder.com/vessels/details/" + imo;
+  link.style.display = "inline";
 }
 
 let oilChartLoaded = false;
