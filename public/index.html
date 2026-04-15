@@ -1788,20 +1788,25 @@ function updateUI(data) {
   if (data.users) {
     const userList = document.getElementById("userList");
     userList.innerHTML = "";
+    const showAll = document.getElementById("showAllUsers")?.checked;
     const select = document.getElementById("coinTargetSelect");
     const prevVal = select.value;
-    select.innerHTML = "<option value=''>— select user —</option>";
+    if (!showAll) {
+      select.innerHTML = "<option value=''>— select user —</option>";
+    }
     data.users.forEach((u, i) => {
       const uid = data.userIds[i];
       const li = document.createElement("li");
       li.innerHTML = "<span>" + u + "</span><button class=\"resetBtn\" onclick=\"resetUser('" + uid + "')\">Reset</button>";
       userList.appendChild(li);
-      const opt = document.createElement("option");
-      opt.value = uid;
-      opt.innerText = u;
-      select.appendChild(opt);
+      if (!showAll) {
+        const opt = document.createElement("option");
+        opt.value = uid;
+        opt.innerText = u;
+        select.appendChild(opt);
+      }
     });
-    if (prevVal) select.value = prevVal;
+    if (!showAll && prevVal) select.value = prevVal;
   }
 
 }
