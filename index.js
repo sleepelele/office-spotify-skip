@@ -30,8 +30,6 @@ let soundEnabled = true;
 let totalPeople = parseInt(process.env.TOTAL_PEOPLE) || 5;
 let lastSongId = null;
 let lastSkipInfo = null;
-let minesweeperScores = [];
-
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
@@ -435,14 +433,23 @@ app.post("/reset-user", (req, res) => {
 
 /* ---------------- MINESWEEPER ---------------- */
 
-app.get("/minesweeper-scores", (req, res) => res.json(minesweeperScores));
+app.get("/minesweeper-scores", async (req, res) => {
+  const { data } = await supabase
+    .from("minesweeper_scores")
+    .select("name, time, date")
+    .order("time", { ascending: true })
+    .limit(20);
+  res.json(data || []);
+});
 
-app.post("/minesweeper-score", (req, res) => {
+app.post("/minesweeper-score", async (req, res) => {
   const { name, time } = req.body;
   if (!name || !time) return res.status(400).json({ success: false });
-  minesweeperScores.push({ name, time, date: new Date().toLocaleDateString() });
-  minesweeperScores.sort((a, b) => a.time - b.time);
-  minesweeperScores = minesweeperScores.slice(0, 20);
+  await supabase.from("minesweeper_scores").insert({
+    name,
+    time,
+    date: new Date().toLocaleDateString()
+  });
   res.json({ success: true });
 });
 
