@@ -523,6 +523,14 @@ app.post("/admin-give-coins", async (req, res) => {
   const newBalance = balance + parseInt(amount);
   await supabase.from("coins").update({ balance: newBalance }).eq("user_id", userId);
 
+  // push update directly to the user's socket if they're online
+  for (const [, socket] of io.of("/").sockets) {
+    if (socket.userId === userId) {
+      socket.emit("coinUpdate", { balance: newBalance });
+      break;
+    }
+  }
+
   res.json({ success: true, newBalance });
 });
 
