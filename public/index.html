@@ -481,6 +481,276 @@ gap:4px;
 #msLeaderboard li.ms-bronze{ color:#7a4a00; font-weight:bold; }
 #msLeaderboard li.ms-me{ background:rgba(0,100,255,0.15); }
 
+/* SONG STATS */
+
+#songStatsBar{
+display:flex;
+gap:16px;
+justify-content:center;
+margin:8px 0 4px;
+font-size:13px;
+opacity:0.75;
+}
+
+#songStatsBar span{
+background:rgba(255,255,255,0.08);
+border-radius:20px;
+padding:3px 10px;
+}
+
+/* LIKE / DISLIKE */
+
+#reactionBtns{
+display:flex;
+gap:10px;
+justify-content:center;
+margin:6px 0;
+}
+
+.reaction-btn{
+background:rgba(255,255,255,0.1);
+border:1px solid rgba(255,255,255,0.2);
+color:white;
+border-radius:20px;
+padding:5px 16px;
+font-size:13px;
+cursor:pointer;
+transition:all .2s;
+}
+
+.reaction-btn:hover{ background:rgba(255,255,255,0.2); }
+.reaction-btn.liked{ background:rgba(29,185,84,0.4); border-color:#1DB954; }
+.reaction-btn.disliked{ background:rgba(231,76,60,0.4); border-color:#e74c3c; }
+
+/* COIN BAR */
+
+#coinBar{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:12px;
+margin:8px 0;
+font-size:13px;
+}
+
+#coinDisplay{
+background:rgba(255,215,0,0.1);
+border:1px solid rgba(255,215,0,0.3);
+border-radius:20px;
+padding:4px 12px;
+color:#ffd700;
+}
+
+#boostBtn{
+background:rgba(255,215,0,0.15);
+border:1px solid rgba(255,215,0,0.4);
+color:#ffd700;
+border-radius:20px;
+padding:5px 14px;
+font-size:12px;
+cursor:pointer;
+transition:all .2s;
+}
+
+#boostBtn:hover{ background:rgba(255,215,0,0.3); }
+#boostBtn:disabled{ opacity:0.4; cursor:default; }
+
+/* BLACKJACK BUTTON */
+
+#bjBtn{
+position:fixed;
+bottom:300px;
+right:20px;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#1a6b3a;
+border:none;
+font-size:22px;
+cursor:pointer;
+box-shadow:0 0 12px rgba(26,107,58,0.6);
+transition:all .2s;
+z-index:10;
+}
+
+#bjBtn:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px rgba(26,107,58,0.9);
+}
+
+/* BLACKJACK MODAL */
+
+#bjModal{
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.82);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#bjModal.open{ display:flex; }
+
+#bjModalBox{
+background:#076324;
+border-radius:16px;
+border:2px solid #1a6b3a;
+box-shadow:0 0 40px rgba(26,107,58,0.5);
+width:620px;
+max-width:95vw;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:bjIn .2s ease;
+}
+
+@keyframes bjIn{
+from{transform:scale(0.92);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#bjHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px 20px;
+background:rgba(0,0,0,0.3);
+border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+#bjHeader h3{
+margin:0;
+font-size:16px;
+color:#ffd700;
+letter-spacing:1px;
+}
+
+#bjCloseBtn{
+background:none;
+border:none;
+color:white;
+font-size:22px;
+cursor:pointer;
+opacity:0.7;
+}
+
+#bjCloseBtn:hover{ opacity:1; }
+
+#bjBody{
+padding:20px;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:14px;
+}
+
+.bj-hand-label{
+font-size:12px;
+opacity:0.6;
+letter-spacing:1px;
+text-transform:uppercase;
+}
+
+.bj-hand{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+justify-content:center;
+min-height:100px;
+align-items:center;
+}
+
+.bj-card{
+width:64px;
+height:90px;
+background:white;
+border-radius:8px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+font-size:22px;
+font-weight:bold;
+box-shadow:2px 2px 6px rgba(0,0,0,0.4);
+color:#000;
+position:relative;
+}
+
+.bj-card.red{ color:#cc0000; }
+
+.bj-card.back{
+background: repeating-linear-gradient(
+  45deg,
+  #1a3a8a,
+  #1a3a8a 5px,
+  #2a4a9a 5px,
+  #2a4a9a 10px
+);
+}
+
+.bj-score{
+font-size:18px;
+font-weight:bold;
+color:#ffd700;
+}
+
+#bjStatus{
+font-size:18px;
+font-weight:bold;
+min-height:28px;
+color:#ffd700;
+}
+
+#bjControls{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+}
+
+.bj-btn{
+padding:10px 22px;
+border:none;
+border-radius:8px;
+font-size:14px;
+font-weight:bold;
+cursor:pointer;
+transition:all .2s;
+}
+
+.bj-btn:hover{ transform:scale(1.05); }
+.bj-btn:disabled{ opacity:0.4; cursor:default; transform:none; }
+
+#bjDealBtn{ background:#ffd700; color:#000; }
+#bjHitBtn{ background:#27ae60; color:#fff; }
+#bjStandBtn{ background:#e74c3c; color:#fff; }
+#bjDoubleBtn{ background:#8e44ad; color:#fff; }
+
+#bjBetRow{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+#bjBetInput{
+width:70px;
+padding:6px;
+border-radius:6px;
+border:none;
+font-size:16px;
+text-align:center;
+}
+
+#bjBalanceDisplay{
+font-size:14px;
+color:#ffd700;
+background:rgba(0,0,0,0.3);
+border-radius:20px;
+padding:4px 14px;
+}
+
 /* OIL PRICE BUTTON */
 
 #oilBtn{
@@ -577,7 +847,7 @@ width:100%;
 
 #vesselBtn{
 position:fixed;
-bottom:230px;
+bottom:300px;
 right:20px;
 width:55px;
 height:55px;
@@ -905,11 +1175,31 @@ background:#c0392b;
 
 <div id="artistName"></div>
 
+<!-- SONG STATS -->
+<div id="songStatsBar">
+  <span id="statPlays" title="Times played">▶ 0</span>
+  <span id="statSkips" title="Times skipped">⏭ 0</span>
+  <span id="statLikes" title="Likes">👍 0</span>
+  <span id="statDislikes" title="Dislikes">👎 0</span>
+</div>
+
+<!-- LIKE / DISLIKE -->
+<div id="reactionBtns">
+  <button id="likeBtn" onclick="songVote('like')" class="reaction-btn">👍 Like</button>
+  <button id="dislikeBtn" onclick="songVote('dislike')" class="reaction-btn">👎 Dislike</button>
+</div>
+
 <div class="progress-container">
 <div id="progressBar"></div>
 </div>
 
 <div id="voteCounter">0 / 0 votes</div>
+
+<!-- COIN BAR -->
+<div id="coinBar">
+  <span id="coinDisplay">🪙 <span id="coinCount">...</span> coins</span>
+  <button id="boostBtn" onclick="boostVote()" title="Spend 1 coin for an extra skip vote">⚡ Boost Vote (1🪙)</button>
+</div>
 
 <button id="skipBtn" onclick="vote()">SKIP</button>
 
@@ -973,6 +1263,43 @@ background:#c0392b;
       <div id="msLeaderboardPanel">
         <h4>🏆 Best Times</h4>
         <ul id="msLeaderboard"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="bjBtn" onclick="toggleBjModal()" title="Blackjack">🃏</button>
+
+<!-- BLACKJACK MODAL -->
+<div id="bjModal" onclick="closeBjModalOutside(event)">
+  <div id="bjModalBox">
+    <div id="bjHeader">
+      <h3>🃏 OFFICE BLACKJACK</h3>
+      <div id="bjBalanceDisplay">🪙 <span id="bjCoins">...</span> coins</div>
+      <button id="bjCloseBtn" onclick="toggleBjModal()">✕</button>
+    </div>
+    <div id="bjBody">
+      <div class="bj-hand-label">Dealer</div>
+      <div class="bj-hand" id="bjDealerHand"></div>
+      <div class="bj-score" id="bjDealerScore"></div>
+
+      <div id="bjStatus"></div>
+
+      <div class="bj-hand" id="bjPlayerHand"></div>
+      <div class="bj-score" id="bjPlayerScore"></div>
+      <div class="bj-hand-label">Your Hand</div>
+
+      <div id="bjBetRow">
+        <label style="color:white;font-size:13px;">Bet:</label>
+        <input id="bjBetInput" type="number" min="1" value="1">
+        <span style="color:#ffd700;font-size:13px;">coins</span>
+      </div>
+
+      <div id="bjControls">
+        <button class="bj-btn" id="bjDealBtn" onclick="bjDeal()">Deal</button>
+        <button class="bj-btn" id="bjHitBtn" onclick="bjHit()" disabled>Hit</button>
+        <button class="bj-btn" id="bjStandBtn" onclick="bjStand()" disabled>Stand</button>
+        <button class="bj-btn" id="bjDoubleBtn" onclick="bjDouble()" disabled>Double</button>
       </div>
     </div>
   </div>
@@ -1313,6 +1640,16 @@ function loadSong() {
         applyAlbumColor(data.image);
         document.getElementById("bg").style.backgroundImage = "url(" + data.image + ")";
       }
+
+      // new song — reset session vote state
+      if (data.songId && data.songId !== currentSongId) {
+        currentSongId = data.songId;
+        currentSessionId = generateSessionId();
+        myVoteThisSession = null;
+        updateReactionButtons();
+        loadSongStats(currentSongId);
+      }
+
       loadVotes();
     });
 }
@@ -1713,11 +2050,277 @@ function renderMsBoard(hitR, hitC) {
   }
 }
 
+/* ---------------- SONG STATS & LIKES ---------------- */
+
+let currentSongId = null;
+let currentSessionId = null;
+let myVoteThisSession = null; // 'like' | 'dislike' | null
+
+function generateSessionId() {
+  return Math.random().toString(36).slice(2);
+}
+
+function loadSongStats(songId) {
+  if (!songId) return;
+  fetch("/song-stats/" + songId)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("statPlays").innerText = "▶ " + (data.plays || 0);
+      document.getElementById("statSkips").innerText = "⏭ " + (data.skips || 0);
+      document.getElementById("statLikes").innerText = "👍 " + (data.likes || 0);
+      document.getElementById("statDislikes").innerText = "👎 " + (data.dislikes || 0);
+    });
+}
+
+function songVote(vote) {
+  if (!currentSongId) return;
+  fetch("/song-vote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, songId: currentSongId, sessionId: currentSessionId, vote })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.action === "removed") {
+      myVoteThisSession = null;
+    } else {
+      myVoteThisSession = vote;
+    }
+    updateReactionButtons();
+    loadSongStats(currentSongId);
+  });
+}
+
+function updateReactionButtons() {
+  const likeBtn = document.getElementById("likeBtn");
+  const dislikeBtn = document.getElementById("dislikeBtn");
+  likeBtn.classList.remove("liked", "disliked");
+  dislikeBtn.classList.remove("liked", "disliked");
+  if (myVoteThisSession === "like") likeBtn.classList.add("liked");
+  if (myVoteThisSession === "dislike") dislikeBtn.classList.add("disliked");
+}
+
+/* ---------------- COINS ---------------- */
+
+let myCoins = 0;
+
+function loadCoins() {
+  fetch("/coins/" + userId + "?name=" + encodeURIComponent(userName))
+    .then(r => r.json())
+    .then(data => {
+      myCoins = data.balance;
+      document.getElementById("coinCount").innerText = myCoins;
+      document.getElementById("bjCoins").innerText = myCoins;
+      document.getElementById("boostBtn").disabled = myCoins < 1;
+    });
+}
+
+function boostVote() {
+  if (myCoins < 1) return;
+  fetch("/boost-vote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, name: userName })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      myCoins = data.newBalance;
+      document.getElementById("coinCount").innerText = myCoins;
+      document.getElementById("bjCoins").innerText = myCoins;
+      document.getElementById("boostBtn").disabled = myCoins < 1;
+      if (data.skipped) {
+        document.getElementById("adminMessage").innerText = "⚡ Coin boost tipped the vote — song skipped!";
+      } else {
+        document.getElementById("adminMessage").innerText = "⚡ Coin boost added! Vote count increased.";
+      }
+    } else {
+      document.getElementById("adminMessage").innerText = data.message || "Boost failed";
+    }
+  });
+}
+
+/* ---------------- BLACKJACK ---------------- */
+
+const BJ_SUITS = ["♠","♥","♦","♣"];
+const BJ_VALUES = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+const BJ_RED = ["♥","♦"];
+
+let bjDeck = [], bjPlayerCards = [], bjDealerCards = [], bjBet = 0, bjGameActive = false;
+
+function toggleBjModal() {
+  const modal = document.getElementById("bjModal");
+  modal.classList.toggle("open");
+  if (modal.classList.contains("open")) {
+    loadCoins();
+    if (!bjGameActive) bjReset();
+  }
+}
+
+function closeBjModalOutside(e) {
+  if (e.target === document.getElementById("bjModal")) {
+    document.getElementById("bjModal").classList.remove("open");
+  }
+}
+
+function bjShuffleDeck() {
+  bjDeck = [];
+  for (const suit of BJ_SUITS)
+    for (const val of BJ_VALUES)
+      bjDeck.push({ suit, val });
+  for (let i = bjDeck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [bjDeck[i], bjDeck[j]] = [bjDeck[j], bjDeck[i]];
+  }
+}
+
+function bjCardValue(card) {
+  if (["J","Q","K"].includes(card.val)) return 10;
+  if (card.val === "A") return 11;
+  return parseInt(card.val);
+}
+
+function bjHandScore(cards) {
+  let score = 0, aces = 0;
+  for (const c of cards) {
+    score += bjCardValue(c);
+    if (c.val === "A") aces++;
+  }
+  while (score > 21 && aces > 0) { score -= 10; aces--; }
+  return score;
+}
+
+function bjRenderCard(card, hidden) {
+  const div = document.createElement("div");
+  div.className = "bj-card" + (hidden ? " back" : (BJ_RED.includes(card.suit) ? " red" : ""));
+  if (!hidden) div.innerHTML = "<div>" + card.val + "</div><div>" + card.suit + "</div>";
+  return div;
+}
+
+function bjRenderHands(hideDealer) {
+  const ph = document.getElementById("bjPlayerHand");
+  const dh = document.getElementById("bjDealerHand");
+  ph.innerHTML = ""; dh.innerHTML = "";
+  bjPlayerCards.forEach(c => ph.appendChild(bjRenderCard(c, false)));
+  bjDealerCards.forEach((c, i) => dh.appendChild(bjRenderCard(c, hideDealer && i === 1)));
+  document.getElementById("bjPlayerScore").innerText = bjHandScore(bjPlayerCards);
+  document.getElementById("bjDealerScore").innerText = hideDealer ? "?" : bjHandScore(bjDealerCards);
+}
+
+function bjSetButtons(inGame) {
+  document.getElementById("bjDealBtn").disabled = inGame;
+  document.getElementById("bjHitBtn").disabled = !inGame;
+  document.getElementById("bjStandBtn").disabled = !inGame;
+  document.getElementById("bjDoubleBtn").disabled = !inGame || bjPlayerCards.length > 2 || myCoins < bjBet;
+  document.getElementById("bjBetInput").disabled = inGame;
+}
+
+function bjReset() {
+  bjPlayerCards = []; bjDealerCards = []; bjGameActive = false;
+  document.getElementById("bjPlayerHand").innerHTML = "";
+  document.getElementById("bjDealerHand").innerHTML = "";
+  document.getElementById("bjPlayerScore").innerText = "";
+  document.getElementById("bjDealerScore").innerText = "";
+  document.getElementById("bjStatus").innerText = "";
+  bjSetButtons(false);
+}
+
+function bjDeal() {
+  const betInput = parseInt(document.getElementById("bjBetInput").value);
+  if (isNaN(betInput) || betInput < 1) return alert("Enter a valid bet!");
+  if (betInput > myCoins) return alert("Not enough coins!");
+  bjBet = betInput;
+  bjShuffleDeck();
+  bjPlayerCards = [bjDeck.pop(), bjDeck.pop()];
+  bjDealerCards = [bjDeck.pop(), bjDeck.pop()];
+  bjGameActive = true;
+  bjRenderHands(true);
+  bjSetButtons(true);
+  document.getElementById("bjStatus").innerText = "";
+
+  // check player blackjack
+  if (bjHandScore(bjPlayerCards) === 21) {
+    bjFinish(true);
+  }
+}
+
+function bjHit() {
+  bjPlayerCards.push(bjDeck.pop());
+  bjRenderHands(true);
+  if (bjHandScore(bjPlayerCards) > 21) bjFinish(false);
+}
+
+function bjStand() {
+  // dealer plays
+  while (bjHandScore(bjDealerCards) < 17) bjDealerCards.push(bjDeck.pop());
+  bjFinish(null);
+}
+
+function bjDouble() {
+  bjBet *= 2;
+  bjPlayerCards.push(bjDeck.pop());
+  bjRenderHands(true);
+  if (bjHandScore(bjPlayerCards) > 21) {
+    bjFinish(false);
+  } else {
+    bjStand();
+  }
+}
+
+function bjFinish(playerBJ) {
+  bjGameActive = false;
+  bjRenderHands(false);
+  bjSetButtons(false);
+
+  const ps = bjHandScore(bjPlayerCards);
+  const ds = bjHandScore(bjDealerCards);
+  let delta = 0;
+  let msg = "";
+
+  if (ps > 21) {
+    msg = "💀 Bust! You lose " + bjBet + " coins";
+    delta = -bjBet;
+  } else if (playerBJ) {
+    const win = Math.ceil(bjBet * 1.5);
+    msg = "🃏 Blackjack! You win " + win + " coins!";
+    delta = win;
+  } else if (ds > 21) {
+    msg = "🎉 Dealer busts! You win " + bjBet + " coins!";
+    delta = bjBet;
+  } else if (ps > ds) {
+    msg = "🎉 You win " + bjBet + " coins!";
+    delta = bjBet;
+  } else if (ps < ds) {
+    msg = "😞 Dealer wins. You lose " + bjBet + " coins";
+    delta = -bjBet;
+  } else {
+    msg = "🤝 Push — bet returned";
+    delta = 0;
+  }
+
+  document.getElementById("bjStatus").innerText = msg;
+
+  fetch("/blackjack-result", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, userName, delta })
+  })
+  .then(r => r.json())
+  .then(data => {
+    myCoins = data.newBalance;
+    document.getElementById("bjCoins").innerText = myCoins;
+    document.getElementById("coinCount").innerText = myCoins;
+    document.getElementById("boostBtn").disabled = myCoins < 1;
+    document.getElementById("bjBetInput").value = Math.min(bjBet, myCoins) || 1;
+  });
+}
+
 loadSong();
 loadVotes();
 loadLastSkip();
 loadWeather();
 loadCurrency();
+loadCoins();
 
 setInterval(loadSong, 10000);
 setInterval(loadLastSkip, 5000);
