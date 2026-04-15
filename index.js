@@ -23,7 +23,7 @@ const supabase = createClient(
 let votes = new Map();
 let coinBoosts = new Map();
 let bannedNames = new Set();
-let bannedDevices = new Set(); // userId-based device bans (persistent via Supabase)
+let bannedDevices = new Set();
 let connectedUsers = new Map();
 let cooldown = false;
 let votingEnabled = true;
@@ -35,13 +35,32 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
-// Load banned devices from Supabase on startup
+async function saveSettings() {
+  await supabase.from("settings").upsert({
+    id: 1,
+    total_people: totalPeople,
+    voting_enabled: votingEnabled,
+    sound_enabled: soundEnabled
+  });
+}
+
+async function loadSettings() {
+  const { data } = await supabase.from("settings").select("*").eq("id", 1).single();
+  if (data) {
+    totalPeople = data.total_people ?? totalPeople;
+    votingEnabled = data.voting_enabled ?? votingEnabled;
+    soundEnabled = data.sound_enabled ?? soundEnabled;
+    console.log("Settings loaded:", { totalPeople, votingEnabled, soundEnabled });
+  }
+}
+
 async function loadBannedDevices() {
   const { data } = await supabase.from("banned_devices").select("user_id");
   if (data) data.forEach(row => bannedDevices.add(row.user_id));
   console.log("Loaded banned devices:", bannedDevices.size);
 }
-loadBannedDevices();
+
+Promise.all([loadSettings(), loadBannedDevices()]);
 
 /* ---------------- SOCKET ---------------- */
 
@@ -170,7 +189,7 @@ app.post("/vote", async (req, res) => {
   io.emit("voteUpdate", buildVoteResponse());
 
   if (totalVoteCount() >= majority()) {
-    await doSkip();
+    try { await doSkip(); } catch(e) { console.error("Skip error:", e.message); }
     return res.json(buildVoteResponse("Song skipped"));
   }
 
@@ -203,7 +222,7 @@ app.post("/boost-vote", async (req, res) => {
   io.emit("voteUpdate", buildVoteResponse());
 
   if (totalVoteCount() >= majority()) {
-    await doSkip();
+    try { await doSkip(); } catch(e) { console.error("Boost skip error:", e.message); }
     return res.json({ success: true, newBalance: balance - 1, skipped: true });
   }
 
@@ -405,24 +424,31 @@ app.post("/admin-auth", (req, res) => {
   res.status(403).json({ success: false });
 });
 
-app.post("/set-total", (req, res) => {
+app.post("/set-total", async (req, res) => {
   if (req.body.password !== process.env.ADMIN_PASSWORD) return res.status(403).json({ success: false });
   const newTotal = parseInt(req.body.total);
-  if (!isNaN(newTotal) && newTotal > 0) { totalPeople = newTotal; votes.clear(); io.emit("voteUpdate", buildVoteResponse()); }
+  if (!isNaN(newTotal) && newTotal > 0) {
+    totalPeople = newTotal;
+    votes.clear();
+    io.emit("voteUpdate", buildVoteResponse());
+    await saveSettings();
+  }
   res.json({ success: true });
 });
 
-app.post("/toggle-voting", (req, res) => {
+app.post("/toggle-voting", async (req, res) => {
   if (req.body.password !== process.env.ADMIN_PASSWORD) return res.status(403).json({ success: false });
   votingEnabled = !votingEnabled;
   io.emit("voteUpdate", buildVoteResponse());
+  await saveSettings();
   res.json({ success: true });
 });
 
-app.post("/toggle-sound", (req, res) => {
+app.post("/toggle-sound", async (req, res) => {
   if (req.body.password !== process.env.ADMIN_PASSWORD) return res.status(403).json({ success: false });
   soundEnabled = !soundEnabled;
   io.emit("voteUpdate", buildVoteResponse());
+  await saveSettings();
   res.json({ success: true });
 });
 
