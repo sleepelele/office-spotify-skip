@@ -779,6 +779,140 @@ transition:all .2s;
 animation:coinFlash 0.5s ease;
 }
 
+/* GAME TABS */
+
+.game-tab-btn{
+background:rgba(255,215,0,0.1);
+border:1px solid rgba(255,215,0,0.3);
+color:#ffd700;
+border-radius:20px;
+padding:4px 12px;
+font-size:11px;
+font-weight:bold;
+cursor:pointer;
+transition:all .2s;
+letter-spacing:0.5px;
+}
+
+.game-tab-btn.active{
+background:rgba(255,215,0,0.35);
+border-color:#ffd700;
+}
+
+.game-tab-btn:hover:not(.active){
+background:rgba(255,215,0,0.2);
+}
+
+.game-panel{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
+padding:10px 0;
+width:100%;
+}
+
+/* COIN FLIP */
+
+#cfCoin{
+font-size:72px;
+transition:transform 0.6s ease;
+display:block;
+}
+
+#cfCoin.flipping{
+animation:cfSpin 0.6s ease;
+}
+
+@keyframes cfSpin{
+0%{ transform:rotateY(0deg) scale(1); }
+50%{ transform:rotateY(90deg) scale(1.3); }
+100%{ transform:rotateY(0deg) scale(1); }
+}
+
+/* SLOTS */
+
+#slotsReels{
+display:flex;
+gap:12px;
+margin:10px 0;
+}
+
+.slot-reel{
+width:80px;
+height:90px;
+background:rgba(0,0,0,0.5);
+border:3px solid #ffd700;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+position:relative;
+}
+
+.slot-symbol{
+font-size:44px;
+transition:transform 0.1s;
+}
+
+.slot-reel.spinning .slot-symbol{
+animation:reelSpin 0.1s steps(1) infinite;
+}
+
+@keyframes reelSpin{
+0%{ transform:translateY(0); opacity:1; }
+50%{ transform:translateY(-10px); opacity:0.5; }
+100%{ transform:translateY(0); opacity:1; }
+}
+
+#slotsPaytable{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:2px 20px;
+font-size:11px;
+color:rgba(255,255,255,0.5);
+margin-top:8px;
+border-top:1px solid rgba(255,255,255,0.1);
+padding-top:8px;
+width:100%;
+}
+
+.pay-row{
+display:flex;
+justify-content:space-between;
+padding:1px 0;
+}
+
+/* QUOTE WIDGET */
+
+#quoteWidget{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+max-width:420px;
+text-align:center;
+z-index:5;
+pointer-events:none;
+}
+
+#quoteText{
+font-size:12px;
+color:rgba(255,255,255,0.35);
+font-style:italic;
+line-height:1.5;
+display:block;
+}
+
+#quoteAuthor{
+font-size:10px;
+color:rgba(255,255,255,0.2);
+display:block;
+margin-top:3px;
+letter-spacing:1px;
+}
+
 /* BLACKJACK BUTTON */
 
 #bjBtn{
@@ -1516,33 +1650,36 @@ background:#c0392b;
   </div>
 </div>
 
-<button id="bjBtn" onclick="toggleBjModal()" title="Blackjack">🃏</button>
+<button id="bjBtn" onclick="toggleBjModal()" title="Games">🪙</button>
 
-<!-- BLACKJACK MODAL -->
+<!-- GAMES MODAL -->
 <div id="bjModal" onclick="closeBjModalOutside(event)">
   <div id="bjModalBox">
     <div id="bjHeader">
-      <h3>🃏 OFFICE BLACKJACK</h3>
+      <h3>🎮 OFFICE GAMES</h3>
+      <div style="display:flex;gap:4px;">
+        <button class="game-tab-btn active" id="tabBlackjack" onclick="switchGame('blackjack',this)">Blackjack</button>
+        <button class="game-tab-btn" id="tabCoinflip" onclick="switchGame('coinflip',this)">Coin Flip</button>
+        <button class="game-tab-btn" id="tabSlots" onclick="switchGame('slots',this)">Slots</button>
+      </div>
       <div id="bjBalanceDisplay">🪙 <span id="bjCoins">...</span> coins</div>
       <button id="bjCloseBtn" onclick="toggleBjModal()">✕</button>
     </div>
-    <div id="bjBody">
+
+    <!-- BLACKJACK PANEL -->
+    <div id="bjBody" class="game-panel">
       <div class="bj-hand-label">Dealer</div>
       <div class="bj-hand" id="bjDealerHand"></div>
       <div class="bj-score" id="bjDealerScore"></div>
-
       <div id="bjStatus"></div>
-
       <div class="bj-hand" id="bjPlayerHand"></div>
       <div class="bj-score" id="bjPlayerScore"></div>
       <div class="bj-hand-label">Your Hand</div>
-
       <div id="bjBetRow">
         <label style="color:white;font-size:13px;">Bet:</label>
         <input id="bjBetInput" type="number" min="1" value="1">
         <span style="color:#ffd700;font-size:13px;">coins</span>
       </div>
-
       <div id="bjControls">
         <button class="bj-btn" id="bjDealBtn" onclick="bjDeal()">Deal</button>
         <button class="bj-btn" id="bjHitBtn" onclick="bjHit()" disabled>Hit</button>
@@ -1550,6 +1687,49 @@ background:#c0392b;
         <button class="bj-btn" id="bjDoubleBtn" onclick="bjDouble()" disabled>Double</button>
       </div>
     </div>
+
+    <!-- COIN FLIP PANEL -->
+    <div id="cfBody" class="game-panel" style="display:none;">
+      <div id="cfCoin">🪙</div>
+      <div id="cfStatus" style="font-size:18px;font-weight:bold;color:#ffd700;min-height:28px;"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin:10px 0;">
+        <label style="color:white;font-size:13px;">Bet:</label>
+        <input id="cfBetInput" type="number" min="1" value="1" style="width:60px;padding:6px;border-radius:6px;border:none;font-size:15px;text-align:center;">
+        <span style="color:#ffd700;font-size:13px;">coins</span>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="bj-btn" id="cfHeadsBtn" onclick="cfFlip('heads')" style="background:#ffd700;color:#000;">Heads</button>
+        <button class="bj-btn" id="cfTailsBtn" onclick="cfFlip('tails')" style="background:#c0c0c0;color:#000;">Tails</button>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:12px;">Win = 2× bet &nbsp;|&nbsp; 50/50 odds</div>
+    </div>
+
+    <!-- SLOTS PANEL -->
+    <div id="slotsBody" class="game-panel" style="display:none;">
+      <div id="slotsReels">
+        <div class="slot-reel" id="reel0"><div class="slot-symbol" id="sym0">🍒</div></div>
+        <div class="slot-reel" id="reel1"><div class="slot-symbol" id="sym1">🍒</div></div>
+        <div class="slot-reel" id="reel2"><div class="slot-symbol" id="sym2">🍒</div></div>
+      </div>
+      <div id="slotsStatus" style="font-size:18px;font-weight:bold;color:#ffd700;min-height:28px;margin:10px 0;"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin:10px 0;">
+        <label style="color:white;font-size:13px;">Bet:</label>
+        <input id="slotsBetInput" type="number" min="1" value="1" style="width:60px;padding:6px;border-radius:6px;border:none;font-size:15px;text-align:center;">
+        <span style="color:#ffd700;font-size:13px;">coins</span>
+      </div>
+      <button class="bj-btn" id="slotsSpinBtn" onclick="slotsSpín()" style="background:#ffd700;color:#000;padding:12px 40px;font-size:16px;">SPIN 🎰</button>
+      <div id="slotsPaytable">
+        <div class="pay-row"><span>💎💎💎</span><span>50×</span></div>
+        <div class="pay-row"><span>⭐⭐⭐</span><span>25×</span></div>
+        <div class="pay-row"><span>🔔🔔🔔</span><span>15×</span></div>
+        <div class="pay-row"><span>🍇🍇🍇</span><span>10×</span></div>
+        <div class="pay-row"><span>🍊🍊🍊</span><span>5×</span></div>
+        <div class="pay-row"><span>🍋🍋🍋</span><span>3×</span></div>
+        <div class="pay-row"><span>🍒🍒🍒</span><span>2×</span></div>
+        <div class="pay-row"><span>Any pair</span><span>1×</span></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1594,6 +1774,12 @@ background:#c0392b;
     </div>
     <div id="oilChartContainer"></div>
   </div>
+</div>
+
+<!-- QUOTE WIDGET -->
+<div id="quoteWidget">
+  <span id="quoteText">Loading...</span>
+  <span id="quoteAuthor"></span>
 </div>
 
 <button id="patchBtn" onclick="togglePatchModal()">📋 PATCH NOTES</button>
@@ -2786,6 +2972,184 @@ function boostVote() {
   });
 }
 
+/* ---------------- GAME HUB ---------------- */
+
+let currentGame = "blackjack";
+
+function switchGame(game, btn) {
+  currentGame = game;
+  document.querySelectorAll(".game-tab-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("bjBody").style.display = game === "blackjack" ? "flex" : "none";
+  document.getElementById("cfBody").style.display = game === "coinflip" ? "flex" : "none";
+  document.getElementById("slotsBody").style.display = game === "slots" ? "flex" : "none";
+  if (game === "blackjack" && !bjGameActive) bjReset();
+  if (game === "slots") slotsReset();
+}
+
+/* ---------------- COIN FLIP ---------------- */
+
+let cfActive = false;
+
+function cfFlip(choice) {
+  if (cfActive) return;
+  const bet = parseInt(document.getElementById("cfBetInput").value);
+  if (isNaN(bet) || bet < 1) return alert("Enter a valid bet!");
+  if (bet > myCoins) return alert("Not enough coins!");
+
+  cfActive = true;
+  document.getElementById("cfHeadsBtn").disabled = true;
+  document.getElementById("cfTailsBtn").disabled = true;
+  document.getElementById("cfStatus").innerText = "Flipping...";
+
+  const coin = document.getElementById("cfCoin");
+  coin.classList.add("flipping");
+
+  setTimeout(() => {
+    coin.classList.remove("flipping");
+    const result = Math.random() < 0.5 ? "heads" : "tails";
+    const won = result === choice;
+    const delta = won ? bet : -bet;
+    coin.innerText = result === "heads" ? "🪙" : "🔘";
+    document.getElementById("cfStatus").innerText = (won ? "🎉 " : "😞 ") + result.toUpperCase() + (won ? " — You win " + bet + " coins!" : " — You lose " + bet + " coins");
+
+    fetch("/blackjack-result", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, userName, delta })
+    })
+    .then(r => r.json())
+    .then(data => {
+      myCoins = data.newBalance;
+      document.getElementById("bjCoins").innerText = myCoins;
+      document.getElementById("coinCount").innerText = myCoins;
+      document.getElementById("boostBtn").disabled = myCoins < 1;
+    });
+
+    setTimeout(() => {
+      coin.innerText = "🪙";
+      document.getElementById("cfStatus").innerText = "";
+      document.getElementById("cfHeadsBtn").disabled = false;
+      document.getElementById("cfTailsBtn").disabled = false;
+      cfActive = false;
+    }, 2000);
+  }, 700);
+}
+
+/* ---------------- SLOTS ---------------- */
+
+const SLOT_SYMBOLS = ["🍒","🍋","🍊","🍇","🔔","⭐","💎"];
+const SLOT_PAYOUTS = {
+  "💎💎💎": 50, "⭐⭐⭐": 25, "🔔🔔🔔": 15,
+  "🍇🍇🍇": 10, "🍊🍊🍊": 5, "🍋🍋🍋": 3, "🍒🍒🍒": 2
+};
+
+let slotsActive = false;
+
+function slotsReset() {
+  ["sym0","sym1","sym2"].forEach(id => { document.getElementById(id).innerText = "🎰"; });
+  document.getElementById("slotsStatus").innerText = "";
+  document.getElementById("slotsSpinBtn").disabled = false;
+}
+
+function slotsSpín() {
+  if (slotsActive) return;
+  const bet = parseInt(document.getElementById("slotsBetInput").value);
+  if (isNaN(bet) || bet < 1) return alert("Enter a valid bet!");
+  if (bet > myCoins) return alert("Not enough coins!");
+
+  slotsActive = true;
+  document.getElementById("slotsSpinBtn").disabled = true;
+  document.getElementById("slotsStatus").innerText = "🎰 Spinning...";
+
+  // spin animation
+  ["reel0","reel1","reel2"].forEach(id => document.getElementById(id).classList.add("spinning"));
+
+  const finalSyms = [0,1,2].map(() => SLOT_SYMBOLS[Math.floor(Math.random()*SLOT_SYMBOLS.length)]);
+
+  // stop reels one by one
+  [0,1,2].forEach((i, idx) => {
+    setTimeout(() => {
+      document.getElementById("reel"+i).classList.remove("spinning");
+      document.getElementById("sym"+i).innerText = finalSyms[i];
+      if (idx === 2) {
+        // calculate payout
+        setTimeout(() => {
+          const key = finalSyms.join("");
+          let multiplier = 0;
+          if (SLOT_PAYOUTS[key]) {
+            multiplier = SLOT_PAYOUTS[key];
+          } else if (finalSyms[0]===finalSyms[1]||finalSyms[1]===finalSyms[2]||finalSyms[0]===finalSyms[2]) {
+            multiplier = 1;
+          }
+          const delta = multiplier > 0 ? bet * multiplier - bet : -bet;
+          let msg = multiplier === 0 ? "😞 No match — lost " + bet + " coins" :
+                    multiplier === 1 ? "😌 Pair! Got your bet back" :
+                    "🎉 " + key + " — " + multiplier + "× — +" + (bet*multiplier-bet) + " coins!";
+          document.getElementById("slotsStatus").innerText = msg;
+
+          fetch("/blackjack-result", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, userName, delta })
+          })
+          .then(r => r.json())
+          .then(data => {
+            myCoins = data.newBalance;
+            document.getElementById("bjCoins").innerText = myCoins;
+            document.getElementById("coinCount").innerText = myCoins;
+            document.getElementById("boostBtn").disabled = myCoins < 1;
+            document.getElementById("slotsSpinBtn").disabled = false;
+            slotsActive = false;
+          });
+        }, 300);
+      }
+    }, 400 + idx * 400);
+  });
+}
+
+/* ---------------- QUOTE OF THE DAY ---------------- */
+
+const FUNNY_QUOTES = [
+  { q: "I always arrive late at the office, but I make up for it by leaving early.", a: "Charles Lamb" },
+  { q: "Hard work never killed anybody, but why take a chance?", a: "Edgar Bergen" },
+  { q: "The brain is a wonderful organ. It starts working the moment you get up in the morning and does not stop until you get into the office.", a: "Robert Frost" },
+  { q: "I like work; it fascinates me. I can sit and look at it for hours.", a: "Jerome K. Jerome" },
+  { q: "By working faithfully eight hours a day you may eventually get to be boss and work twelve hours a day.", a: "Robert Frost" },
+  { q: "Son, if you really want something in this life, you have to work for it. Now quiet! They're about to announce the lottery numbers.", a: "Homer Simpson" },
+  { q: "Monday is a great day to be miserable... said no one ever.", a: "Office Wisdom" },
+  { q: "There is no I in team, but there is in wine.", a: "Office Wisdom" },
+  { q: "Teamwork means never having to take all the blame yourself.", a: "Office Wisdom" },
+  { q: "I thought I wanted a career. Turns out I just wanted paychecks.", a: "Office Wisdom" },
+  { q: "My keyboard must be broken. The escape key doesn't work.", a: "Office Wisdom" },
+  { q: "I'm not lazy, I'm on energy-saving mode.", a: "Office Wisdom" },
+  { q: "My boss told me to have a good day, so I went home.", a: "Office Wisdom" },
+  { q: "The best part of going to work is coming back home at the end of the day.", a: "Office Wisdom" },
+  { q: "I pretend to work. They pretend to pay me.", a: "Soviet Joke" },
+  { q: "If you think you are too small to make a difference, try sleeping with a mosquito.", a: "Dalai Lama" },
+  { q: "Age is something that doesn't matter, unless you are a cheese.", a: "Luis Buñuel" },
+  { q: "People who think they know everything are a great annoyance to those of us who do.", a: "Isaac Asimov" },
+  { q: "Before you criticize someone, walk a mile in their shoes. That way, when you do criticize them, you're a mile away and have their shoes.", a: "Jack Handey" },
+  { q: "A day without sunshine is like, you know, night.", a: "Steve Martin" },
+  { q: "We've all heard that a million monkeys banging on a million typewriters will eventually reproduce the entire works of Shakespeare. Now, thanks to the Internet, we know this is not true.", a: "Robert Wilensky" },
+  { q: "Never put off till tomorrow what you can do the day after tomorrow just as well.", a: "Mark Twain" },
+  { q: "If at first you don't succeed, then skydiving definitely isn't for you.", a: "Steven Wright" },
+  { q: "I asked God for a bike, but I know God doesn't work that way. So I stole a bike and asked for forgiveness.", a: "Emo Philips" },
+  { q: "To steal ideas from one person is plagiarism; to steal from many is research.", a: "Steven Wright" },
+  { q: "I find television very educating. Every time somebody turns on the set, I go into the other room and read a book.", a: "Groucho Marx" },
+  { q: "Behind every great man is a woman rolling her eyes.", a: "Jim Carrey" },
+  { q: "The early bird might get the worm, but the second mouse gets the cheese.", a: "Willie Nelson" },
+  { q: "If you're going to do something tonight that you'll be sorry for tomorrow morning, sleep late.", a: "Henny Youngman" },
+  { q: "Alcohol does not solve any problems, but then again, neither does milk.", a: "Office Wisdom" },
+];
+
+function loadQuote() {
+  const dayIndex = Math.floor(Date.now() / 86400000) % FUNNY_QUOTES.length;
+  const quote = FUNNY_QUOTES[dayIndex];
+  document.getElementById("quoteText").innerText = "\"" + quote.q + "\"";
+  document.getElementById("quoteAuthor").innerText = "— " + quote.a;
+}
+
 /* ---------------- BLACKJACK ---------------- */
 
 const BJ_SUITS = ["♠","♥","♦","♣"];
@@ -2977,6 +3341,7 @@ loadLastSkip();
 loadWeather();
 loadCurrency();
 loadCoins();
+loadQuote();
 
 setInterval(loadSong, 10000);
 setInterval(loadLastSkip, 5000);
