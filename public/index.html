@@ -14,8 +14,6 @@ color:white;
 overflow:hidden;
 }
 
-/* blurred background */
-
 #bg{
 position:fixed;
 width:100%;
@@ -26,8 +24,6 @@ filter:blur(60px) brightness(0.4);
 transform:scale(1.2);
 z-index:-1;
 }
-
-/* layout */
 
 .layout{display:flex;}
 
@@ -49,8 +45,6 @@ width:260px;
 border-radius:15px;
 }
 
-/* progress */
-
 .progress-container{
 background:rgba(255,255,255,0.2);
 height:10px;
@@ -69,7 +63,6 @@ border-radius:10px;
 /* SKIP BUTTON */
 
 #skipBtn{
-
 background:#1DB954;
 border:none;
 padding:18px 55px;
@@ -79,35 +72,33 @@ font-weight:bold;
 color:white;
 cursor:pointer;
 margin-top:20px;
-
 box-shadow:0 0 15px rgba(29,185,84,0.6);
-
-transition:all .2s;
-
+transition:all .3s;
 }
 
-#skipBtn:hover{
-
+#skipBtn:hover:not(.voted){
 transform:scale(1.08);
-
 box-shadow:0 0 25px rgba(29,185,84,0.9);
-
 }
+
+#skipBtn.voted{
+background:#555;
+box-shadow:0 0 10px rgba(255,255,255,0.1);
+cursor:default;
+transform:scale(1);
+}
+
 /* WEATHER WIDGET */
 
 #weatherWidget{
-
 position:fixed;
 top:20px;
 left:360px;
-
 background:rgba(0,0,0,0.25);
 backdrop-filter:blur(10px);
 -webkit-backdrop-filter:blur(10px);
-
 padding:14px;
 border-radius:12px;
-
 font-size:14px;
 width:170px;
 border:1px solid rgba(255,255,255,0.08);
@@ -124,31 +115,84 @@ font-size:12px;
 opacity:0.9;
 }
 
-
-/* CURRENCY WIDGET */
+/* CURRENCY CALCULATOR WIDGET */
 
 #currencyWidget{
-
 position:fixed;
 bottom:20px;
 left:360px;
-
 background:rgba(0,0,0,0.25);
 backdrop-filter:blur(10px);
 -webkit-backdrop-filter:blur(10px);
-
 padding:14px;
 border-radius:12px;
-
 font-size:13px;
-width:170px;
+width:210px;
 border:1px solid rgba(255,255,255,0.08);
 }
 
 .currencyTitle{
 font-weight:bold;
+margin-bottom:10px;
+}
+
+#currencySelector{
+margin-bottom:10px;
+}
+
+#currencySelector select{
+background:rgba(255,255,255,0.1);
+color:white;
+border:1px solid rgba(255,255,255,0.2);
+border-radius:6px;
+padding:4px 6px;
+font-size:12px;
+cursor:pointer;
+width:100%;
+}
+
+#currencySelector select option{
+background:#222;
+}
+
+.calc-row{
+display:flex;
+align-items:center;
+gap:6px;
 margin-bottom:6px;
 }
+
+.calc-label{
+font-size:11px;
+opacity:0.7;
+width:30px;
+flex-shrink:0;
+}
+
+.calc-input{
+background:rgba(255,255,255,0.1);
+border:1px solid rgba(255,255,255,0.2);
+border-radius:6px;
+color:white;
+font-size:13px;
+padding:5px 8px;
+width:100%;
+box-sizing:border-box;
+}
+
+.calc-input:focus{
+outline:none;
+border-color:#1DB954;
+background:rgba(29,185,84,0.1);
+}
+
+#rateLabel{
+font-size:11px;
+opacity:0.5;
+text-align:right;
+margin-top:4px;
+}
+
 /* admin */
 
 #adminBtn{
@@ -214,8 +258,6 @@ font-size:13px;
 color:#1DB954;
 }
 
-/* GIFS */
-
 #cornerGif{
 position:fixed;
 bottom:20px;
@@ -235,8 +277,6 @@ pointer-events:none;
 z-index:5;
 opacity:.95;
 }
-
-/* user list reset buttons */
 
 #userList{
 list-style:none;
@@ -265,7 +305,7 @@ font-size:11px;
 .resetBtn:hover{
 background:#c0392b;
 }
-  
+
 </style>
 </head>
 
@@ -274,20 +314,39 @@ background:#c0392b;
 <div id="bg"></div>
 
 <div id="weatherWidget">
-
 <div id="weatherCity"></div>
 <div id="weatherNow"></div>
 <div id="weatherForecast"></div>
-
 </div>
 
+<!-- CURRENCY CALCULATOR -->
 <div id="currencyWidget">
+<div class="currencyTitle">Currency Calc</div>
 
-<div class="currencyTitle">EUR Rates</div>
-<div id="currencyRates">Loading...</div>
-
+<div id="currencySelector">
+  <select id="currencyPicker" onchange="onCurrencyChange()">
+    <option value="GBP">GBP 🇬🇧</option>
+    <option value="USD">USD 🇺🇸</option>
+    <option value="PLN">PLN 🇵🇱</option>
+    <option value="SEK">SEK 🇸🇪</option>
+    <option value="NOK">NOK 🇳🇴</option>
+    <option value="DKK">DKK 🇩🇰</option>
+  </select>
 </div>
-  
+
+<div class="calc-row">
+  <span class="calc-label">EUR</span>
+  <input class="calc-input" id="eurInput" type="number" placeholder="0.00" oninput="calcFromEur()">
+</div>
+
+<div class="calc-row">
+  <span class="calc-label" id="foreignLabel">GBP</span>
+  <input class="calc-input" id="foreignInput" type="number" placeholder="0.00" oninput="calcFromForeign()">
+</div>
+
+<div id="rateLabel">loading rate...</div>
+</div>
+
 <img id="cornerGif" src="/dancer.gif">
 <img id="topRightGif" src="/penguin.gif">
 
@@ -321,15 +380,11 @@ background:#c0392b;
 
 <button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
 
-<!-- ADMIN PANEL -->
-
 <div id="adminPanel">
 
 <div id="loginSection">
-
 <input type="password" id="adminPasswordInput" placeholder="Admin password">
 <button onclick="adminLogin()">Login</button>
-
 </div>
 
 <div id="adminControls" style="display:none">
@@ -351,9 +406,7 @@ background:#c0392b;
 <ul id="userList"></ul>
 
 <h4>Ban User</h4>
-
 <input id="banName" placeholder="Name">
-
 <button onclick="banUser()">Ban</button>
 <button onclick="clearVotes()">Clear Votes</button>
 
@@ -367,343 +420,331 @@ background:#c0392b;
 
 <script>
 
-const socket=io();
+const socket = io();
+const pingSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
 
-const pingSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+let userId = localStorage.getItem("userId");
+let userName = localStorage.getItem("userName");
+let lastCount = 0;
+let hasVoted = false;
+let rates = {};
 
-let userId=localStorage.getItem("userId");
-let userName=localStorage.getItem("userName");
-let lastCount=0;
-
-if(!userId){
-userId=crypto.randomUUID();
-localStorage.setItem("userId",userId);
+if (!userId) {
+  userId = crypto.randomUUID();
+  localStorage.setItem("userId", userId);
 }
 
-if(!userName){
-userName=prompt("Enter your name:");
-localStorage.setItem("userName",userName);
+if (!userName) {
+  userName = prompt("Enter your name:");
+  localStorage.setItem("userName", userName);
 }
 
-socket.on("voteUpdate",data=>updateUI(data));
-socket.emit("registerUser", {userId, name:userName});
+socket.on("voteUpdate", data => updateUI(data));
+socket.emit("registerUser", { userId, name: userName });
 
-function vote(){
+/* ---------------- VOTE ---------------- */
 
-fetch("/vote",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({userId,name:userName})
-})
-.then(res=>res.json())
-.then(updateUI);
+function vote() {
+  if (hasVoted) return;
 
+  fetch("/vote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, name: userName })
+  })
+  .then(res => res.json())
+  .then(data => {
+    hasVoted = true;
+    setVotedState(true);
+    updateUI(data);
+  });
 }
 
-function updateUI(data){
-
-if(data.count>lastCount && data.soundEnabled){
-pingSound.play().catch(()=>{});
+function setVotedState(voted) {
+  const btn = document.getElementById("skipBtn");
+  if (voted) {
+    btn.classList.add("voted");
+    btn.innerText = "✓ Voted";
+  } else {
+    btn.classList.remove("voted");
+    btn.innerText = "SKIP";
+  }
 }
 
-lastCount=data.count;
+/* ---------------- UI ---------------- */
 
-document.getElementById("voteCounter").innerText =
-data.count+" / "+data.needed+" votes";
+function updateUI(data) {
 
-const percent=data.needed>0?(data.count/data.needed)*100:0;
+  if (data.count > lastCount && data.soundEnabled) {
+    pingSound.play().catch(() => {});
+  }
 
-document.getElementById("progressBar").style.width =
-Math.min(percent,100)+"%";
+  // reset voted state when votes clear after a skip or song change
+  if (data.count === 0 && lastCount > 0) {
+    hasVoted = false;
+    setVotedState(false);
+  }
 
-const list=document.getElementById("voters");
-list.innerHTML="";
+  lastCount = data.count;
 
-data.voters.forEach(v=>{
-const li=document.createElement("li");
-li.innerText=v;
-list.appendChild(li);
-});
+  document.getElementById("voteCounter").innerText =
+    data.count + " / " + data.needed + " votes";
 
-updateSwitch("votingSwitch",data.votingEnabled);
-updateSwitch("soundSwitch",data.soundEnabled);
+  const percent = data.needed > 0 ? (data.count / data.needed) * 100 : 0;
+  document.getElementById("progressBar").style.width = Math.min(percent, 100) + "%";
 
-if(data.message){
-document.getElementById("adminMessage").innerText=data.message;
-}
+  const list = document.getElementById("voters");
+  list.innerHTML = "";
+  data.voters.forEach(v => {
+    const li = document.createElement("li");
+    li.innerText = v;
+    if (v === userName) li.style.color = "#1DB954";
+    list.appendChild(li);
+  });
 
-/* CONNECTED USERS */
+  updateSwitch("votingSwitch", data.votingEnabled);
+  updateSwitch("soundSwitch", data.soundEnabled);
 
-if(data.users){
-const userList=document.getElementById("userList");
-userList.innerHTML="";
-data.users.forEach((u,i)=>{
-const li=document.createElement("li");
-const uid=data.userIds[i];
-li.innerHTML=`<span>${u}</span><button class="resetBtn" onclick="resetUser('${uid}')">Reset</button>`;
-userList.appendChild(li);
-});
-}
+  if (data.message) {
+    document.getElementById("adminMessage").innerText = data.message;
+  }
 
-}
-
-function resetUser(uid){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/reset-user",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({userId:uid, password})
-})
-.then(res=>res.json())
-.then(data=>{
-if(data.success){
-document.getElementById("adminMessage").innerText="User reset — they'll be prompted for a new name on reload.";
-}
-});
-
-}
-
-function loadWeather(){
-
-fetch("/weather")
-.then(res=>res.json())
-.then(data=>{
-
-document.getElementById("weatherCity").innerText=data.city;
-
-document.getElementById("weatherNow").innerHTML=
-`
-<div>${data.temp}°C</div>
-<div>Wind ${data.wind} km/h</div>
-<div>Rain ${data.rain}%</div>
-`;
-
-const f=document.getElementById("weatherForecast");
-f.innerHTML="";
-
-data.forecast.forEach(d=>{
-
-const date=new Date(d.date);
-const day=date.toLocaleDateString("en-US",{weekday:"short"});
-
-const line=document.createElement("div");
-line.innerText=day+" "+d.temp+"°C";
-
-f.appendChild(line);
-
-});
-
-});
+  if (data.users) {
+    const userList = document.getElementById("userList");
+    userList.innerHTML = "";
+    data.users.forEach((u, i) => {
+      const li = document.createElement("li");
+      const uid = data.userIds[i];
+      li.innerHTML = "<span>" + u + "</span><button class=\"resetBtn\" onclick=\"resetUser('" + uid + "')\">Reset</button>";
+      userList.appendChild(li);
+    });
+  }
 
 }
 
-function loadCurrency(){
-
-fetch("/currency")
-.then(res=>res.json())
-.then(data=>{
-
-if(!data) return;
-
-document.getElementById("currencyRates").innerHTML=`
-
-GB GBP → ${data.GBP ?? "-"}<br>
-US USD → ${data.USD ?? "-"}<br>
-PL PLN → ${data.PLN ?? "-"}<br>
-SE SEK → ${data.SEK ?? "-"}<br>
-NO NOK → ${data.NOK ?? "-"}<br>
-DK DKK → ${data.DKK ?? "-"}
-
-`;
-
-});
-
+function resetUser(uid) {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/reset-user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: uid, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("adminMessage").innerText = "User reset — they will be prompted for a new name on reload.";
+    }
+  });
 }
 
-function applyAlbumColor(imageUrl){
+/* ---------------- CURRENCY CALCULATOR ---------------- */
 
-const img=new Image();
-img.crossOrigin="anonymous";
-img.src=imageUrl;
-
-img.onload=function(){
-
-const canvas=document.createElement("canvas");
-const ctx=canvas.getContext("2d");
-
-canvas.width=img.width;
-canvas.height=img.height;
-
-ctx.drawImage(img,0,0);
-
-const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;
-
-let r=0,g=0,b=0,count=0;
-
-for(let i=0;i<data.length;i+=40){
-
-r+=data[i];
-g+=data[i+1];
-b+=data[i+2];
-count++;
-
+function loadCurrency() {
+  fetch("/currency")
+    .then(res => res.json())
+    .then(data => {
+      if (!data) return;
+      rates = data;
+      updateRateLabel();
+    });
 }
 
-r=Math.floor(r/count);
-g=Math.floor(g/count);
-b=Math.floor(b/count);
-
-const color=`rgb(${r},${g},${b})`;
-
-document.getElementById("weatherWidget").style.boxShadow=`0 0 20px ${color}`;
-document.getElementById("currencyWidget").style.boxShadow=`0 0 20px ${color}`;
-
-};
-
+function getSelectedCurrency() {
+  return document.getElementById("currencyPicker").value;
 }
 
-function updateSwitch(id,state){
-const el=document.getElementById(id);
-state?el.classList.add("on"):el.classList.remove("on");
+function getRate() {
+  const cur = getSelectedCurrency();
+  return parseFloat(rates[cur]) || 1;
 }
 
-function loadVotes(){
-fetch("/votes").then(res=>res.json()).then(updateUI);
+function updateRateLabel() {
+  const cur = getSelectedCurrency();
+  const rate = getRate();
+  document.getElementById("foreignLabel").innerText = cur;
+  document.getElementById("rateLabel").innerText = "1 EUR = " + rate + " " + cur;
 }
 
-function loadSong(){
-
-fetch("/current-song")
-.then(res=>res.json())
-.then(data=>{
-
-if(!data.title)return;
-
-const parts=data.title.split(" - ");
-
-document.getElementById("songTitle").innerText=parts[0];
-document.getElementById("artistName").innerText=parts[1]||"";
-
-if(data.image){
-document.getElementById("albumCover").src=data.image;
-  applyAlbumColor(data.image);
-document.getElementById("bg").style.backgroundImage=`url(${data.image})`;
+function onCurrencyChange() {
+  updateRateLabel();
+  const eurVal = document.getElementById("eurInput").value;
+  if (eurVal !== "") {
+    calcFromEur();
+  } else {
+    calcFromForeign();
+  }
 }
 
-loadVotes();
-
-});
-
+function calcFromEur() {
+  const eur = parseFloat(document.getElementById("eurInput").value);
+  if (isNaN(eur)) {
+    document.getElementById("foreignInput").value = "";
+    return;
+  }
+  document.getElementById("foreignInput").value = (eur * getRate()).toFixed(2);
 }
 
-function loadLastSkip(){
-
-fetch("/last-skip")
-.then(res=>res.json())
-.then(data=>{
-
-const panel=document.getElementById("lastSkipPanel");
-
-if(!data){
-panel.innerHTML="No skips yet";
-return;
+function calcFromForeign() {
+  const foreign = parseFloat(document.getElementById("foreignInput").value);
+  if (isNaN(foreign)) {
+    document.getElementById("eurInput").value = "";
+    return;
+  }
+  document.getElementById("eurInput").value = (foreign / getRate()).toFixed(2);
 }
 
-panel.innerHTML=`
-<p><strong>Song:</strong><br>${data.song}</p>
-<p><strong>Skipped By:</strong></p>
-<ul>${data.skippedBy.map(n=>`<li>${n}</li>`).join("")}</ul>
-<p><strong>Time:</strong><br>${data.time}</p>
-`;
+/* ---------------- WEATHER ---------------- */
 
-});
+function loadWeather() {
+  fetch("/weather")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("weatherCity").innerText = data.city;
+      document.getElementById("weatherNow").innerHTML =
+        "<div>" + data.temp + "°C</div>" +
+        "<div>Wind " + data.wind + " km/h</div>" +
+        "<div>Rain " + data.rain + "%</div>";
 
+      const f = document.getElementById("weatherForecast");
+      f.innerHTML = "";
+      data.forecast.forEach(d => {
+        const date = new Date(d.date);
+        const day = date.toLocaleDateString("en-US", { weekday: "short" });
+        const line = document.createElement("div");
+        line.innerText = day + " " + d.temp + "°C";
+        f.appendChild(line);
+      });
+    });
 }
 
-function toggleAdminPanel(){
-const panel=document.getElementById("adminPanel");
-panel.style.display=panel.style.display==="none"?"block":"none";
+/* ---------------- MISC ---------------- */
+
+function applyAlbumColor(imageUrl) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = imageUrl;
+  img.onload = function () {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let r = 0, g = 0, b = 0, count = 0;
+    for (let i = 0; i < data.length; i += 40) {
+      r += data[i]; g += data[i + 1]; b += data[i + 2]; count++;
+    }
+    r = Math.floor(r / count); g = Math.floor(g / count); b = Math.floor(b / count);
+    const color = "rgb(" + r + "," + g + "," + b + ")";
+    document.getElementById("weatherWidget").style.boxShadow = "0 0 20px " + color;
+    document.getElementById("currencyWidget").style.boxShadow = "0 0 20px " + color;
+  };
 }
 
-function adminLogin(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/admin-auth",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-})
-.then(res=>{
-if(res.status===403){alert("Wrong password");return;}
-document.getElementById("loginSection").style.display="none";
-document.getElementById("adminControls").style.display="block";
-});
-
+function updateSwitch(id, state) {
+  const el = document.getElementById(id);
+  state ? el.classList.add("on") : el.classList.remove("on");
 }
 
-function setTotal(){
-
-const total=document.getElementById("totalInput").value;
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/set-total",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({total,password})
-});
-
+function loadVotes() {
+  fetch("/votes").then(res => res.json()).then(updateUI);
 }
 
-function toggleVoting(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/toggle-voting",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-});
-
+function loadSong() {
+  fetch("/current-song")
+    .then(res => res.json())
+    .then(data => {
+      if (!data.title) return;
+      const parts = data.title.split(" - ");
+      document.getElementById("songTitle").innerText = parts[0];
+      document.getElementById("artistName").innerText = parts[1] || "";
+      if (data.image) {
+        document.getElementById("albumCover").src = data.image;
+        applyAlbumColor(data.image);
+        document.getElementById("bg").style.backgroundImage = "url(" + data.image + ")";
+      }
+      loadVotes();
+    });
 }
 
-function toggleSound(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/toggle-sound",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-});
-
+function loadLastSkip() {
+  fetch("/last-skip")
+    .then(res => res.json())
+    .then(data => {
+      const panel = document.getElementById("lastSkipPanel");
+      if (!data) { panel.innerHTML = "No skips yet"; return; }
+      panel.innerHTML =
+        "<p><strong>Song:</strong><br>" + data.song + "</p>" +
+        "<p><strong>Skipped By:</strong></p>" +
+        "<ul>" + data.skippedBy.map(n => "<li>" + n + "</li>").join("") + "</ul>" +
+        "<p><strong>Time:</strong><br>" + data.time + "</p>";
+    });
 }
 
-function banUser(){
-
-const name=document.getElementById("banName").value;
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/ban-user",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({name,password})
-});
-
+function toggleAdminPanel() {
+  const panel = document.getElementById("adminPanel");
+  panel.style.display = panel.style.display === "none" ? "block" : "none";
 }
 
-function clearVotes(){
+function adminLogin() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/admin-auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password })
+  })
+  .then(res => {
+    if (res.status === 403) { alert("Wrong password"); return; }
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("adminControls").style.display = "block";
+  });
+}
 
-const password=document.getElementById("adminPasswordInput").value;
+function setTotal() {
+  const total = document.getElementById("totalInput").value;
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/set-total", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ total, password })
+  });
+}
 
-fetch("/clear-votes",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-});
+function toggleVoting() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/toggle-voting", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password })
+  });
+}
 
+function toggleSound() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/toggle-sound", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password })
+  });
+}
+
+function banUser() {
+  const name = document.getElementById("banName").value;
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/ban-user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, password })
+  });
+}
+
+function clearVotes() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/clear-votes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password })
+  });
 }
 
 loadSong();
@@ -712,10 +753,10 @@ loadLastSkip();
 loadWeather();
 loadCurrency();
 
-setInterval(loadSong,10000);
-setInterval(loadLastSkip,5000);
-setInterval(loadWeather,600000);
-setInterval(loadCurrency,600000);
+setInterval(loadSong, 10000);
+setInterval(loadLastSkip, 5000);
+setInterval(loadWeather, 600000);
+setInterval(loadCurrency, 600000);
 
 </script>
 
