@@ -197,7 +197,7 @@ margin-top:4px;
 
 #adminBtn{
 position:fixed;
-bottom:20px;
+bottom:160px;
 right:20px;
 width:55px;
 height:55px;
@@ -210,7 +210,7 @@ cursor:pointer;
 
 #adminPanel{
 position:fixed;
-bottom:90px;
+bottom:230px;
 right:20px;
 background:#181818;
 padding:15px;
@@ -278,6 +278,192 @@ z-index:5;
 opacity:.95;
 }
 
+/* OIL PRICE BUTTON */
+
+#oilBtn{
+position:fixed;
+bottom:90px;
+right:20px;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#8B4513;
+border:none;
+font-size:22px;
+cursor:pointer;
+box-shadow:0 0 12px rgba(139,69,19,0.6);
+transition:all .2s;
+z-index:10;
+}
+
+#oilBtn:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px rgba(139,69,19,0.9);
+}
+
+/* OIL MODAL */
+
+#oilModal{
+display:none;
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+background:rgba(0,0,0,0.75);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#oilModal.open{
+display:flex;
+}
+
+#oilModalBox{
+background:#1a1a1a;
+border-radius:16px;
+border:1px solid rgba(139,69,19,0.4);
+box-shadow:0 0 40px rgba(139,69,19,0.3);
+width:85vw;
+height:80vh;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:oilModalIn .25s ease;
+}
+
+@keyframes oilModalIn{
+from{transform:scale(0.92);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#oilModalHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px 20px;
+background:rgba(139,69,19,0.15);
+border-bottom:1px solid rgba(139,69,19,0.3);
+flex-shrink:0;
+}
+
+#oilModalHeader h3{
+margin:0;
+font-size:16px;
+color:#e8a87c;
+letter-spacing:1px;
+}
+
+#oilCloseBtn{
+background:none;
+border:none;
+color:white;
+font-size:22px;
+cursor:pointer;
+opacity:0.7;
+line-height:1;
+}
+
+#oilCloseBtn:hover{opacity:1;}
+
+#oilChartContainer{
+flex:1;
+width:100%;
+}
+
+/* OIL CHART BUTTON */
+
+#oilBtn{
+position:fixed;
+bottom:90px;
+right:20px;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#8B4513;
+border:none;
+font-size:22px;
+cursor:pointer;
+box-shadow:0 0 12px rgba(139,69,19,0.6);
+transition:all .2s;
+z-index:10;
+}
+
+#oilBtn:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px rgba(139,69,19,0.9);
+}
+
+/* OIL MODAL */
+
+#oilModal{
+display:none;
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+background:rgba(0,0,0,0.75);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#oilModal.open{
+display:flex;
+}
+
+#oilModalBox{
+background:#131722;
+border-radius:16px;
+border:1px solid rgba(139,69,19,0.4);
+box-shadow:0 0 40px rgba(139,69,19,0.3);
+width:85vw;
+height:80vh;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:oilModalIn .25s ease;
+}
+
+@keyframes oilModalIn{
+from{transform:scale(0.92);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#oilModalHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px 20px;
+background:rgba(139,69,19,0.15);
+border-bottom:1px solid rgba(139,69,19,0.3);
+flex-shrink:0;
+}
+
+#oilModalHeader h3{
+margin:0;
+font-size:16px;
+color:#e8a87c;
+letter-spacing:1px;
+}
+
+#oilCloseBtn{
+background:none;
+border:none;
+color:white;
+font-size:22px;
+cursor:pointer;
+opacity:0.7;
+line-height:1;
+}
+
+#oilCloseBtn:hover{opacity:1;}
+
+#oilChartContainer{
+flex:1;
+width:100%;
+}
+
+/* USER LIST */
+
 #userList{
 list-style:none;
 padding:0;
@@ -321,7 +507,7 @@ background:#c0392b;
 
 <!-- CURRENCY CALCULATOR -->
 <div id="currencyWidget">
-<div class="currencyTitle">Currency Calc</div>
+<div class="currencyTitle">Currency Calculator</div>
 
 <div id="currencySelector">
   <select id="currencyPicker" onchange="onCurrencyChange()">
@@ -376,6 +562,55 @@ background:#c0392b;
 <ul id="voters"></ul>
 
 </div>
+</div>
+
+<button id="oilBtn" onclick="toggleOilModal()" title="Brent Crude Oil Price">🛢️</button>
+
+<!-- OIL PRICE MODAL -->
+<div id="oilModal" onclick="closeOilModalOutside(event)">
+  <div id="oilModalBox">
+    <div id="oilModalHeader">
+      <h3>🛢️ BRENT CRUDE OIL — LIVE PRICE</h3>
+      <button id="oilCloseBtn" onclick="toggleOilModal()">✕</button>
+    </div>
+    <div id="oilChartContainer">
+      <div class="tradingview-widget-container" style="height:100%;width:100%">
+        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+        <div class="tradingview-widget-copyright">
+          <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">
+            <span style="color:#888;font-size:11px">Track on TradingView</span>
+          </a>
+        </div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+        {
+          "autosize": true,
+          "symbol": "TVC:UKOIL",
+          "interval": "60",
+          "timezone": "Europe/Riga",
+          "theme": "dark",
+          "style": "1",
+          "locale": "en",
+          "allow_symbol_change": false,
+          "calendar": false,
+          "support_host": "https://www.tradingview.com"
+        }
+        </script>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="oilBtn" onclick="toggleOilModal()" title="Brent Crude Oil Price">🛢️</button>
+
+<!-- OIL CHART MODAL -->
+<div id="oilModal" onclick="closeOilModalOutside(event)">
+  <div id="oilModalBox">
+    <div id="oilModalHeader">
+      <h3>🛢️ BRENT CRUDE OIL — LIVE PRICE</h3>
+      <button id="oilCloseBtn" onclick="toggleOilModal()">✕</button>
+    </div>
+    <div id="oilChartContainer"></div>
+  </div>
 </div>
 
 <button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
@@ -745,6 +980,62 @@ function clearVotes() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ password })
   });
+}
+
+function toggleOilModal() {
+  const modal = document.getElementById("oilModal");
+  modal.classList.toggle("open");
+}
+
+function closeOilModalOutside(event) {
+  if (event.target === document.getElementById("oilModal")) {
+    document.getElementById("oilModal").classList.remove("open");
+  }
+}
+
+let oilChartLoaded = false;
+
+function toggleOilModal() {
+  const modal = document.getElementById("oilModal");
+  modal.classList.toggle("open");
+
+  // only inject the TradingView widget once
+  if (modal.classList.contains("open") && !oilChartLoaded) {
+    oilChartLoaded = true;
+    const container = document.getElementById("oilChartContainer");
+    const script = document.createElement("script");
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      autosize: true,
+      symbol: "TVC:UKOIL",
+      interval: "60",
+      timezone: "Europe/Riga",
+      theme: "dark",
+      style: "1",
+      locale: "en",
+      allow_symbol_change: false,
+      calendar: false,
+      support_host: "https://www.tradingview.com"
+    });
+    const wrapper = document.createElement("div");
+    wrapper.className = "tradingview-widget-container";
+    wrapper.style.height = "100%";
+    wrapper.style.width = "100%";
+    const chartDiv = document.createElement("div");
+    chartDiv.className = "tradingview-widget-container__widget";
+    chartDiv.style.height = "calc(100% - 32px)";
+    chartDiv.style.width = "100%";
+    wrapper.appendChild(chartDiv);
+    wrapper.appendChild(script);
+    container.appendChild(wrapper);
+  }
+}
+
+function closeOilModalOutside(event) {
+  if (event.target === document.getElementById("oilModal")) {
+    document.getElementById("oilModal").classList.remove("open");
+  }
 }
 
 loadSong();
