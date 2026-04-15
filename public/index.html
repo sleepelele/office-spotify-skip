@@ -278,6 +278,209 @@ z-index:5;
 opacity:.95;
 }
 
+/* MINESWEEPER BUTTON */
+
+#msBtn{
+position:fixed;
+bottom:230px;
+right:20px;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#4a4a4a;
+border:none;
+font-size:22px;
+cursor:pointer;
+box-shadow:0 0 12px rgba(80,80,80,0.6);
+transition:all .2s;
+z-index:10;
+}
+
+#msBtn:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px rgba(120,120,120,0.9);
+}
+
+/* MINESWEEPER MODAL */
+
+#msModal{
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.80);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#msModal.open{ display:flex; }
+
+#msModalBox{
+background:#c0c0c0;
+border-radius:4px;
+border:3px solid #fff;
+border-right-color:#808080;
+border-bottom-color:#808080;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:msIn .2s ease;
+max-width:97vw;
+}
+
+@keyframes msIn{
+from{transform:scale(0.93);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#msTopBar{
+background:#c0c0c0;
+padding:6px 8px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-bottom:2px solid #808080;
+gap:12px;
+}
+
+#msTopBar h3{
+margin:0;
+font-size:13px;
+color:#000;
+font-family:Arial;
+}
+
+.ms-display{
+background:#000;
+color:#ff0000;
+font-family:"Courier New",monospace;
+font-size:22px;
+font-weight:bold;
+padding:2px 6px;
+border:2px inset #808080;
+min-width:52px;
+text-align:center;
+letter-spacing:2px;
+}
+
+#msFace{
+font-size:22px;
+cursor:pointer;
+background:#c0c0c0;
+border:2px solid #fff;
+border-right-color:#808080;
+border-bottom-color:#808080;
+padding:2px 6px;
+border-radius:2px;
+}
+
+#msFace:hover{ background:#d0d0d0; }
+
+#msCloseBtn{
+background:#c0c0c0;
+border:2px solid #fff;
+border-right-color:#808080;
+border-bottom-color:#808080;
+color:#000;
+font-size:13px;
+font-weight:bold;
+cursor:pointer;
+padding:2px 8px;
+}
+
+#msCloseBtn:hover{ background:#d0d0d0; }
+
+#msContent{
+display:flex;
+}
+
+#msGrid{
+display:grid;
+grid-template-columns:repeat(30, 22px);
+grid-template-rows:repeat(16, 22px);
+border:3px inset #808080;
+margin:6px;
+flex-shrink:0;
+}
+
+.ms-cell{
+width:22px;
+height:22px;
+background:#c0c0c0;
+border:2px solid #fff;
+border-right-color:#808080;
+border-bottom-color:#808080;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+font-weight:bold;
+cursor:pointer;
+user-select:none;
+font-family:Arial;
+box-sizing:border-box;
+}
+
+.ms-cell:active:not(.revealed):not(.flagged){
+border:1px solid #808080;
+background:#bdbdbd;
+}
+
+.ms-cell.revealed{
+background:#bdbdbd;
+border:1px solid #808080;
+cursor:default;
+font-size:13px;
+}
+
+.ms-cell.mine-hit{ background:#ff4444; }
+.ms-cell.mine-shown{ background:#bdbdbd; }
+.ms-cell.flagged{ cursor:default; }
+
+#msLeaderboardPanel{
+width:170px;
+background:#c0c0c0;
+border-left:3px inset #808080;
+padding:8px;
+display:flex;
+flex-direction:column;
+flex-shrink:0;
+}
+
+#msLeaderboardPanel h4{
+margin:0 0 8px 0;
+font-size:12px;
+font-family:Arial;
+color:#000;
+text-align:center;
+border-bottom:2px inset #808080;
+padding-bottom:4px;
+}
+
+#msLeaderboard{
+list-style:none;
+padding:0;
+margin:0;
+font-size:11px;
+font-family:"Courier New",monospace;
+overflow-y:auto;
+}
+
+#msLeaderboard li{
+display:flex;
+justify-content:space-between;
+padding:3px 2px;
+border-bottom:1px solid #aaa;
+color:#000;
+gap:4px;
+}
+
+#msLeaderboard li.ms-gold{ color:#8B6914; font-weight:bold; }
+#msLeaderboard li.ms-silver{ color:#555; font-weight:bold; }
+#msLeaderboard li.ms-bronze{ color:#7a4a00; font-weight:bold; }
+#msLeaderboard li.ms-me{ background:rgba(0,100,255,0.15); }
+
 /* OIL PRICE BUTTON */
 
 #oilBtn{
@@ -374,7 +577,7 @@ width:100%;
 
 #vesselBtn{
 position:fixed;
-bottom:160px;
+bottom:300px;
 right:20px;
 width:55px;
 height:55px;
@@ -752,6 +955,28 @@ background:#c0392b;
 </div>
 
 <button id="oilBtn" onclick="toggleOilModal()" title="Brent Crude Oil Price">🛢️</button>
+
+<button id="msBtn" onclick="toggleMsModal()" title="Minesweeper">💣</button>
+
+<!-- MINESWEEPER MODAL -->
+<div id="msModal" onclick="closeMsModalOutside(event)">
+  <div id="msModalBox">
+    <div id="msTopBar">
+      <h3>💣 MINESWEEPER — Expert (30×16)</h3>
+      <div class="ms-display" id="msMines">099</div>
+      <span id="msFace" onclick="initMinesweeper()">🙂</span>
+      <div class="ms-display" id="msTimer">000</div>
+      <button id="msCloseBtn" onclick="toggleMsModal()">✕</button>
+    </div>
+    <div id="msContent">
+      <div id="msGrid"></div>
+      <div id="msLeaderboardPanel">
+        <h4>🏆 Best Times</h4>
+        <ul id="msLeaderboard"></ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 <button id="vesselBtn" onclick="toggleVesselModal()" title="Vessel Tracker">⚓</button>
 
@@ -1298,6 +1523,193 @@ function toggleOilModal() {
 function closeOilModalOutside(event) {
   if (event.target === document.getElementById("oilModal")) {
     document.getElementById("oilModal").classList.remove("open");
+  }
+}
+
+/* ---------------- MINESWEEPER ---------------- */
+
+const MS_COLS = 30, MS_ROWS = 16, MS_MINES = 99;
+let msBoard = [], msRevealed = [], msFlagged = [];
+let msGameOver = false, msFirstClick = true, msStarted = false;
+let msTimer = null, msSeconds = 0;
+const msNumColors = ["","#0000ff","#007b00","#ff0000","#00007b","#7b0000","#007b7b","#000","#7b7b7b"];
+
+function toggleMsModal() {
+  const modal = document.getElementById("msModal");
+  const wasOpen = modal.classList.contains("open");
+  modal.classList.toggle("open");
+  if (!wasOpen) {
+    initMinesweeper();
+    loadMsScores();
+  }
+}
+
+function closeMsModalOutside(e) {
+  if (e.target === document.getElementById("msModal")) {
+    document.getElementById("msModal").classList.remove("open");
+    clearInterval(msTimer);
+  }
+}
+
+function initMinesweeper() {
+  clearInterval(msTimer);
+  msBoard = Array.from({length:MS_ROWS}, () => Array(MS_COLS).fill(0));
+  msRevealed = Array.from({length:MS_ROWS}, () => Array(MS_COLS).fill(false));
+  msFlagged = Array.from({length:MS_ROWS}, () => Array(MS_COLS).fill(false));
+  msGameOver = false; msFirstClick = true; msStarted = false; msSeconds = 0;
+  document.getElementById("msTimer").innerText = "000";
+  document.getElementById("msMines").innerText = "099";
+  document.getElementById("msFace").innerText = "🙂";
+  renderMsBoard();
+}
+
+function placeMines(safeR, safeC) {
+  let placed = 0;
+  while (placed < MS_MINES) {
+    const r = Math.floor(Math.random() * MS_ROWS);
+    const c = Math.floor(Math.random() * MS_COLS);
+    if (Math.abs(r-safeR) <= 1 && Math.abs(c-safeC) <= 1) continue;
+    if (msBoard[r][c] === -1) continue;
+    msBoard[r][c] = -1;
+    placed++;
+  }
+  for (let r = 0; r < MS_ROWS; r++) {
+    for (let c = 0; c < MS_COLS; c++) {
+      if (msBoard[r][c] === -1) continue;
+      let n = 0;
+      for (let dr = -1; dr <= 1; dr++)
+        for (let dc = -1; dc <= 1; dc++) {
+          const nr=r+dr, nc=c+dc;
+          if (nr>=0&&nr<MS_ROWS&&nc>=0&&nc<MS_COLS&&msBoard[nr][nc]===-1) n++;
+        }
+      msBoard[r][c] = n;
+    }
+  }
+}
+
+function revealFlood(r, c) {
+  if (r<0||r>=MS_ROWS||c<0||c>=MS_COLS||msRevealed[r][c]||msFlagged[r][c]) return;
+  msRevealed[r][c] = true;
+  if (msBoard[r][c] === 0)
+    for (let dr=-1;dr<=1;dr++)
+      for (let dc=-1;dc<=1;dc++)
+        revealFlood(r+dr, c+dc);
+}
+
+function msClick(r, c) {
+  if (msGameOver || msFlagged[r][c] || msRevealed[r][c]) return;
+  if (msFirstClick) {
+    msFirstClick = false;
+    placeMines(r, c);
+    msStarted = true;
+    msTimer = setInterval(() => {
+      msSeconds++;
+      document.getElementById("msTimer").innerText = String(Math.min(msSeconds,999)).padStart(3,"0");
+    }, 1000);
+  }
+  if (msBoard[r][c] === -1) {
+    msGameOver = true;
+    clearInterval(msTimer);
+    msRevealed[r][c] = true;
+    document.getElementById("msFace").innerText = "😵";
+    renderMsBoard(r, c);
+    return;
+  }
+  revealFlood(r, c);
+  checkMsWin();
+  renderMsBoard();
+}
+
+function msChord(r, c) {
+  if (!msRevealed[r][c] || msBoard[r][c] <= 0) return;
+  let flagCount = 0;
+  for (let dr=-1;dr<=1;dr++)
+    for (let dc=-1;dc<=1;dc++) {
+      const nr=r+dr, nc=c+dc;
+      if (nr>=0&&nr<MS_ROWS&&nc>=0&&nc<MS_COLS&&msFlagged[nr][nc]) flagCount++;
+    }
+  if (flagCount === msBoard[r][c])
+    for (let dr=-1;dr<=1;dr++)
+      for (let dc=-1;dc<=1;dc++) {
+        const nr=r+dr, nc=c+dc;
+        if (nr>=0&&nr<MS_ROWS&&nc>=0&&nc<MS_COLS&&!msFlagged[nr][nc]&&!msRevealed[nr][nc])
+          msClick(nr, nc);
+      }
+}
+
+function msRightClick(e, r, c) {
+  e.preventDefault();
+  if (msGameOver || msRevealed[r][c] || !msStarted) return;
+  msFlagged[r][c] = !msFlagged[r][c];
+  const flagged = msFlagged.flat().filter(Boolean).length;
+  document.getElementById("msMines").innerText = String(Math.max(0, MS_MINES-flagged)).padStart(3,"0");
+  renderMsBoard();
+}
+
+function checkMsWin() {
+  const revealed = msRevealed.flat().filter(Boolean).length;
+  if (revealed === MS_ROWS*MS_COLS - MS_MINES) {
+    msGameOver = true;
+    clearInterval(msTimer);
+    document.getElementById("msFace").innerText = "😎";
+    fetch("/minesweeper-score", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({name: userName, time: msSeconds})
+    }).then(() => loadMsScores());
+  }
+}
+
+function loadMsScores() {
+  fetch("/minesweeper-scores")
+    .then(r => r.json())
+    .then(scores => {
+      const ul = document.getElementById("msLeaderboard");
+      ul.innerHTML = "";
+      if (!scores.length) {
+        ul.innerHTML = "<li style='color:#666;font-size:10px;'>No records yet!</li>";
+        return;
+      }
+      scores.slice(0,10).forEach((s,i) => {
+        const li = document.createElement("li");
+        if (i===0) li.classList.add("ms-gold");
+        if (i===1) li.classList.add("ms-silver");
+        if (i===2) li.classList.add("ms-bronze");
+        if (s.name === userName) li.classList.add("ms-me");
+        li.innerHTML = "<span>" + (i+1) + ". " + s.name + "</span><span>" + s.time + "s</span>";
+        ul.appendChild(li);
+      });
+    });
+}
+
+function renderMsBoard(hitR, hitC) {
+  const grid = document.getElementById("msGrid");
+  grid.innerHTML = "";
+  for (let r=0;r<MS_ROWS;r++) {
+    for (let c=0;c<MS_COLS;c++) {
+      const cell = document.createElement("div");
+      cell.className = "ms-cell";
+      if (msRevealed[r][c]) {
+        cell.classList.add("revealed");
+        if (msBoard[r][c] === -1) {
+          cell.classList.add(r===hitR&&c===hitC ? "mine-hit" : "mine-shown");
+          cell.innerText = "💣";
+        } else if (msBoard[r][c] > 0) {
+          cell.innerText = msBoard[r][c];
+          cell.style.color = msNumColors[msBoard[r][c]];
+        }
+      } else if (msFlagged[r][c]) {
+        cell.classList.add("flagged");
+        cell.innerText = msGameOver && msBoard[r][c] !== -1 ? "❌" : "🚩";
+      } else if (msGameOver && msBoard[r][c] === -1) {
+        cell.classList.add("revealed","mine-shown");
+        cell.innerText = "💣";
+      }
+      cell.onclick = () => msClick(r, c);
+      cell.ondblclick = () => msChord(r, c);
+      cell.oncontextmenu = e => msRightClick(e, r, c);
+      grid.appendChild(cell);
+    }
   }
 }
 
