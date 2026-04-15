@@ -1212,6 +1212,7 @@ function selectVessel(btn, mmsi, imo) {
   const windyFrame = document.getElementById("windyFrame");
   windyFrame.style.display = "none";
   windyFrame.src = "";
+  document.getElementById("vesselMapFrame").style.display = "block";
   const toggleBtn = document.getElementById("weatherToggleBtn");
   toggleBtn.innerText = "🌦️ Weather OFF";
   toggleBtn.classList.remove("active");
