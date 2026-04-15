@@ -853,7 +853,14 @@ if (!userId) {
 }
 
 if (!userName) {
-  userName = prompt("Enter your name:");
+  let name = "";
+  while (!name || !name.trim()) {
+    name = prompt("Enter your name to continue:");
+    if (!name || !name.trim()) {
+      alert("A name is required to use this app!");
+    }
+  }
+  userName = name.trim();
   localStorage.setItem("userName", userName);
 }
 
