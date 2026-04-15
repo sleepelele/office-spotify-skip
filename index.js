@@ -259,12 +259,12 @@ app.get("/currency", async (req, res) => {
     const r = response.data.rates;
 
     res.json({
-      GBP: (1 / r.GBP).toFixed(3),
-      PLN: (1 / r.PLN).toFixed(3),
-      USD: (1 / r.USD).toFixed(3),
-      NOK: (1 / r.NOK).toFixed(3),
-      SEK: (1 / r.SEK).toFixed(3),
-      DKK: (1 / r.DKK).toFixed(3)
+      GBP: r.GBP.toFixed(3),
+      PLN: r.PLN.toFixed(3),
+      USD: r.USD.toFixed(3),
+      NOK: r.NOK.toFixed(3),
+      SEK: r.SEK.toFixed(3),
+      DKK: r.DKK.toFixed(3)
     });
 
   } catch {
