@@ -1806,6 +1806,7 @@ socket.emit("registerUser", { userId, name: userName });
 
 function playCoinSound() {
   const sound = new Audio("/slot.mp3");
+  sound.volume = 0.5;
   sound.play().catch(() => {});
 }
 
