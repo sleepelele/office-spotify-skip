@@ -453,6 +453,18 @@ gap:8px;
 flex-wrap:wrap;
 }
 
+.vesselGroupLabel{
+font-size:10px;
+font-weight:bold;
+color:#5dade2;
+letter-spacing:2px;
+opacity:0.7;
+padding:0 4px;
+align-self:center;
+border-left:2px solid #5dade2;
+padding-left:6px;
+}
+
 .vesselSelectBtn{
 background:rgba(26,82,118,0.4);
 border:1px solid rgba(26,82,118,0.6);
@@ -721,10 +733,16 @@ background:#c0392b;
     <div id="vesselModalHeader">
       <h3>⚓ VESSEL TRACKER</h3>
       <div id="vesselBtns">
+        <span class="vesselGroupLabel">BALT1</span>
         <button class="vesselSelectBtn" onclick="selectVessel(this, '209659000', '9814014')">Containerships Aurora</button>
         <button class="vesselSelectBtn" onclick="selectVessel(this, '210028000', '9866249')">Containerships Borealis</button>
+        <span class="vesselGroupLabel">BALT2</span>
         <button class="vesselSelectBtn" onclick="selectVessel(this, '256800000', '9961295')">CMA CGM Ermitage</button>
         <button class="vesselSelectBtn" onclick="selectVessel(this, '256883000', '9961312')">CMA CGM Tivoli</button>
+        <span class="vesselGroupLabel">SECI</span>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '255805903', '9344253')">CT Pachuca</button>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '255916246', '9331191')">Canarias Express</button>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '255806405', '9331206')">Andalucia Express</button>
       </div>
       <a id="vesselDetailsLink" href="#" target="_blank" style="display:none">📋 Full Details ↗</a>
       <button id="vesselCloseBtn" onclick="toggleVesselModal()">✕</button>
