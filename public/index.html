@@ -572,6 +572,27 @@ border-radius:2px;
 
 #msFace:hover{ background:#d0d0d0; }
 
+.ms-diff-btn{
+background:#c0c0c0;
+border:2px solid #fff;
+border-right-color:#808080;
+border-bottom-color:#808080;
+color:#000;
+font-size:11px;
+font-weight:bold;
+padding:2px 8px;
+cursor:pointer;
+}
+
+.ms-diff-btn.active{
+background:#a0a0a0;
+border:2px solid #808080;
+border-right-color:#fff;
+border-bottom-color:#fff;
+}
+
+.ms-diff-btn:hover:not(.active){ background:#d0d0d0; }
+
 #msCloseBtn{
 background:#c0c0c0;
 border:2px solid #fff;
@@ -592,8 +613,6 @@ display:flex;
 
 #msGrid{
 display:grid;
-grid-template-columns:repeat(30, 22px);
-grid-template-rows:repeat(16, 22px);
 border:3px inset #808080;
 margin:6px;
 flex-shrink:0;
@@ -1466,8 +1485,12 @@ background:#c0392b;
 <div id="msModal" onclick="closeMsModalOutside(event)">
   <div id="msModalBox">
     <div id="msTopBar">
-      <h3>💣 MINESWEEPER — Expert (30×16)</h3>
-      <div class="ms-display" id="msMines">099</div>
+      <h3>💣 MINESWEEPER</h3>
+      <div style="display:flex;gap:4px;">
+        <button class="ms-diff-btn active" id="diffEasy" onclick="setDifficulty('easy',this)">Easy</button>
+        <button class="ms-diff-btn" id="diffExpert" onclick="setDifficulty('expert',this)">Expert</button>
+      </div>
+      <div class="ms-display" id="msMines">010</div>
       <span id="msFace" onclick="initMinesweeper()">🙂</span>
       <div class="ms-display" id="msTimer">000</div>
       <button id="msCloseBtn" onclick="toggleMsModal()">✕</button>
@@ -2332,19 +2355,36 @@ function closeOilModalOutside(event) {
 
 /* ---------------- MINESWEEPER ---------------- */
 
-const MS_COLS = 30, MS_ROWS = 16, MS_MINES = 99;
+const MS_DIFFICULTIES = {
+  easy:   { cols: 9,  rows: 9,  mines: 10, label: "Easy (9×9)"   },
+  expert: { cols: 30, rows: 16, mines: 99, label: "Expert (30×16)" }
+};
+let msDifficulty = "easy";
+let MS_COLS = 9, MS_ROWS = 9, MS_MINES = 10;
 let msBoard = [], msRevealed = [], msFlagged = [];
 let msGameOver = false, msFirstClick = true, msStarted = false;
 let msTimer = null, msSeconds = 0;
 const msNumColors = ["","#0000ff","#007b00","#ff0000","#00007b","#7b0000","#007b7b","#000","#7b7b7b"];
+
+function setDifficulty(diff, btn) {
+  msDifficulty = diff;
+  const d = MS_DIFFICULTIES[diff];
+  MS_COLS = d.cols; MS_ROWS = d.rows; MS_MINES = d.mines;
+  document.querySelectorAll(".ms-diff-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  // resize grid CSS
+  document.getElementById("msGrid").style.gridTemplateColumns = "repeat(" + MS_COLS + ", 22px)";
+  document.getElementById("msGrid").style.gridTemplateRows = "repeat(" + MS_ROWS + ", 22px)";
+  initMinesweeper();
+  loadMsScores();
+}
 
 function toggleMsModal() {
   const modal = document.getElementById("msModal");
   const wasOpen = modal.classList.contains("open");
   modal.classList.toggle("open");
   if (!wasOpen) {
-    initMinesweeper();
-    loadMsScores();
+    setDifficulty("easy", document.getElementById("diffEasy"));
   }
 }
 
@@ -2362,7 +2402,7 @@ function initMinesweeper() {
   msFlagged = Array.from({length:MS_ROWS}, () => Array(MS_COLS).fill(false));
   msGameOver = false; msFirstClick = true; msStarted = false; msSeconds = 0;
   document.getElementById("msTimer").innerText = "000";
-  document.getElementById("msMines").innerText = "099";
+  document.getElementById("msMines").innerText = String(MS_MINES).padStart(3,"0");
   document.getElementById("msFace").innerText = "🙂";
   renderMsBoard();
 }
@@ -2459,16 +2499,18 @@ function checkMsWin() {
     fetch("/minesweeper-score", {
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({name: userName, time: msSeconds})
+      body: JSON.stringify({name: userName, time: msSeconds, difficulty: msDifficulty})
     }).then(() => loadMsScores());
   }
 }
 
 function loadMsScores() {
-  fetch("/minesweeper-scores")
+  fetch("/minesweeper-scores?difficulty=" + msDifficulty)
     .then(r => r.json())
     .then(scores => {
       const ul = document.getElementById("msLeaderboard");
+      const label = MS_DIFFICULTIES[msDifficulty].label;
+      ul.previousElementSibling.innerText = "🏆 " + label;
       ul.innerHTML = "";
       if (!scores.length) {
         ul.innerHTML = "<li style='color:#666;font-size:10px;'>No records yet!</li>";
