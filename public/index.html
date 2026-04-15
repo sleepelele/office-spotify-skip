@@ -769,6 +769,16 @@ transition:all .2s;
 #boostBtn:hover{ background:rgba(255,215,0,0.3); }
 #boostBtn:disabled{ opacity:0.4; cursor:default; }
 
+@keyframes coinFlash{
+0%{ transform:scale(1); }
+30%{ transform:scale(1.2); background:rgba(255,215,0,0.4); }
+100%{ transform:scale(1); }
+}
+
+#coinDisplay.flash{
+animation:coinFlash 0.5s ease;
+}
+
 /* BLACKJACK BUTTON */
 
 #bjBtn{
@@ -1768,6 +1778,16 @@ socket.on("voteUpdate", data => updateUI(data));
 socket.on("device_banned", () => {
   document.getElementById("bannedOverlay").style.display = "flex";
   document.getElementById("skipBtn").disabled = true;
+});
+socket.on("coinUpdate", (data) => {
+  myCoins = data.balance;
+  document.getElementById("coinCount").innerText = myCoins;
+  document.getElementById("bjCoins").innerText = myCoins;
+  document.getElementById("boostBtn").disabled = myCoins < 1;
+  const display = document.getElementById("coinDisplay");
+  display.classList.remove("flash");
+  void display.offsetWidth; // force reflow
+  display.classList.add("flash");
 });
 socket.emit("registerUser", { userId, name: userName });
 
@@ -2845,6 +2865,7 @@ setInterval(loadSong, 10000);
 setInterval(loadLastSkip, 5000);
 setInterval(loadWeather, 600000);
 setInterval(loadCurrency, 600000);
+setInterval(loadCoins, 30000);
 
 </script>
 
