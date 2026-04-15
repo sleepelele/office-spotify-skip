@@ -266,6 +266,8 @@ async function doSkip() {
   cooldown = true;
 
   io.emit("voteUpdate", buildVoteResponse("Song skipped"));
+  // tell all clients to refresh song immediately after a short delay for Spotify to update
+  setTimeout(() => io.emit("songSkipped"), 1200);
 
   setTimeout(() => {
     cooldown = false;
