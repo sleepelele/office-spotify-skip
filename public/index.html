@@ -212,15 +212,16 @@ cursor:pointer;
 
 #adminPanel{
 position:fixed;
-bottom:230px;
-right:20px;
+bottom:90px;
+right:90px;
 background:#181818;
 padding:15px;
 border-radius:10px;
 display:none;
-width:220px;
-max-height:70vh;
+width:240px;
+max-height:75vh;
 overflow-y:auto;
+box-shadow:-4px 4px 20px rgba(0,0,0,0.6);
 }
 
 .switch{
@@ -1292,8 +1293,26 @@ margin:0;
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:5px;
-font-size:13px;
+margin-bottom:6px;
+font-size:12px;
+gap:6px;
+}
+
+.userDot{
+width:8px;
+height:8px;
+border-radius:50%;
+flex-shrink:0;
+}
+
+.userDot.online{ background:#1DB954; box-shadow:0 0 4px #1DB954; }
+.userDot.offline{ background:#555; }
+
+.userLabel{
+flex:1;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
 }
 
 .resetBtn{
@@ -1659,13 +1678,10 @@ background:#c0392b;
 <div id="soundSwitch" class="switch" onclick="toggleSound()"></div>
 </div>
 
-<h4>Connected Users</h4>
+<h4>All Users</h4>
 <ul id="userList"></ul>
 
 <h4>Give Coins 🪙</h4>
-<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11px;color:#aaa;">
-  <label><input type="checkbox" id="showAllUsers" onchange="toggleAllUsers()"> Show offline users too</label>
-</div>
 <select id="coinTargetSelect" style="width:100%;margin-bottom:6px;background:#222;color:white;border:1px solid #444;border-radius:4px;padding:4px;">
   <option value="">— select user —</option>
 </select>
@@ -1674,10 +1690,9 @@ background:#c0392b;
   <button onclick="giveCoins()" style="flex:1;">Give Coins</button>
 </div>
 
-<h4>Ban User</h4>
-<input id="banName" placeholder="Name">
-<button onclick="banUser()">Ban</button>
-<button onclick="clearVotes()">Clear Votes</button>
+<div style="margin-top:10px;">
+<button onclick="clearVotes()" style="width:100%;">Clear Votes</button>
+</div>
 
 <div id="adminMessage"></div>
 
@@ -1786,49 +1801,101 @@ function updateUI(data) {
   }
 
   if (data.users) {
-    const userList = document.getElementById("userList");
-    userList.innerHTML = "";
-    const showAll = document.getElementById("showAllUsers")?.checked;
-    const select = document.getElementById("coinTargetSelect");
-    const prevVal = select.value;
-    if (!showAll) {
-      select.innerHTML = "<option value=''>— select user —</option>";
+    onlineUserIds = new Set(data.userIds);
+    onlineUserNames = new Map(data.userIds.map((id, i) => [id, data.users[i]]));
+    renderAllUsers();
+  }
+
+}
+
+let onlineUserIds = new Set();
+let onlineUserNames = new Map();
+let allKnownUsers = [];
+
+function renderAllUsers() {
+  const userList = document.getElementById("userList");
+  userList.innerHTML = "";
+  const select = document.getElementById("coinTargetSelect");
+  const prevVal = select.value;
+  select.innerHTML = "<option value=''>— select user —</option>";
+
+  // merge: all known users + any online users not yet in known list
+  const combined = [...allKnownUsers];
+  onlineUserIds.forEach(uid => {
+    if (!combined.find(u => u.user_id === uid)) {
+      combined.push({ user_id: uid, user_name: onlineUserNames.get(uid) || uid, balance: "?" });
     }
-    data.users.forEach((u, i) => {
-      const uid = data.userIds[i];
-      const li = document.createElement("li");
-      li.innerHTML = "<span>" + u + "</span><button class=\"resetBtn\" onclick=\"resetUser('" + uid + "')\">Reset</button>";
-      userList.appendChild(li);
-      if (!showAll) {
-        const opt = document.createElement("option");
-        opt.value = uid;
-        opt.innerText = u;
-        select.appendChild(opt);
-      }
+  });
+
+  combined.sort((a, b) => {
+    const aOnline = onlineUserIds.has(a.user_id);
+    const bOnline = onlineUserIds.has(b.user_id);
+    if (aOnline && !bOnline) return -1;
+    if (!aOnline && bOnline) return 1;
+    return (a.user_name || "").localeCompare(b.user_name || "");
+  });
+
+  combined.forEach(u => {
+    const isOnline = onlineUserIds.has(u.user_id);
+    const li = document.createElement("li");
+    li.innerHTML =
+      "<div class='userDot " + (isOnline ? "online" : "offline") + "'></div>" +
+      "<span class='userLabel' title='" + u.user_name + "'>" + u.user_name + "</span>" +
+      (isOnline ? "<button class='resetBtn' onclick=\"resetUser('" + u.user_id + "')\">Reset</button>" : "") +
+      "<button class='resetBtn' style='background:#c0392b;' onclick=\"banUserById('" + u.user_id + "','" + u.user_name.replace(/'/g,"") + "')\">Ban</button>";
+    userList.appendChild(li);
+
+    const opt = document.createElement("option");
+    opt.value = u.user_id;
+    opt.innerText = u.user_name + " (" + u.balance + "🪙)" + (isOnline ? " 🟢" : "");
+    select.appendChild(opt);
+  });
+
+  if (prevVal) select.value = prevVal;
+}
+
+function loadAllKnownUsers() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/all-users?password=" + encodeURIComponent(password))
+    .then(r => r.json())
+    .then(users => {
+      allKnownUsers = users || [];
+      renderAllUsers();
     });
-    if (!showAll && prevVal) select.value = prevVal;
-  }
-
 }
 
-function toggleAllUsers() {
-  const showAll = document.getElementById("showAllUsers").checked;
-  if (showAll) {
-    const password = document.getElementById("adminPasswordInput").value;
-    fetch("/all-users?password=" + encodeURIComponent(password))
-      .then(r => r.json())
-      .then(users => {
-        const select = document.getElementById("coinTargetSelect");
-        select.innerHTML = "<option value=''>— select user —</option>";
-        users.forEach(u => {
-          const opt = document.createElement("option");
-          opt.value = u.user_id;
-          opt.innerText = u.user_name + " (" + u.balance + "🪙)";
-          select.appendChild(opt);
-        });
-      });
-  }
+function adminLogin() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/admin-auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password })
+  })
+  .then(res => {
+    if (res.status === 403) { alert("Wrong password"); return; }
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("adminControls").style.display = "block";
+    loadAllKnownUsers();
+    setInterval(loadAllKnownUsers, 30000);
+  });
 }
+
+function banUserById(uid, name) {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/ban-user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, password })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("adminMessage").innerText = name + " banned!";
+    }
+  });
+}
+
+function toggleAllUsers() {} 
 
 function giveCoins() {
   const password = document.getElementById("adminPasswordInput").value;
@@ -2035,20 +2102,6 @@ function toggleAdminPanel() {
   panel.style.display = panel.style.display === "none" ? "block" : "none";
 }
 
-function adminLogin() {
-  const password = document.getElementById("adminPasswordInput").value;
-  fetch("/admin-auth", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password })
-  })
-  .then(res => {
-    if (res.status === 403) { alert("Wrong password"); return; }
-    document.getElementById("loginSection").style.display = "none";
-    document.getElementById("adminControls").style.display = "block";
-  });
-}
-
 function setTotal() {
   const total = document.getElementById("totalInput").value;
   const password = document.getElementById("adminPasswordInput").value;
@@ -2074,16 +2127,6 @@ function toggleSound() {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ password })
-  });
-}
-
-function banUser() {
-  const name = document.getElementById("banName").value;
-  const password = document.getElementById("adminPasswordInput").value;
-  fetch("/ban-user", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, password })
   });
 }
 
