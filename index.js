@@ -369,6 +369,23 @@ app.post("/reset-user", (req, res) => {
 
 });
 
+/* ---------------- MINESWEEPER SCORES ---------------- */
+
+let minesweeperScores = [];
+
+app.get("/minesweeper-scores", (req, res) => {
+  res.json(minesweeperScores);
+});
+
+app.post("/minesweeper-score", (req, res) => {
+  const { name, time } = req.body;
+  if (!name || !time) return res.status(400).json({ success: false });
+  minesweeperScores.push({ name, time, date: new Date().toLocaleDateString() });
+  minesweeperScores.sort((a, b) => a.time - b.time);
+  minesweeperScores = minesweeperScores.slice(0, 20);
+  res.json({ success: true });
+});
+
 /* ---------------- START SERVER ---------------- */
 
 server.listen(process.env.PORT || 3000, () => {
