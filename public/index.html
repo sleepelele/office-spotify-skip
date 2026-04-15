@@ -891,25 +891,32 @@ position:fixed;
 bottom:20px;
 left:50%;
 transform:translateX(-50%);
-max-width:420px;
+max-width:440px;
+width:max-content;
 text-align:center;
 z-index:5;
+background:rgba(0,0,0,0.45);
+backdrop-filter:blur(10px);
+-webkit-backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,0.08);
+border-radius:12px;
+padding:10px 18px;
 pointer-events:none;
 }
 
 #quoteText{
-font-size:12px;
-color:rgba(255,255,255,0.35);
+font-size:13px;
+color:rgba(255,255,255,0.75);
 font-style:italic;
 line-height:1.5;
 display:block;
 }
 
 #quoteAuthor{
-font-size:10px;
-color:rgba(255,255,255,0.2);
+font-size:11px;
+color:rgba(255,255,255,0.4);
 display:block;
-margin-top:3px;
+margin-top:4px;
 letter-spacing:1px;
 }
 
