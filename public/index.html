@@ -1307,6 +1307,7 @@ flex-shrink:0;
 
 .userDot.online{ background:#1DB954; box-shadow:0 0 4px #1DB954; }
 .userDot.offline{ background:#555; }
+.userDot.banned{ background:#e74c3c; }
 
 .userLabel{
 flex:1;
@@ -1654,6 +1655,13 @@ background:#c0392b;
   </div>
 </div>
 
+<!-- DEVICE BANNED OVERLAY -->
+<div id="bannedOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:999;justify-content:center;align-items:center;flex-direction:column;gap:16px;">
+  <div style="font-size:48px;">🚫</div>
+  <div style="font-size:22px;font-weight:bold;color:#e74c3c;">Device Banned</div>
+  <div style="font-size:14px;color:rgba(255,255,255,0.5);text-align:center;max-width:300px;">Your device has been banned from this app. Contact the admin if you think this is a mistake.</div>
+</div>
+
 <button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
 
 <div id="adminPanel">
@@ -1680,6 +1688,9 @@ background:#c0392b;
 
 <h4>All Users</h4>
 <ul id="userList"></ul>
+
+<h4>Banned Devices</h4>
+<ul id="bannedList" style="list-style:none;padding:0;margin:0;font-size:12px;"></ul>
 
 <h4>Give Coins 🪙</h4>
 <select id="coinTargetSelect" style="width:100%;margin-bottom:6px;background:#222;color:white;border:1px solid #444;border-radius:4px;padding:4px;">
@@ -1731,6 +1742,10 @@ if (!userName) {
 }
 
 socket.on("voteUpdate", data => updateUI(data));
+socket.on("device_banned", () => {
+  document.getElementById("bannedOverlay").style.display = "flex";
+  document.getElementById("skipBtn").disabled = true;
+});
 socket.emit("registerUser", { userId, name: userName });
 
 /* ---------------- VOTE ---------------- */
@@ -1837,18 +1852,24 @@ function renderAllUsers() {
 
   combined.forEach(u => {
     const isOnline = onlineUserIds.has(u.user_id);
+    const isBanned = window._bannedIds && window._bannedIds.has(u.user_id);
     const li = document.createElement("li");
     li.innerHTML =
-      "<div class='userDot " + (isOnline ? "online" : "offline") + "'></div>" +
-      "<span class='userLabel' title='" + u.user_name + "'>" + u.user_name + "</span>" +
-      (isOnline ? "<button class='resetBtn' onclick=\"resetUser('" + u.user_id + "')\">Reset</button>" : "") +
-      "<button class='resetBtn' style='background:#c0392b;' onclick=\"banUserById('" + u.user_id + "','" + u.user_name.replace(/'/g,"") + "')\">Ban</button>";
+      "<div class='userDot " + (isBanned ? "banned" : isOnline ? "online" : "offline") + "'></div>" +
+      "<span class='userLabel' title='" + u.user_name + "' style='" + (isBanned ? "color:#e74c3c;text-decoration:line-through;" : "") + "'>" + u.user_name + "</span>" +
+      (isOnline && !isBanned ? "<button class='resetBtn' onclick=\"resetUser('" + u.user_id + "')\">Reset</button>" : "") +
+      (isBanned
+        ? "<button class='resetBtn' style='background:#27ae60;font-size:10px;' onclick=\"unbanDevice('" + u.user_id + "','" + u.user_name.replace(/'/g,"") + "')\">Unban</button>"
+        : "<button class='resetBtn' style='background:#c0392b;' onclick=\"banUserById('" + u.user_id + "','" + u.user_name.replace(/'/g,"") + "')\">Ban</button>"
+      );
     userList.appendChild(li);
 
-    const opt = document.createElement("option");
-    opt.value = u.user_id;
-    opt.innerText = u.user_name + " (" + u.balance + "🪙)" + (isOnline ? " 🟢" : "");
-    select.appendChild(opt);
+    if (!isBanned) {
+      const opt = document.createElement("option");
+      opt.value = u.user_id;
+      opt.innerText = u.user_name + " (" + u.balance + "🪙)" + (isOnline ? " 🟢" : "");
+      select.appendChild(opt);
+    }
   });
 
   if (prevVal) select.value = prevVal;
@@ -1856,12 +1877,16 @@ function renderAllUsers() {
 
 function loadAllKnownUsers() {
   const password = document.getElementById("adminPasswordInput").value;
-  fetch("/all-users?password=" + encodeURIComponent(password))
-    .then(r => r.json())
-    .then(users => {
-      allKnownUsers = users || [];
-      renderAllUsers();
-    });
+  Promise.all([
+    fetch("/all-users?password=" + encodeURIComponent(password)).then(r => r.json()),
+    fetch("/banned-devices?password=" + encodeURIComponent(password)).then(r => r.json())
+  ]).then(([users, banned]) => {
+    allKnownUsers = users || [];
+    const bannedIds = new Set((banned || []).map(b => b.user_id));
+    window._bannedIds = bannedIds;
+    renderAllUsers();
+    loadBannedDevices();
+  });
 }
 
 function adminLogin() {
@@ -1881,21 +1906,58 @@ function adminLogin() {
 }
 
 function banUserById(uid, name) {
+  if (!confirm("Ban device for " + name + "? They will be kicked and blocked from all interactions.")) return;
   const password = document.getElementById("adminPasswordInput").value;
-  fetch("/ban-user", {
+  fetch("/ban-device", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, password })
+    body: JSON.stringify({ userId: uid, userName: name, password })
   })
   .then(r => r.json())
   .then(data => {
     if (data.success) {
-      document.getElementById("adminMessage").innerText = name + " banned!";
+      document.getElementById("adminMessage").innerText = name + "'s device banned!";
+      loadAllKnownUsers();
     }
   });
 }
 
-function toggleAllUsers() {} 
+function unbanDevice(uid, name) {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/unban-device", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: uid, password })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("adminMessage").innerText = name + " unbanned!";
+      loadAllKnownUsers();
+    }
+  });
+}
+
+function loadBannedDevices() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/banned-devices?password=" + encodeURIComponent(password))
+    .then(r => r.json())
+    .then(list => {
+      const ul = document.getElementById("bannedList");
+      ul.innerHTML = "";
+      if (!list.length) {
+        ul.innerHTML = "<li style='color:#555;font-size:11px;'>No banned devices</li>";
+        return;
+      }
+      list.forEach(b => {
+        const li = document.createElement("li");
+        li.style.cssText = "display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;";
+        li.innerHTML = "<span style='font-size:11px;color:#e74c3c;'>🚫 " + b.user_name + "</span>" +
+          "<button class='resetBtn' style='background:#27ae60;font-size:10px;' onclick=\"unbanDevice('" + b.user_id + "','" + b.user_name.replace(/'/g,"") + "')\">Unban</button>";
+        ul.appendChild(li);
+      });
+    });
+}
 
 function giveCoins() {
   const password = document.getElementById("adminPasswordInput").value;
