@@ -446,6 +446,17 @@ app.post("/minesweeper-score", (req, res) => {
   res.json({ success: true });
 });
 
+app.get("/all-users", async (req, res) => {
+  if (req.query.password !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json([]);
+  }
+  const { data } = await supabase
+    .from("coins")
+    .select("user_id, user_name, balance")
+    .order("user_name");
+  res.json(data || []);
+});
+
 app.post("/admin-give-coins", async (req, res) => {
   if (req.body.password !== process.env.ADMIN_PASSWORD) {
     return res.status(403).json({ success: false });
