@@ -20,9 +20,10 @@ const supabase = createClient(
 
 /* ---------------- STATE ---------------- */
 
-let votes = new Map();         // userId -> name
-let coinBoosts = new Map();    // userId -> extra vote count spent this round
+let votes = new Map();
+let coinBoosts = new Map();
 let bannedNames = new Set();
+let bannedDevices = new Set(); // userId-based device bans (persistent via Supabase)
 let connectedUsers = new Map();
 let cooldown = false;
 let votingEnabled = true;
@@ -34,11 +35,23 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 
+// Load banned devices from Supabase on startup
+async function loadBannedDevices() {
+  const { data } = await supabase.from("banned_devices").select("user_id");
+  if (data) data.forEach(row => bannedDevices.add(row.user_id));
+  console.log("Loaded banned devices:", bannedDevices.size);
+}
+loadBannedDevices();
+
 /* ---------------- SOCKET ---------------- */
 
 io.on("connection", (socket) => {
 
   socket.on("registerUser", ({ userId, name }) => {
+    if (bannedDevices.has(userId)) {
+      socket.emit("device_banned");
+      return;
+    }
     socket.userId = userId;
     connectedUsers.set(userId, name);
     io.emit("voteUpdate", buildVoteResponse());
@@ -146,6 +159,7 @@ app.post("/vote", async (req, res) => {
   if (!votingEnabled) return res.json(buildVoteResponse("Voting disabled"));
 
   const { userId, name } = req.body;
+  if (bannedDevices.has(userId)) return res.json(buildVoteResponse("Device banned"));
   connectedUsers.set(userId, name);
 
   if (bannedNames.has(name)) return res.json(buildVoteResponse(`${name} is banned`));
@@ -171,6 +185,7 @@ app.post("/boost-vote", async (req, res) => {
 
   if (!votingEnabled) return res.json({ success: false, message: "Voting disabled" });
   if (cooldown) return res.json({ success: false, message: "Cooldown active" });
+  if (bannedDevices.has(userId)) return res.json({ success: false, message: "Device banned" });
 
   // check coin balance
   const balance = await checkAndResetCoins(userId, name);
@@ -486,6 +501,48 @@ app.post("/blackjack-result", async (req, res) => {
   const newBalance = Math.max(0, balance + delta);
   await supabase.from("coins").update({ balance: newBalance }).eq("user_id", userId);
   res.json({ success: true, newBalance });
+});
+
+/* ---------------- DEVICE BAN ---------------- */
+
+app.post("/ban-device", async (req, res) => {
+  if (req.body.password !== process.env.ADMIN_PASSWORD) return res.status(403).json({ success: false });
+  const { userId, userName } = req.body;
+  if (!userId) return res.status(400).json({ success: false });
+
+  bannedDevices.add(userId);
+
+  // kick them off if currently connected
+  for (const [id, socket] of io.of("/").sockets) {
+    if (socket.userId === userId) {
+      socket.emit("device_banned");
+      socket.disconnect(true);
+    }
+  }
+
+  // remove from connected users and votes
+  connectedUsers.delete(userId);
+  votes.delete(userId);
+  coinBoosts.delete(userId);
+  io.emit("voteUpdate", buildVoteResponse());
+
+  await supabase.from("banned_devices").upsert({ user_id: userId, user_name: userName, banned_at: new Date().toISOString() });
+
+  res.json({ success: true });
+});
+
+app.post("/unban-device", async (req, res) => {
+  if (req.body.password !== process.env.ADMIN_PASSWORD) return res.status(403).json({ success: false });
+  const { userId } = req.body;
+  bannedDevices.delete(userId);
+  await supabase.from("banned_devices").delete().eq("user_id", userId);
+  res.json({ success: true });
+});
+
+app.get("/banned-devices", async (req, res) => {
+  if (req.query.password !== process.env.ADMIN_PASSWORD) return res.status(403).json([]);
+  const { data } = await supabase.from("banned_devices").select("*").order("banned_at", { ascending: false });
+  res.json(data || []);
 });
 
 /* ---------------- START SERVER ---------------- */
