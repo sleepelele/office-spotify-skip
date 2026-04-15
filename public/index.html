@@ -258,6 +258,198 @@ font-size:13px;
 color:#1DB954;
 }
 
+/* PATCH NOTES BUTTON */
+
+#patchBtn{
+position:fixed;
+bottom:20px;
+left:170px;
+background:rgba(29,185,84,0.15);
+border:1px solid rgba(29,185,84,0.4);
+color:#1DB954;
+font-size:10px;
+font-weight:bold;
+letter-spacing:1.5px;
+padding:6px 14px;
+border-radius:20px;
+cursor:pointer;
+z-index:10;
+transition:all .2s;
+}
+
+#patchBtn:hover{
+background:rgba(29,185,84,0.3);
+border-color:#1DB954;
+}
+
+#patchModal{
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.78);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#patchModal.open{ display:flex; }
+
+#patchModalBox{
+background:#0f0f0f;
+border-radius:14px;
+border:1px solid rgba(29,185,84,0.25);
+box-shadow:0 0 40px rgba(29,185,84,0.1);
+width:680px;
+max-width:92vw;
+max-height:85vh;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:patchIn .2s ease;
+}
+
+@keyframes patchIn{
+from{transform:scale(0.93);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#patchModalHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:16px 22px;
+border-bottom:1px solid rgba(255,255,255,0.08);
+flex-shrink:0;
+gap:12px;
+}
+
+#patchModalHeader h3{
+margin:0;
+font-size:15px;
+color:#1DB954;
+letter-spacing:2px;
+font-family:monospace;
+}
+
+#patchVersion{
+font-size:10px;
+font-family:monospace;
+background:#1DB954;
+color:#0a3d1f;
+padding:3px 10px;
+border-radius:3px;
+letter-spacing:1px;
+font-weight:bold;
+}
+
+#patchCloseBtn{
+background:none;
+border:none;
+color:rgba(255,255,255,0.5);
+font-size:20px;
+cursor:pointer;
+line-height:1;
+margin-left:auto;
+}
+
+#patchCloseBtn:hover{color:white;}
+
+#patchContent{
+overflow-y:auto;
+padding:20px 22px;
+}
+
+.patch-section{
+margin-bottom:22px;
+}
+
+.patch-section-header{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:12px;
+padding-bottom:8px;
+border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.patch-tag{
+font-size:9px;
+font-weight:bold;
+letter-spacing:2px;
+padding:3px 9px;
+border-radius:3px;
+text-transform:uppercase;
+}
+
+.patch-tag-new{ background:#0C447C; color:#B5D4F4; }
+.patch-tag-feature{ background:#0F6E56; color:#9FE1CB; }
+.patch-tag-game{ background:#3C3489; color:#CECBF6; }
+
+.patch-section-title{
+font-size:14px;
+font-weight:bold;
+color:white;
+}
+
+.patch-entry{
+display:flex;
+gap:12px;
+padding:10px 0;
+border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+.patch-entry:last-child{ border-bottom:none; }
+
+.patch-entry-icon{
+width:30px;
+height:30px;
+border-radius:6px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:15px;
+flex-shrink:0;
+background:rgba(255,255,255,0.06);
+}
+
+.patch-entry-name{
+font-size:13px;
+font-weight:bold;
+margin-bottom:4px;
+color:white;
+}
+
+.patch-entry-desc{
+font-size:12px;
+color:rgba(255,255,255,0.55);
+line-height:1.6;
+}
+
+.patch-note-tag{
+display:inline-block;
+margin-top:5px;
+font-size:10px;
+font-family:monospace;
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.1);
+border-radius:3px;
+padding:2px 8px;
+color:rgba(255,255,255,0.35);
+letter-spacing:1px;
+}
+
+#patchFooter{
+font-size:10px;
+color:rgba(255,255,255,0.18);
+font-family:monospace;
+text-align:center;
+padding:10px 22px;
+border-top:1px solid rgba(255,255,255,0.06);
+flex-shrink:0;
+letter-spacing:1px;
+}
+
 #cornerGif{
 position:fixed;
 bottom:20px;
@@ -1348,6 +1540,99 @@ background:#c0392b;
   </div>
 </div>
 
+<button id="patchBtn" onclick="togglePatchModal()">📋 PATCH NOTES</button>
+
+<!-- PATCH NOTES MODAL -->
+<div id="patchModal" onclick="closePatchModalOutside(event)">
+  <div id="patchModalBox">
+    <div id="patchModalHeader">
+      <h3>📋 PATCH NOTES</h3>
+      <span id="patchVersion">v2.0.0 — "PAY TO WIN"</span>
+      <button id="patchCloseBtn" onclick="togglePatchModal()">✕</button>
+    </div>
+    <div id="patchContent">
+
+      <div class="patch-section">
+        <div class="patch-section-header">
+          <span class="patch-tag patch-tag-new">New System</span>
+          <span class="patch-section-title">Daily Coin Economy</span>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">🪙</div>
+          <div>
+            <div class="patch-entry-name">Daily Coin Allowance</div>
+            <div class="patch-entry-desc">All players now receive 5 coins each day upon login. Coins are tied to your username and persist across sessions. Balance resets every midnight Riga time — whether you spent them or not. Use them wisely.</div>
+            <span class="patch-note-tag">RESETS: 00:00 EET / EEST</span>
+          </div>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">⚡</div>
+          <div>
+            <div class="patch-entry-name">Boost Vote — Spend 1 Coin for an Extra Skip</div>
+            <div class="patch-entry-desc">Found a song so terrible you simply cannot wait for your colleagues to agree? Spend 1 coin to add an extra vote toward the skip threshold. Multiple players can boost simultaneously — enough boosts can tip a vote over the majority line without anyone else clicking Skip.</div>
+            <span class="patch-note-tag">COST: 1 COIN PER BOOST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="patch-section">
+        <div class="patch-section-header">
+          <span class="patch-tag patch-tag-feature">New Feature</span>
+          <span class="patch-section-title">Song Reputation System</span>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">▶</div>
+          <div>
+            <div class="patch-entry-name">Play & Skip Counter</div>
+            <div class="patch-entry-desc">Every song now tracks how many times it has been played and how many times the office has voted to remove it. Stats are displayed live under the song title and persist permanently — so that one song everyone keeps skipping will have a permanent record of shame.</div>
+            <span class="patch-note-tag">STORED IN: SUPABASE DATABASE</span>
+          </div>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">👍</div>
+          <div>
+            <div class="patch-entry-name">Like & Dislike Voting</div>
+            <div class="patch-entry-desc">Each time a song appears, players can cast one Like or one Dislike. Changing your mind is allowed — clicking the opposite reaction switches your vote. Clicking the same button again removes it. Votes are tracked per song appearance, so you can vote fresh each time.</div>
+            <span class="patch-note-tag">ONE VOTE PER PLAYER PER APPEARANCE</span>
+          </div>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">📊</div>
+          <div>
+            <div class="patch-entry-name">Live Stats Bar</div>
+            <div class="patch-entry-desc">A compact stats row now appears under every song showing total plays, total skips, total likes and total dislikes — all time, across every session, every day. This data survives server restarts and does not reset.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="patch-section">
+        <div class="patch-section-header">
+          <span class="patch-tag patch-tag-game">New Game</span>
+          <span class="patch-section-title">Office Blackjack — Coin Gambling Expansion</span>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">🃏</div>
+          <div>
+            <div class="patch-entry-name">Blackjack Table is Open</div>
+            <div class="patch-entry-desc">A fully functional Blackjack game is now accessible via the card button on the right panel. Standard rules apply: dealer hits on soft 16, stands on 17+. You can Hit, Stand, or Double Down. Winnings and losses update your coin balance in real time.</div>
+            <span class="patch-note-tag">ACCESS: 🃏 BUTTON · RIGHT PANEL</span>
+          </div>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">💰</div>
+          <div>
+            <div class="patch-entry-name">Bet Your Coins</div>
+            <div class="patch-entry-desc">Set your bet before each hand. Win and receive your bet back plus the same amount in coins. Hit Blackjack (Ace + 10-value on deal) and earn 1.5x your bet. Lose and the coins are gone. Going bust on a doubled bet hurts twice as much — you have been warned.</div>
+            <span class="patch-note-tag">BLACKJACK PAYS: 1.5x</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div id="patchFooter">OFFICE SPOTIFY SKIP &nbsp;·&nbsp; BUILD APRIL 2026 &nbsp;·&nbsp; NOT FOR PUBLIC DISTRIBUTION &nbsp;·&nbsp; POWERED BY RENDER + SUPABASE</div>
+  </div>
+</div>
+
 <button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
 
 <div id="adminPanel">
@@ -2313,6 +2598,16 @@ function bjFinish(playerBJ) {
     document.getElementById("boostBtn").disabled = myCoins < 1;
     document.getElementById("bjBetInput").value = Math.min(bjBet, myCoins) || 1;
   });
+}
+
+function togglePatchModal() {
+  document.getElementById("patchModal").classList.toggle("open");
+}
+
+function closePatchModalOutside(e) {
+  if (e.target === document.getElementById("patchModal")) {
+    document.getElementById("patchModal").classList.remove("open");
+  }
 }
 
 loadSong();
