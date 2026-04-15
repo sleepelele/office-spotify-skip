@@ -252,7 +252,11 @@ async function doSkip() {
 
   // record skip in Supabase
   if (songId) {
-    await supabase.rpc("increment_song_skips", { p_song_id: songId }).catch(() => {});
+    try {
+      await supabase.rpc("increment_song_skips", { p_song_id: songId });
+    } catch(e) {
+      console.error("Stats update error:", e.message);
+    }
   }
 
   await skipTrack();
