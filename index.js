@@ -479,20 +479,23 @@ app.post("/reset-user", (req, res) => {
 /* ---------------- MINESWEEPER ---------------- */
 
 app.get("/minesweeper-scores", async (req, res) => {
+  const difficulty = req.query.difficulty || "expert";
   const { data } = await supabase
     .from("minesweeper_scores")
-    .select("name, time, date")
+    .select("name, time, date, difficulty")
+    .eq("difficulty", difficulty)
     .order("time", { ascending: true })
     .limit(20);
   res.json(data || []);
 });
 
 app.post("/minesweeper-score", async (req, res) => {
-  const { name, time } = req.body;
+  const { name, time, difficulty } = req.body;
   if (!name || !time) return res.status(400).json({ success: false });
   await supabase.from("minesweeper_scores").insert({
     name,
     time,
+    difficulty: difficulty || "expert",
     date: new Date().toLocaleDateString()
   });
   res.json({ success: true });
