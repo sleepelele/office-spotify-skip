@@ -446,6 +446,20 @@ app.post("/minesweeper-score", (req, res) => {
   res.json({ success: true });
 });
 
+app.post("/admin-give-coins", async (req, res) => {
+  if (req.body.password !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ success: false });
+  }
+  const { userId, userName, amount } = req.body;
+  if (!userId || !amount || amount < 1) return res.status(400).json({ success: false });
+
+  const balance = await checkAndResetCoins(userId, userName);
+  const newBalance = balance + parseInt(amount);
+  await supabase.from("coins").update({ balance: newBalance }).eq("user_id", userId);
+
+  res.json({ success: true, newBalance });
+});
+
 /* ---------------- BLACKJACK COINS ---------------- */
 
 app.post("/blackjack-result", async (req, res) => {
