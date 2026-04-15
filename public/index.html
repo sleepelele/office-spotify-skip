@@ -497,6 +497,28 @@ opacity:0.8;
 
 #vesselDetailsLink:hover{opacity:1;}
 
+#weatherToggleBtn{
+background:rgba(41,128,185,0.3);
+border:1px solid rgba(41,128,185,0.6);
+color:white;
+border-radius:20px;
+padding:5px 12px;
+font-size:12px;
+cursor:pointer;
+transition:all .2s;
+white-space:nowrap;
+}
+
+#weatherToggleBtn.active{
+background:rgba(41,128,185,0.8);
+border-color:#7fb3d3;
+color:#c8e6f5;
+}
+
+#weatherToggleBtn:hover{
+background:rgba(41,128,185,0.6);
+}
+
 #vesselCloseBtn{
 background:none;
 border:none;
@@ -510,10 +532,16 @@ flex-shrink:0;
 
 #vesselCloseBtn:hover{opacity:1;}
 
-#vesselMapFrame{
+#vesselMapContainer{
 flex:1;
+position:relative;
+}
+
+#vesselMapFrame{
+position:absolute;
+top:0;left:0;
+width:100%;height:100%;
 border:none;
-width:100%;
 }
 
 /* OIL MODAL */
@@ -747,9 +775,13 @@ background:#c0392b;
         <button class="vesselSelectBtn" onclick="selectVessel(this, '255772000', '9436197')">BG Onyx</button>
       </div>
       <a id="vesselDetailsLink" href="#" target="_blank" style="display:none">📋 Full Details ↗</a>
+      <button id="weatherToggleBtn" onclick="toggleWeatherLayer()" title="Toggle Weather" style="display:none">🌦️ Weather OFF</button>
       <button id="vesselCloseBtn" onclick="toggleVesselModal()">✕</button>
     </div>
-    <iframe id="vesselMapFrame" src="" loading="lazy" allowfullscreen></iframe>
+    <div id="vesselMapContainer" style="flex:1;position:relative;">
+      <iframe id="vesselMapFrame" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
+      <iframe id="windyFrame" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:none;" allowfullscreen></iframe>
+    </div>
   </div>
 </div>
 
@@ -1161,19 +1193,55 @@ function closeVesselModalOutside(event) {
   }
 }
 
+let currentMmsi = null;
+let weatherLayerOn = false;
+
 function selectVessel(btn, mmsi, imo) {
   // highlight active button
   document.querySelectorAll(".vesselSelectBtn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
 
-  // load map centered on vessel
+  currentMmsi = mmsi;
+
+  // load vessel map
   const frame = document.getElementById("vesselMapFrame");
   frame.src = "https://www.vesselfinder.com/aismap?mmsi=" + mmsi + "&zoom=8&names=true&fleet=false";
+
+  // reset weather layer
+  weatherLayerOn = false;
+  const windyFrame = document.getElementById("windyFrame");
+  windyFrame.style.display = "none";
+  windyFrame.src = "";
+  const toggleBtn = document.getElementById("weatherToggleBtn");
+  toggleBtn.innerText = "🌦️ Weather OFF";
+  toggleBtn.classList.remove("active");
+  toggleBtn.style.display = "inline";
 
   // show full details link
   const link = document.getElementById("vesselDetailsLink");
   link.href = "https://www.vesselfinder.com/vessels/details/" + imo;
   link.style.display = "inline";
+}
+
+function toggleWeatherLayer() {
+  weatherLayerOn = !weatherLayerOn;
+  const vesselFrame = document.getElementById("vesselMapFrame");
+  const windyFrame = document.getElementById("windyFrame");
+  const toggleBtn = document.getElementById("weatherToggleBtn");
+
+  if (weatherLayerOn) {
+    // load Windy centered on same region as vessel map
+    windyFrame.src = "https://embed.windy.com/embed2.html?lat=55&lon=10&detailLat=55&detailLon=10&width=650&height=450&zoom=5&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1";
+    windyFrame.style.display = "block";
+    vesselFrame.style.display = "none";
+    toggleBtn.innerText = "🚢 Vessels ON";
+    toggleBtn.classList.add("active");
+  } else {
+    windyFrame.style.display = "none";
+    vesselFrame.style.display = "block";
+    toggleBtn.innerText = "🌦️ Weather OFF";
+    toggleBtn.classList.remove("active");
+  }
 }
 
 let oilChartLoaded = false;
