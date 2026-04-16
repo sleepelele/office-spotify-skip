@@ -31,6 +31,11 @@ let soundEnabled = true;
 let totalPeople = parseInt(process.env.TOTAL_PEOPLE) || 5;
 let lastSongId = null;
 let lastSkipInfo = null;
+
+// volume votes: separate maps for up/down, same majority logic
+let volUpVotes = new Map();   // userId -> name
+let volDownVotes = new Map();
+let volCooldown = false;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
@@ -105,7 +110,10 @@ function buildVoteResponse(message = "") {
     cooldown,
     votingEnabled,
     soundEnabled,
-    message
+    message,
+    volUp: volUpVotes.size,
+    volDown: volDownVotes.size,
+    volCooldown
   };
 }
 
@@ -268,6 +276,8 @@ async function doSkip() {
 
   votes.clear();
   coinBoosts.clear();
+  volUpVotes.clear();
+  volDownVotes.clear();
   cooldown = true;
 
   io.emit("voteUpdate", buildVoteResponse("Song skipped"));
@@ -408,6 +418,81 @@ app.get("/coins/:userId", async (req, res) => {
   const { name } = req.query;
   const balance = await checkAndResetCoins(userId, name || "Unknown");
   res.json({ balance });
+});
+
+/* ---------------- VOLUME VOTE ---------------- */
+
+app.get("/current-volume", async (req, res) => {
+  try {
+    const token = await getAccessToken();
+    const response = await axios.get(
+      "https://api.spotify.com/v1/me/player",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const volume = response.data?.device?.volume_percent ?? null;
+    res.json({ volume });
+  } catch {
+    res.json({ volume: null });
+  }
+});
+
+app.post("/vote-volume", async (req, res) => {
+  const { userId, name, direction } = req.body; // direction: 'up' | 'down'
+  if (!votingEnabled) return res.json(buildVoteResponse("Voting disabled"));
+  if (bannedDevices.has(userId)) return res.json(buildVoteResponse("Device banned"));
+  if (volCooldown) return res.json({ ...buildVoteResponse(), message: "Volume cooldown active" });
+
+  const map = direction === "up" ? volUpVotes : volDownVotes;
+  const other = direction === "up" ? volDownVotes : volUpVotes;
+
+  // remove from opposite direction if switching
+  other.delete(userId);
+
+  if (map.has(userId)) {
+    map.delete(userId); // undo vote
+  } else {
+    map.set(userId, name);
+  }
+
+  io.emit("voteUpdate", buildVoteResponse());
+
+  if (map.size >= majority()) {
+    try {
+      const token = await getAccessToken();
+      const playerRes = await axios.get(
+        "https://api.spotify.com/v1/me/player",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const current = playerRes.data?.device?.volume_percent ?? 50;
+      const newVol = direction === "up"
+        ? Math.min(100, current + 10)
+        : Math.max(0, current - 10);
+
+      await axios.put(
+        `https://api.spotify.com/v1/me/player/volume?volume_percent=${newVol}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      volUpVotes.clear();
+      volDownVotes.clear();
+      volCooldown = true;
+
+      io.emit("voteUpdate", buildVoteResponse(`Volume ${direction === "up" ? "▲" : "▼"} → ${newVol}%`));
+      io.emit("volumeChanged", { volume: newVol });
+
+      setTimeout(() => {
+        volCooldown = false;
+        io.emit("voteUpdate", buildVoteResponse());
+      }, 30000);
+
+      return res.json({ ...buildVoteResponse(), newVolume: newVol });
+    } catch(e) {
+      console.error("Volume error:", e.message);
+    }
+  }
+
+  res.json(buildVoteResponse());
 });
 
 /* ---------------- STATUS ---------------- */
