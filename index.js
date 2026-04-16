@@ -303,15 +303,22 @@ async function fetchPlaylistTracks() {
     const token = await getAccessToken();
     let tracks = [];
     let url = `https://api.spotify.com/v1/playlists/${OFFICE_PLAYLIST_ID}/tracks?limit=100&fields=next,items(track(id),added_by(id))`;
+    let pageCount = 0;
 
     while (url) {
       const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
       tracks = tracks.concat(res.data.items);
       url = res.data.next || null;
+      pageCount++;
+      // small delay between pages to avoid rate limiting
+      if (url) await new Promise(r => setTimeout(r, 200));
     }
+
+    console.log("Fetched", pageCount, "pages,", tracks.length, "tracks");
 
     // collect unique user IDs
     const userIds = [...new Set(tracks.map(t => t.added_by?.id).filter(Boolean))];
+    console.log("Unique adders:", userIds.length);
 
     // fetch user profiles
     const userProfiles = {};
@@ -324,7 +331,10 @@ async function fetchPlaylistTracks() {
           name: r.data.display_name || uid,
           avatar: r.data.images?.[0]?.url || null
         };
-      } catch { userProfiles[uid] = { name: uid, avatar: null }; }
+      } catch(e) {
+        console.error("User profile error for", uid, ":", e.message);
+        userProfiles[uid] = { name: uid, avatar: null };
+      }
     }));
 
     // build track map
@@ -343,7 +353,7 @@ async function fetchPlaylistTracks() {
     playlistCacheTime = Date.now();
     console.log("Playlist cache refreshed:", Object.keys(map).length, "tracks");
   } catch(e) {
-    console.error("Playlist cache error:", e.message);
+    console.error("Playlist cache error:", e.response?.status, e.response?.data || e.message);
   }
 }
 
