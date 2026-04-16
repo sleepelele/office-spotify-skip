@@ -1600,6 +1600,11 @@ background:#c0392b;
 
 <div id="artistName"></div>
 
+<div id="songAdder" style="display:none;align-items:center;justify-content:center;gap:7px;margin:5px 0;font-size:12px;color:rgba(255,255,255,0.55);">
+  <img id="adderAvatar" src="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;display:none;">
+  <span>Added by <strong id="adderName" style="color:rgba(255,255,255,0.8);"></strong></span>
+</div>
+
 <!-- SONG STATS -->
 <div id="songStatsBar">
   <span id="statPlays" title="Times played">▶ 0</span>
@@ -2533,6 +2538,23 @@ function loadSong() {
         document.getElementById("albumCover").src = data.image;
         applyAlbumColor(data.image);
         document.getElementById("bg").style.backgroundImage = "url(" + data.image + ")";
+      }
+
+      // show adder info
+      const adderEl = document.getElementById("songAdder");
+      const adderAvatar = document.getElementById("adderAvatar");
+      const adderName = document.getElementById("adderName");
+      if (data.addedByName) {
+        adderName.innerText = data.addedByName;
+        if (data.addedByAvatar) {
+          adderAvatar.src = data.addedByAvatar;
+          adderAvatar.style.display = "inline-block";
+        } else {
+          adderAvatar.style.display = "none";
+        }
+        adderEl.style.display = "flex";
+      } else {
+        adderEl.style.display = "none";
       }
 
       // new song — reset session vote state
