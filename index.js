@@ -301,6 +301,14 @@ const PLAYLIST_CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 async function fetchPlaylistTracks() {
   try {
     const token = await getAccessToken();
+
+    // test basic playlist access first
+    const testRes = await axios.get(
+      `https://api.spotify.com/v1/playlists/${OFFICE_PLAYLIST_ID}?fields=id,name`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log("Playlist access OK:", testRes.data.name);
+
     let tracks = [];
     let url = `https://api.spotify.com/v1/playlists/${OFFICE_PLAYLIST_ID}/tracks?limit=100&fields=next,items(track(id),added_by(id))`;
     let pageCount = 0;
@@ -310,17 +318,14 @@ async function fetchPlaylistTracks() {
       tracks = tracks.concat(res.data.items);
       url = res.data.next || null;
       pageCount++;
-      // small delay between pages to avoid rate limiting
       if (url) await new Promise(r => setTimeout(r, 200));
     }
 
     console.log("Fetched", pageCount, "pages,", tracks.length, "tracks");
 
-    // collect unique user IDs
     const userIds = [...new Set(tracks.map(t => t.added_by?.id).filter(Boolean))];
     console.log("Unique adders:", userIds.length);
 
-    // fetch user profiles
     const userProfiles = {};
     await Promise.all(userIds.map(async (uid) => {
       try {
@@ -332,12 +337,10 @@ async function fetchPlaylistTracks() {
           avatar: r.data.images?.[0]?.url || null
         };
       } catch(e) {
-        console.error("User profile error for", uid, ":", e.message);
         userProfiles[uid] = { name: uid, avatar: null };
       }
     }));
 
-    // build track map
     const map = {};
     tracks.forEach(t => {
       if (!t.track?.id || !t.added_by?.id) return;
