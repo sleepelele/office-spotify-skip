@@ -2535,23 +2535,6 @@ function loadSong() {
         document.getElementById("bg").style.backgroundImage = "url(" + data.image + ")";
       }
 
-      // show adder info
-      const adderEl = document.getElementById("songAdder");
-      const adderAvatar = document.getElementById("adderAvatar");
-      const adderName = document.getElementById("adderName");
-      if (data.addedByName) {
-        adderName.innerText = data.addedByName;
-        if (data.addedByAvatar) {
-          adderAvatar.src = data.addedByAvatar;
-          adderAvatar.style.display = "inline-block";
-        } else {
-          adderAvatar.style.display = "none";
-        }
-        adderEl.style.display = "flex";
-      } else {
-        adderEl.style.display = "none";
-      }
-
       // new song — reset session vote state
       if (data.songId && data.songId !== currentSongId) {
         currentSongId = data.songId;
