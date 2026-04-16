@@ -310,7 +310,7 @@ async function fetchPlaylistTracks() {
     console.log("Playlist access OK:", testRes.data.name);
 
     let tracks = [];
-    let url = `https://api.spotify.com/v1/playlists/${OFFICE_PLAYLIST_ID}/tracks?limit=100&fields=next,items(track(id),added_by(id))`;
+    let url = `https://api.spotify.com/v1/playlists/${OFFICE_PLAYLIST_ID}/tracks?limit=100`;
     let pageCount = 0;
 
     while (url) {
