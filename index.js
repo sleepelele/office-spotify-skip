@@ -657,10 +657,10 @@ app.post("/admin-give-coins", async (req, res) => {
     return res.status(403).json({ success: false });
   }
   const { userId, userName, amount } = req.body;
-  if (!userId || !amount || amount < 1) return res.status(400).json({ success: false });
+  if (!userId || amount === undefined || amount === null) return res.status(400).json({ success: false });
 
   const balance = await checkAndResetCoins(userId, userName);
-  const newBalance = balance + parseInt(amount);
+  const newBalance = Math.max(0, balance + parseInt(amount));
   await supabase.from("coins").update({ balance: newBalance }).eq("user_id", userId);
 
   // push update directly to the user's socket if they're online
