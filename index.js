@@ -250,8 +250,13 @@ async function doSkip() {
     time: new Date().toLocaleTimeString()
   };
 
-  // record skip in Supabase
-  if (songId) {
+  // only record skip stat if playing from the office playlist
+  const context = response.data?.context;
+  const isOfficePlaylist = context &&
+    context.type === "playlist" &&
+    context.uri === `spotify:playlist:${OFFICE_PLAYLIST_ID}`;
+
+  if (songId && isOfficePlaylist) {
     try {
       await supabase.rpc("increment_song_skips", { p_song_id: songId });
     } catch(e) {
@@ -275,6 +280,8 @@ async function doSkip() {
   }, 60000);
 }
 
+const OFFICE_PLAYLIST_ID = "7vjr14h7zkDuyGOofPjbL7";
+
 /* ---------------- CURRENT SONG ---------------- */
 
 app.get("/current-song", async (req, res) => {
@@ -295,7 +302,13 @@ app.get("/current-song", async (req, res) => {
     const title = item.name + " - " + item.artists.map(a => a.name).join(", ");
     const albumImage = item.album.images[0]?.url || null;
 
-    // new song detected — clear votes, increment play count
+    // check if playing from the office playlist
+    const context = response.data.context;
+    const isOfficePlaylist = context &&
+      context.type === "playlist" &&
+      context.uri === `spotify:playlist:${OFFICE_PLAYLIST_ID}`;
+
+    // new song detected — clear votes regardless of playlist
     if (lastSongId && lastSongId !== songId) {
       votes.clear();
       coinBoosts.clear();
@@ -303,9 +316,9 @@ app.get("/current-song", async (req, res) => {
       io.emit("voteUpdate", buildVoteResponse());
     }
 
-    if (lastSongId !== songId) {
+    // only track stats if playing from office playlist
+    if (lastSongId !== songId && isOfficePlaylist) {
       lastSongId = songId;
-      // upsert play count
       const { data: existing } = await supabase
         .from("song_stats")
         .select("plays")
@@ -317,9 +330,11 @@ app.get("/current-song", async (req, res) => {
       } else {
         await supabase.from("song_stats").insert({ song_id: songId, title, plays: 1, skips: 0, likes: 0, dislikes: 0 });
       }
+    } else if (lastSongId !== songId) {
+      lastSongId = songId;
     }
 
-    res.json({ title, image: albumImage, songId });
+    res.json({ title, image: albumImage, songId, isOfficePlaylist });
 
   } catch (err) {
     console.error("Spotify error:", err.response?.data || err.message);
