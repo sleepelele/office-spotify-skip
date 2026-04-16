@@ -950,10 +950,12 @@ display:none;
 position:fixed;
 top:0;left:0;
 width:100%;height:100%;
-background:rgba(0,0,0,0.82);
+background:rgba(0,0,0,0.3);
 z-index:100;
 justify-content:center;
-align-items:center;
+align-items:flex-start;
+padding-top:60px;
+pointer-events:none;
 }
 
 #bjModal.open{ display:flex; }
@@ -969,6 +971,7 @@ display:flex;
 flex-direction:column;
 overflow:hidden;
 animation:bjIn .2s ease;
+pointer-events:auto;
 }
 
 @keyframes bjIn{
@@ -1660,7 +1663,7 @@ background:#c0392b;
 <button id="bjBtn" onclick="toggleBjModal()" title="Games">🪙</button>
 
 <!-- GAMES MODAL -->
-<div id="bjModal" onclick="closeBjModalOutside(event)">
+<div id="bjModal">
   <div id="bjModalBox">
     <div id="bjHeader">
       <h3>🎮 OFFICE GAMES</h3>
@@ -2991,7 +2994,7 @@ function switchGame(game, btn) {
   document.getElementById("cfBody").style.display = game === "coinflip" ? "flex" : "none";
   document.getElementById("slotsBody").style.display = game === "slots" ? "flex" : "none";
   if (game === "blackjack" && !bjGameActive) bjReset();
-  if (game === "slots") slotsReset();
+  // slots and coinflip preserve state naturally — no reset on tab switch
 }
 
 /* ---------------- COIN FLIP ---------------- */
@@ -3170,7 +3173,8 @@ function toggleBjModal() {
   modal.classList.toggle("open");
   if (modal.classList.contains("open")) {
     loadCoins();
-    if (!bjGameActive) bjReset();
+    // only reset if nothing has been started yet
+    if (!bjGameActive && document.getElementById("bjDealerHand").children.length === 0) bjReset();
   }
 }
 
