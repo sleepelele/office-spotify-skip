@@ -1634,8 +1634,8 @@ background:#c0392b;
 <div id="volumeBar">
   <span id="volumeDisplay">🔊 <span id="volumeLevel">...</span>%</span>
   <div id="volumeVoteRow">
-    <button id="volUpBtn" onclick="voteVolume('up')" class="vol-btn">▲ +10% <span id="volUpCount"></span></button>
-    <button id="volDownBtn" onclick="voteVolume('down')" class="vol-btn">▼ -10% <span id="volDownCount"></span></button>
+    <button id="volUpBtn" onclick="voteVolume('up')" class="vol-btn">▲ +5% <span id="volUpCount"></span></button>
+    <button id="volDownBtn" onclick="voteVolume('down')" class="vol-btn">▼ -5% <span id="volDownCount"></span></button>
   </div>
 </div>
 
@@ -3512,6 +3512,7 @@ setInterval(loadLastSkip, 5000);
 setInterval(loadWeather, 600000);
 setInterval(loadCurrency, 600000);
 setInterval(loadCoins, 30000);
+setInterval(loadVolume, 15000);
 
 </script>
 
