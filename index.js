@@ -574,7 +574,45 @@ app.post("/reset-user", (req, res) => {
   connectedUsers.delete(userId);
   votes.delete(userId);
   coinBoosts.delete(userId);
+
+  // push force_rename to the target user's socket
+  for (const [, socket] of io.of("/").sockets) {
+    if (socket.userId === userId) {
+      socket.emit("force_rename");
+      break;
+    }
+  }
+
   io.emit("voteUpdate", buildVoteResponse(`${name} has been reset`));
+  res.json({ success: true });
+});
+
+app.post("/rename-user", async (req, res) => {
+  if (req.body.password !== process.env.ADMIN_PASSWORD) return res.status(403).json({ success: false });
+  const { userId, newName } = req.body;
+  if (!userId || !newName || !newName.trim()) return res.status(400).json({ success: false });
+
+  const trimmed = newName.trim();
+
+  // update in connected users if online
+  if (connectedUsers.has(userId)) {
+    connectedUsers.set(userId, trimmed);
+    // update their vote entry too if they've voted
+    if (votes.has(userId)) votes.set(userId, trimmed);
+  }
+
+  // update in Supabase coins table
+  await supabase.from("coins").update({ user_name: trimmed }).eq("user_id", userId);
+
+  // push the new name to their browser so it updates live
+  for (const [, socket] of io.of("/").sockets) {
+    if (socket.userId === userId) {
+      socket.emit("name_updated", { newName: trimmed });
+      break;
+    }
+  }
+
+  io.emit("voteUpdate", buildVoteResponse());
   res.json({ success: true });
 });
 
