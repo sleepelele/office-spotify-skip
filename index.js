@@ -465,8 +465,8 @@ app.post("/vote-volume", async (req, res) => {
       );
       const current = playerRes.data?.device?.volume_percent ?? 50;
       const newVol = direction === "up"
-        ? Math.min(100, current + 10)
-        : Math.max(0, current - 10);
+        ? Math.min(100, current + 5)
+        : Math.max(0, current - 5);
 
       await axios.put(
         `https://api.spotify.com/v1/me/player/volume?volume_percent=${newVol}`,
