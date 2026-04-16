@@ -292,86 +292,6 @@ async function doSkip() {
 
 const OFFICE_PLAYLIST_ID = "7vjr14h7zkDuyGOofPjbL7";
 
-/* ---------------- PLAYLIST TRACK CACHE ---------------- */
-
-let playlistTrackMap = {}; // trackId -> { addedById, addedByName, addedByAvatar }
-let playlistCacheTime = 0;
-const PLAYLIST_CACHE_TTL = 30 * 60 * 1000; // 30 minutes
-
-async function fetchPlaylistTracks() {
-  try {
-    const token = await getAccessToken();
-
-    // test basic playlist access first
-    const testRes = await axios.get(
-      `https://api.spotify.com/v1/playlists/${OFFICE_PLAYLIST_ID}?fields=id,name`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    console.log("Playlist access OK:", testRes.data.name);
-
-    let tracks = [];
-    let url = `https://api.spotify.com/v1/playlists/${OFFICE_PLAYLIST_ID}/tracks?limit=100`;
-    let pageCount = 0;
-
-    while (url) {
-      const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
-      tracks = tracks.concat(res.data.items);
-      url = res.data.next || null;
-      pageCount++;
-      if (url) await new Promise(r => setTimeout(r, 200));
-    }
-
-    console.log("Fetched", pageCount, "pages,", tracks.length, "tracks");
-
-    const userIds = [...new Set(tracks.map(t => t.added_by?.id).filter(Boolean))];
-    console.log("Unique adders:", userIds.length);
-
-    const userProfiles = {};
-    await Promise.all(userIds.map(async (uid) => {
-      try {
-        const r = await axios.get(`https://api.spotify.com/v1/users/${uid}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        userProfiles[uid] = {
-          name: r.data.display_name || uid,
-          avatar: r.data.images?.[0]?.url || null
-        };
-      } catch(e) {
-        userProfiles[uid] = { name: uid, avatar: null };
-      }
-    }));
-
-    const map = {};
-    tracks.forEach(t => {
-      if (!t.track?.id || !t.added_by?.id) return;
-      const uid = t.added_by.id;
-      map[t.track.id] = {
-        addedById: uid,
-        addedByName: userProfiles[uid]?.name || uid,
-        addedByAvatar: userProfiles[uid]?.avatar || null
-      };
-    });
-
-    playlistTrackMap = map;
-    playlistCacheTime = Date.now();
-    console.log("Playlist cache refreshed:", Object.keys(map).length, "tracks");
-  } catch(e) {
-    console.error("Playlist cache error:", e.response?.status, e.response?.data || e.message);
-  }
-}
-
-async function getPlaylistAdder(trackId) {
-  if (Date.now() - playlistCacheTime > PLAYLIST_CACHE_TTL) {
-    await fetchPlaylistTracks();
-  }
-  return playlistTrackMap[trackId] || null;
-}
-
-// load on startup
-fetchPlaylistTracks();
-// refresh every 30 min
-setInterval(fetchPlaylistTracks, PLAYLIST_CACHE_TTL);
-
 /* ---------------- CURRENT SONG ---------------- */
 
 app.get("/current-song", async (req, res) => {
@@ -409,58 +329,22 @@ app.get("/current-song", async (req, res) => {
     // only track stats if playing from office playlist
     if (lastSongId !== songId && isOfficePlaylist) {
       lastSongId = songId;
-
-      const adder = await getPlaylistAdder(songId);
-
       const { data: existing } = await supabase
         .from("song_stats")
-        .select("plays, added_by_name")
+        .select("plays")
         .eq("song_id", songId)
         .single();
 
       if (existing) {
-        const update = { plays: existing.plays + 1, title };
-        // store adder if not already set
-        if (!existing.added_by_name && adder) {
-          update.added_by_name = adder.addedByName;
-          update.added_by_avatar = adder.addedByAvatar;
-        }
-        await supabase.from("song_stats").update(update).eq("song_id", songId);
+        await supabase.from("song_stats").update({ plays: existing.plays + 1, title }).eq("song_id", songId);
       } else {
-        await supabase.from("song_stats").insert({
-          song_id: songId,
-          title,
-          plays: 1,
-          skips: 0,
-          likes: 0,
-          dislikes: 0,
-          added_by_name: adder?.addedByName || null,
-          added_by_avatar: adder?.addedByAvatar || null
-        });
+        await supabase.from("song_stats").insert({ song_id: songId, title, plays: 1, skips: 0, likes: 0, dislikes: 0 });
       }
-
-      res.json({ title, image: albumImage, songId, isOfficePlaylist,
-        addedByName: adder?.addedByName || null,
-        addedByAvatar: adder?.addedByAvatar || null
-      });
-      return;
-
     } else if (lastSongId !== songId) {
       lastSongId = songId;
     }
 
-    // not office playlist or same song — check if we have adder in DB
-    const { data: stats } = await supabase
-      .from("song_stats")
-      .select("added_by_name, added_by_avatar")
-      .eq("song_id", songId)
-      .single();
-
-    res.json({
-      title, image: albumImage, songId, isOfficePlaylist,
-      addedByName: stats?.added_by_name || null,
-      addedByAvatar: stats?.added_by_avatar || null
-    });
+    res.json({ title, image: albumImage, songId, isOfficePlaylist });
 
   } catch (err) {
     console.error("Spotify error:", err.response?.data || err.message);
@@ -477,7 +361,7 @@ app.get("/song-stats/:songId", async (req, res) => {
     .select("*")
     .eq("song_id", req.params.songId)
     .single();
-  res.json(data || { plays: 0, skips: 0, likes: 0, dislikes: 0, added_by_name: null, added_by_avatar: null });
+  res.json(data || { plays: 0, skips: 0, likes: 0, dislikes: 0 });
 });
 
 app.post("/song-vote", async (req, res) => {
