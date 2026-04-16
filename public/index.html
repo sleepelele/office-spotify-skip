@@ -779,6 +779,44 @@ transition:all .2s;
 animation:coinFlash 0.5s ease;
 }
 
+/* VOLUME VOTE */
+
+#volumeBar{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:8px;
+margin-top:14px;
+}
+
+#volumeDisplay{
+font-size:13px;
+color:rgba(255,255,255,0.6);
+background:rgba(255,255,255,0.08);
+border-radius:20px;
+padding:3px 12px;
+}
+
+#volumeVoteRow{
+display:flex;
+gap:10px;
+}
+
+.vol-btn{
+background:rgba(255,255,255,0.1);
+border:1px solid rgba(255,255,255,0.2);
+color:white;
+border-radius:20px;
+padding:6px 16px;
+font-size:13px;
+cursor:pointer;
+transition:all .2s;
+}
+
+.vol-btn:hover{ background:rgba(255,255,255,0.2); }
+.vol-btn.voted{ background:rgba(29,185,84,0.35); border-color:#1DB954; }
+.vol-btn:disabled{ opacity:0.4; cursor:default; }
+
 /* GAME TABS */
 
 .game-tab-btn{
@@ -1592,6 +1630,15 @@ background:#c0392b;
 
 <ul id="voters"></ul>
 
+<!-- VOLUME VOTE -->
+<div id="volumeBar">
+  <span id="volumeDisplay">🔊 <span id="volumeLevel">...</span>%</span>
+  <div id="volumeVoteRow">
+    <button id="volUpBtn" onclick="voteVolume('up')" class="vol-btn">▲ +10% <span id="volUpCount"></span></button>
+    <button id="volDownBtn" onclick="voteVolume('down')" class="vol-btn">▼ -10% <span id="volDownCount"></span></button>
+  </div>
+</div>
+
 </div>
 </div>
 
@@ -1987,6 +2034,9 @@ socket.on("coinUpdate", (data) => {
   display.classList.add("flash");
   playCoinSound();
 });
+socket.on("volumeChanged", (data) => {
+  document.getElementById("volumeLevel").innerText = data.volume;
+});
 socket.on("songSkipped", () => {
   // poll rapidly after skip until new song appears
   let attempts = 0;
@@ -1997,6 +2047,35 @@ socket.on("songSkipped", () => {
   }, 800);
 });
 socket.emit("registerUser", { userId, name: userName });
+
+/* ---------------- VOLUME VOTE ---------------- */
+
+let myVolVote = null; // 'up' | 'down' | null
+
+function voteVolume(direction) {
+  fetch("/vote-volume", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, name: userName, direction })
+  })
+  .then(r => r.json())
+  .then(data => {
+    updateUI(data);
+    if (data.newVolume !== undefined) {
+      document.getElementById("volumeLevel").innerText = data.newVolume;
+    }
+  });
+}
+
+function loadVolume() {
+  fetch("/current-volume")
+    .then(r => r.json())
+    .then(data => {
+      if (data.volume !== null) {
+        document.getElementById("volumeLevel").innerText = data.volume;
+      }
+    });
+}
 
 /* ---------------- COIN SOUND ---------------- */
 
@@ -2068,6 +2147,18 @@ function updateUI(data) {
 
   updateSwitch("votingSwitch", data.votingEnabled);
   updateSwitch("soundSwitch", data.soundEnabled);
+
+  // volume vote counts
+  if (data.volUp !== undefined) {
+    const upBtn = document.getElementById("volUpBtn");
+    const downBtn = document.getElementById("volDownBtn");
+    document.getElementById("volUpCount").innerText = data.volUp > 0 ? "(" + data.volUp + ")" : "";
+    document.getElementById("volDownCount").innerText = data.volDown > 0 ? "(" + data.volDown + ")" : "";
+    upBtn.disabled = data.volCooldown;
+    downBtn.disabled = data.volCooldown;
+    upBtn.title = data.volCooldown ? "Volume on cooldown" : "Vote to increase volume";
+    downBtn.title = data.volCooldown ? "Volume on cooldown" : "Vote to decrease volume";
+  }
 
   if (data.message) {
     document.getElementById("adminMessage").innerText = data.message;
@@ -3360,6 +3451,7 @@ loadWeather();
 loadCurrency();
 loadCoins();
 loadQuote();
+loadVolume();
 
 setInterval(loadSong, 10000);
 setInterval(loadLastSkip, 5000);
