@@ -14,8 +14,6 @@ color:white;
 overflow:hidden;
 }
 
-/* blurred background */
-
 #bg{
 position:fixed;
 width:100%;
@@ -26,8 +24,6 @@ filter:blur(60px) brightness(0.4);
 transform:scale(1.2);
 z-index:-1;
 }
-
-/* layout */
 
 .layout{display:flex;}
 
@@ -49,8 +45,6 @@ width:260px;
 border-radius:15px;
 }
 
-/* progress */
-
 .progress-container{
 background:rgba(255,255,255,0.2);
 height:10px;
@@ -69,7 +63,6 @@ border-radius:10px;
 /* SKIP BUTTON */
 
 #skipBtn{
-
 background:#1DB954;
 border:none;
 padding:18px 55px;
@@ -79,38 +72,38 @@ font-weight:bold;
 color:white;
 cursor:pointer;
 margin-top:20px;
-
 box-shadow:0 0 15px rgba(29,185,84,0.6);
-
-transition:all .2s;
-
+transition:all .3s;
 }
 
-#skipBtn:hover{
-
+#skipBtn:hover:not(.voted){
 transform:scale(1.08);
-
 box-shadow:0 0 25px rgba(29,185,84,0.9);
-
 }
+
+#skipBtn.voted{
+background:#555;
+box-shadow:0 0 10px rgba(255,255,255,0.1);
+cursor:default;
+transform:scale(1);
+}
+
 /* WEATHER WIDGET */
 
 #weatherWidget{
-
 position:fixed;
 top:20px;
 left:360px;
-
-background:rgba(0,0,0,0.25);
+background:rgba(0,0,0,0.65);
 backdrop-filter:blur(10px);
 -webkit-backdrop-filter:blur(10px);
-
 padding:14px;
 border-radius:12px;
-
 font-size:14px;
 width:170px;
-border:1px solid rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.15);
+color:white;
+z-index:5;
 }
 
 #weatherCity{
@@ -124,146 +117,82 @@ font-size:12px;
 opacity:0.9;
 }
 
-
-/* CURRENCY WIDGET */
+/* CURRENCY CALCULATOR WIDGET */
 
 #currencyWidget{
-
 position:fixed;
 bottom:20px;
 left:360px;
-
 background:rgba(0,0,0,0.25);
 backdrop-filter:blur(10px);
 -webkit-backdrop-filter:blur(10px);
-
 padding:14px;
 border-radius:12px;
-
 font-size:13px;
-width:170px;
+width:210px;
 border:1px solid rgba(255,255,255,0.08);
 }
 
 .currencyTitle{
 font-weight:bold;
+margin-bottom:10px;
+}
+
+#currencySelector{
+margin-bottom:10px;
+}
+
+#currencySelector select{
+background:rgba(255,255,255,0.1);
+color:white;
+border:1px solid rgba(255,255,255,0.2);
+border-radius:6px;
+padding:4px 6px;
+font-size:12px;
+cursor:pointer;
+width:100%;
+}
+
+#currencySelector select option{
+background:#222;
+}
+
+.calc-row{
+display:flex;
+align-items:center;
+gap:6px;
 margin-bottom:6px;
 }
-/* HOLIDAY CALENDAR */
 
-#calendarWidget{
-position:fixed;
-bottom:20px;
-left:590px;
-background:rgba(0,0,0,0.65);
-backdrop-filter:blur(10px);
--webkit-backdrop-filter:blur(10px);
-padding:12px;
-border-radius:12px;
-font-size:12px;
-width:210px;
-border:1px solid rgba(255,255,255,0.1);
-color:white;
-z-index:5;
-}
-
-.cal-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:8px;
-}
-
-.cal-nav{
-background:none;
-border:none;
-color:rgba(255,255,255,0.6);
-cursor:pointer;
-font-size:14px;
-padding:0 4px;
-line-height:1;
-}
-
-.cal-nav:hover{ color:white; }
-
-.cal-month-label{
-font-weight:bold;
-font-size:12px;
-letter-spacing:0.5px;
-}
-
-.cal-grid{
-display:grid;
-grid-template-columns:repeat(7,1fr);
-gap:2px;
-}
-
-.cal-day-header{
-text-align:center;
-font-size:9px;
-color:rgba(255,255,255,0.4);
-padding:2px 0;
-font-weight:bold;
-}
-
-.cal-day{
-text-align:center;
-padding:3px 0;
-border-radius:4px;
-position:relative;
+.calc-label{
 font-size:11px;
-cursor:default;
-line-height:1.4;
+opacity:0.7;
+width:30px;
+flex-shrink:0;
 }
 
-.cal-day.other-month{ color:rgba(255,255,255,0.2); }
-
-.cal-day.today{
-background:rgba(29,185,84,0.25);
-color:#1DB954;
-font-weight:bold;
-border-radius:50%;
-}
-
-.cal-day.has-holiday{ cursor:pointer; }
-
-.cal-day.has-holiday::after{
-content:'';
-display:block;
-width:4px;
-height:4px;
-border-radius:50%;
-background:#ffd700;
-margin:0 auto;
-margin-top:1px;
-}
-
-.cal-day.has-holiday:hover{
-background:rgba(255,215,0,0.15);
-border-radius:4px;
-}
-
-.cal-tooltip{
-position:fixed;
-background:rgba(0,0,0,0.92);
-border:1px solid rgba(255,255,255,0.15);
-border-radius:8px;
-padding:8px 12px;
-font-size:11px;
+.calc-input{
+background:rgba(255,255,255,0.1);
+border:1px solid rgba(255,255,255,0.2);
+border-radius:6px;
 color:white;
-z-index:9999;
-pointer-events:none;
-display:none;
-max-width:220px;
-line-height:1.7;
-box-shadow:0 4px 20px rgba(0,0,0,0.5);
+font-size:13px;
+padding:5px 8px;
+width:100%;
+box-sizing:border-box;
 }
 
-.cal-tooltip-name{
-font-weight:bold;
-color:#ffd700;
-margin-bottom:4px;
-font-size:12px;
+.calc-input:focus{
+outline:none;
+border-color:#1DB954;
+background:rgba(29,185,84,0.1);
+}
+
+#rateLabel{
+font-size:11px;
+opacity:0.5;
+text-align:right;
+margin-top:4px;
 }
 
 /* admin */
@@ -284,12 +213,15 @@ cursor:pointer;
 #adminPanel{
 position:fixed;
 bottom:90px;
-right:20px;
+right:90px;
 background:#181818;
 padding:15px;
 border-radius:10px;
 display:none;
-width:220px;
+width:240px;
+max-height:75vh;
+overflow-y:auto;
+box-shadow:-4px 4px 20px rgba(0,0,0,0.6);
 }
 
 .switch{
@@ -329,7 +261,197 @@ font-size:13px;
 color:#1DB954;
 }
 
-/* GIFS */
+/* PATCH NOTES BUTTON */
+
+#patchBtn{
+position:fixed;
+bottom:185px;
+left:20px;
+background:rgba(29,185,84,0.15);
+border:1px solid rgba(29,185,84,0.4);
+color:#1DB954;
+font-size:10px;
+font-weight:bold;
+letter-spacing:1.5px;
+padding:6px 14px;
+border-radius:20px;
+cursor:pointer;
+z-index:10;
+transition:all .2s;
+}
+
+#patchBtn:hover{
+background:rgba(29,185,84,0.3);
+border-color:#1DB954;
+}
+
+#patchModal{
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.78);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#patchModal.open{ display:flex; }
+
+#patchModalBox{
+background:#0f0f0f;
+border-radius:14px;
+border:1px solid rgba(29,185,84,0.25);
+box-shadow:0 0 40px rgba(29,185,84,0.1);
+width:680px;
+max-width:92vw;
+max-height:85vh;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:patchIn .2s ease;
+}
+
+@keyframes patchIn{
+from{transform:scale(0.93);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#patchModalHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:16px 22px;
+border-bottom:1px solid rgba(255,255,255,0.08);
+flex-shrink:0;
+gap:12px;
+}
+
+#patchModalHeader h3{
+margin:0;
+font-size:15px;
+color:#1DB954;
+letter-spacing:2px;
+font-family:monospace;
+}
+
+#patchVersion{
+font-size:10px;
+font-family:monospace;
+background:#1DB954;
+color:#0a3d1f;
+padding:3px 10px;
+border-radius:3px;
+letter-spacing:1px;
+font-weight:bold;
+}
+
+#patchCloseBtn{
+background:none;
+border:none;
+color:rgba(255,255,255,0.5);
+font-size:20px;
+cursor:pointer;
+line-height:1;
+margin-left:auto;
+}
+
+#patchCloseBtn:hover{color:white;}
+
+#patchContent{
+overflow-y:auto;
+padding:20px 22px;
+}
+
+.patch-section{
+margin-bottom:22px;
+}
+
+.patch-section-header{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:12px;
+padding-bottom:8px;
+border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.patch-tag{
+font-size:9px;
+font-weight:bold;
+letter-spacing:2px;
+padding:3px 9px;
+border-radius:3px;
+text-transform:uppercase;
+}
+
+.patch-tag-new{ background:#0C447C; color:#B5D4F4; }
+.patch-tag-feature{ background:#0F6E56; color:#9FE1CB; }
+.patch-tag-game{ background:#3C3489; color:#CECBF6; }
+
+.patch-section-title{
+font-size:14px;
+font-weight:bold;
+color:white;
+}
+
+.patch-entry{
+display:flex;
+gap:12px;
+padding:10px 0;
+border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+.patch-entry:last-child{ border-bottom:none; }
+
+.patch-entry-icon{
+width:30px;
+height:30px;
+border-radius:6px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:15px;
+flex-shrink:0;
+background:rgba(255,255,255,0.06);
+}
+
+.patch-entry-name{
+font-size:13px;
+font-weight:bold;
+margin-bottom:4px;
+color:white;
+}
+
+.patch-entry-desc{
+font-size:12px;
+color:rgba(255,255,255,0.55);
+line-height:1.6;
+}
+
+.patch-note-tag{
+display:inline-block;
+margin-top:5px;
+font-size:10px;
+font-family:monospace;
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.1);
+border-radius:3px;
+padding:2px 8px;
+color:rgba(255,255,255,0.35);
+letter-spacing:1px;
+}
+
+#patchFooter{
+font-size:10px;
+color:rgba(255,255,255,0.18);
+font-family:monospace;
+text-align:center;
+padding:10px 22px;
+border-top:1px solid rgba(255,255,255,0.06);
+flex-shrink:0;
+letter-spacing:1px;
+}
 
 #cornerGif{
 position:fixed;
@@ -350,7 +472,1075 @@ pointer-events:none;
 z-index:5;
 opacity:.95;
 }
-  
+
+/* MINESWEEPER BUTTON */
+
+#msBtn{
+position:fixed;
+bottom:160px;
+right:20px;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#4a4a4a;
+border:none;
+font-size:22px;
+cursor:pointer;
+box-shadow:0 0 12px rgba(80,80,80,0.6);
+transition:all .2s;
+z-index:10;
+}
+
+#msBtn:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px rgba(120,120,120,0.9);
+}
+
+/* MINESWEEPER MODAL */
+
+#msModal{
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.80);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#msModal.open{ display:flex; }
+
+#msModalBox{
+background:#c0c0c0;
+border-radius:4px;
+border:3px solid #fff;
+border-right-color:#808080;
+border-bottom-color:#808080;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:msIn .2s ease;
+max-width:97vw;
+}
+
+@keyframes msIn{
+from{transform:scale(0.93);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#msTopBar{
+background:#c0c0c0;
+padding:6px 8px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-bottom:2px solid #808080;
+gap:12px;
+}
+
+#msTopBar h3{
+margin:0;
+font-size:13px;
+color:#000;
+font-family:Arial;
+}
+
+.ms-display{
+background:#000;
+color:#ff0000;
+font-family:"Courier New",monospace;
+font-size:22px;
+font-weight:bold;
+padding:2px 6px;
+border:2px inset #808080;
+min-width:52px;
+text-align:center;
+letter-spacing:2px;
+}
+
+#msFace{
+font-size:22px;
+cursor:pointer;
+background:#c0c0c0;
+border:2px solid #fff;
+border-right-color:#808080;
+border-bottom-color:#808080;
+padding:2px 6px;
+border-radius:2px;
+}
+
+#msFace:hover{ background:#d0d0d0; }
+
+.ms-diff-btn{
+background:#c0c0c0;
+border:2px solid #fff;
+border-right-color:#808080;
+border-bottom-color:#808080;
+color:#000;
+font-size:11px;
+font-weight:bold;
+padding:2px 8px;
+cursor:pointer;
+}
+
+.ms-diff-btn.active{
+background:#a0a0a0;
+border:2px solid #808080;
+border-right-color:#fff;
+border-bottom-color:#fff;
+}
+
+.ms-diff-btn:hover:not(.active){ background:#d0d0d0; }
+
+#msCloseBtn{
+background:#c0c0c0;
+border:2px solid #fff;
+border-right-color:#808080;
+border-bottom-color:#808080;
+color:#000;
+font-size:13px;
+font-weight:bold;
+cursor:pointer;
+padding:2px 8px;
+}
+
+#msCloseBtn:hover{ background:#d0d0d0; }
+
+#msContent{
+display:flex;
+}
+
+#msGrid{
+display:grid;
+border:3px inset #808080;
+margin:6px;
+flex-shrink:0;
+}
+
+.ms-cell{
+width:22px;
+height:22px;
+background:#c0c0c0;
+border:2px solid #fff;
+border-right-color:#808080;
+border-bottom-color:#808080;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+font-weight:bold;
+cursor:pointer;
+user-select:none;
+font-family:Arial;
+box-sizing:border-box;
+}
+
+.ms-cell:active:not(.revealed):not(.flagged){
+border:1px solid #808080;
+background:#bdbdbd;
+}
+
+.ms-cell.revealed{
+background:#bdbdbd;
+border:1px solid #808080;
+cursor:default;
+font-size:13px;
+}
+
+.ms-cell.mine-hit{ background:#ff4444; }
+.ms-cell.mine-shown{ background:#bdbdbd; }
+.ms-cell.flagged{ cursor:default; }
+
+#msLeaderboardPanel{
+width:170px;
+background:#c0c0c0;
+border-left:3px inset #808080;
+padding:8px;
+display:flex;
+flex-direction:column;
+flex-shrink:0;
+}
+
+#msLeaderboardPanel h4{
+margin:0 0 8px 0;
+font-size:12px;
+font-family:Arial;
+color:#000;
+text-align:center;
+border-bottom:2px inset #808080;
+padding-bottom:4px;
+}
+
+#msLeaderboard{
+list-style:none;
+padding:0;
+margin:0;
+font-size:11px;
+font-family:"Courier New",monospace;
+overflow-y:auto;
+}
+
+#msLeaderboard li{
+display:flex;
+justify-content:space-between;
+padding:3px 2px;
+border-bottom:1px solid #aaa;
+color:#000;
+gap:4px;
+}
+
+#msLeaderboard li.ms-gold{ color:#8B6914; font-weight:bold; }
+#msLeaderboard li.ms-silver{ color:#555; font-weight:bold; }
+#msLeaderboard li.ms-bronze{ color:#7a4a00; font-weight:bold; }
+#msLeaderboard li.ms-me{ background:rgba(0,100,255,0.15); }
+
+/* SONG STATS */
+
+#songStatsBar{
+display:flex;
+gap:16px;
+justify-content:center;
+margin:8px 0 4px;
+font-size:13px;
+opacity:0.75;
+}
+
+#songStatsBar span{
+background:rgba(255,255,255,0.08);
+border-radius:20px;
+padding:3px 10px;
+}
+
+/* LIKE / DISLIKE */
+
+#reactionBtns{
+display:flex;
+gap:10px;
+justify-content:center;
+margin:6px 0;
+}
+
+.reaction-btn{
+background:rgba(255,255,255,0.1);
+border:1px solid rgba(255,255,255,0.2);
+color:white;
+border-radius:20px;
+padding:5px 16px;
+font-size:13px;
+cursor:pointer;
+transition:all .2s;
+}
+
+.reaction-btn:hover{ background:rgba(255,255,255,0.2); }
+.reaction-btn.liked{ background:rgba(29,185,84,0.4); border-color:#1DB954; }
+.reaction-btn.disliked{ background:rgba(231,76,60,0.4); border-color:#e74c3c; }
+
+/* COIN BAR */
+
+#coinBar{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:12px;
+margin:8px 0;
+font-size:13px;
+}
+
+#coinDisplay{
+background:rgba(255,215,0,0.1);
+border:1px solid rgba(255,215,0,0.3);
+border-radius:20px;
+padding:4px 12px;
+color:#ffd700;
+}
+
+#boostBtn{
+background:rgba(255,215,0,0.15);
+border:1px solid rgba(255,215,0,0.4);
+color:#ffd700;
+border-radius:20px;
+padding:5px 14px;
+font-size:12px;
+cursor:pointer;
+transition:all .2s;
+}
+
+#boostBtn:hover{ background:rgba(255,215,0,0.3); }
+#boostBtn:disabled{ opacity:0.4; cursor:default; }
+
+@keyframes coinFlash{
+0%{ transform:scale(1); }
+30%{ transform:scale(1.2); background:rgba(255,215,0,0.4); }
+100%{ transform:scale(1); }
+}
+
+#coinDisplay.flash{
+animation:coinFlash 0.5s ease;
+}
+
+/* VOLUME VOTE */
+
+#volumeBar{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:8px;
+margin-top:14px;
+}
+
+#volumeDisplay{
+font-size:13px;
+color:rgba(255,255,255,0.6);
+background:rgba(255,255,255,0.08);
+border-radius:20px;
+padding:3px 12px;
+}
+
+#volumeVoteRow{
+display:flex;
+gap:10px;
+}
+
+.vol-btn{
+background:rgba(255,255,255,0.1);
+border:1px solid rgba(255,255,255,0.2);
+color:white;
+border-radius:20px;
+padding:6px 16px;
+font-size:13px;
+cursor:pointer;
+transition:all .2s;
+}
+
+.vol-btn:hover{ background:rgba(255,255,255,0.2); }
+.vol-btn.voted{ background:rgba(29,185,84,0.35); border-color:#1DB954; }
+.vol-btn:disabled{ opacity:0.4; cursor:default; }
+
+/* GAME TABS */
+
+.game-tab-btn{
+background:rgba(255,215,0,0.1);
+border:1px solid rgba(255,215,0,0.3);
+color:#ffd700;
+border-radius:20px;
+padding:4px 12px;
+font-size:11px;
+font-weight:bold;
+cursor:pointer;
+transition:all .2s;
+letter-spacing:0.5px;
+}
+
+.game-tab-btn.active{
+background:rgba(255,215,0,0.35);
+border-color:#ffd700;
+}
+
+.game-tab-btn:hover:not(.active){
+background:rgba(255,215,0,0.2);
+}
+
+.game-panel{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
+padding:10px 0;
+width:100%;
+}
+
+/* COIN FLIP */
+
+#cfCoin{
+font-size:72px;
+transition:transform 0.6s ease;
+display:block;
+}
+
+#cfCoin.flipping{
+animation:cfSpin 0.6s ease;
+}
+
+@keyframes cfSpin{
+0%{ transform:rotateY(0deg) scale(1); }
+50%{ transform:rotateY(90deg) scale(1.3); }
+100%{ transform:rotateY(0deg) scale(1); }
+}
+
+/* SLOTS */
+
+#slotsReels{
+display:flex;
+gap:12px;
+margin:10px 0;
+}
+
+.slot-reel{
+width:80px;
+height:90px;
+background:rgba(0,0,0,0.5);
+border:3px solid #ffd700;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+position:relative;
+}
+
+.slot-symbol{
+font-size:44px;
+transition:transform 0.1s;
+}
+
+.slot-reel.spinning .slot-symbol{
+animation:reelSpin 0.1s steps(1) infinite;
+}
+
+@keyframes reelSpin{
+0%{ transform:translateY(0); opacity:1; }
+50%{ transform:translateY(-10px); opacity:0.5; }
+100%{ transform:translateY(0); opacity:1; }
+}
+
+#slotsPaytable{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:2px 20px;
+font-size:11px;
+color:rgba(255,255,255,0.5);
+margin-top:8px;
+border-top:1px solid rgba(255,255,255,0.1);
+padding-top:8px;
+width:100%;
+}
+
+.pay-row{
+display:flex;
+justify-content:space-between;
+padding:1px 0;
+}
+
+/* QUOTE WIDGET */
+
+#quoteWidget{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+max-width:440px;
+width:max-content;
+text-align:center;
+z-index:5;
+background:rgba(0,0,0,0.45);
+backdrop-filter:blur(10px);
+-webkit-backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,0.08);
+border-radius:12px;
+padding:10px 18px;
+pointer-events:none;
+}
+
+#quoteText{
+font-size:13px;
+color:rgba(255,255,255,0.75);
+font-style:italic;
+line-height:1.5;
+display:block;
+}
+
+#quoteAuthor{
+font-size:11px;
+color:rgba(255,255,255,0.4);
+display:block;
+margin-top:4px;
+letter-spacing:1px;
+}
+
+/* BLACKJACK BUTTON */
+
+#bjBtn{
+position:fixed;
+bottom:230px;
+right:20px;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#1a6b3a;
+border:none;
+font-size:22px;
+cursor:pointer;
+box-shadow:0 0 12px rgba(26,107,58,0.6);
+transition:all .2s;
+z-index:10;
+}
+
+#bjBtn:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px rgba(26,107,58,0.9);
+}
+
+/* BLACKJACK MODAL */
+
+#bjModal{
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.3);
+z-index:100;
+justify-content:center;
+align-items:flex-start;
+padding-top:60px;
+pointer-events:none;
+}
+
+#bjModal.open{ display:flex; }
+
+#bjModalBox{
+background:#076324;
+border-radius:16px;
+border:2px solid #1a6b3a;
+box-shadow:0 0 40px rgba(26,107,58,0.5);
+width:620px;
+max-width:95vw;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:bjIn .2s ease;
+pointer-events:auto;
+}
+
+@keyframes bjIn{
+from{transform:scale(0.92);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#bjHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px 20px;
+background:rgba(0,0,0,0.3);
+border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+#bjHeader h3{
+margin:0;
+font-size:16px;
+color:#ffd700;
+letter-spacing:1px;
+}
+
+#bjCloseBtn{
+background:none;
+border:none;
+color:white;
+font-size:22px;
+cursor:pointer;
+opacity:0.7;
+}
+
+#bjCloseBtn:hover{ opacity:1; }
+
+#bjBody{
+padding:20px;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:14px;
+}
+
+.bj-hand-label{
+font-size:12px;
+opacity:0.6;
+letter-spacing:1px;
+text-transform:uppercase;
+}
+
+.bj-hand{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+justify-content:center;
+min-height:100px;
+align-items:center;
+}
+
+.bj-card{
+width:64px;
+height:90px;
+background:white;
+border-radius:8px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+font-size:22px;
+font-weight:bold;
+box-shadow:2px 2px 6px rgba(0,0,0,0.4);
+color:#000;
+position:relative;
+}
+
+.bj-card.red{ color:#cc0000; }
+
+.bj-card.back{
+background: repeating-linear-gradient(
+  45deg,
+  #1a3a8a,
+  #1a3a8a 5px,
+  #2a4a9a 5px,
+  #2a4a9a 10px
+);
+}
+
+.bj-score{
+font-size:18px;
+font-weight:bold;
+color:#ffd700;
+}
+
+#bjStatus{
+font-size:18px;
+font-weight:bold;
+min-height:28px;
+color:#ffd700;
+}
+
+#bjControls{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:center;
+}
+
+.bj-btn{
+padding:10px 22px;
+border:none;
+border-radius:8px;
+font-size:14px;
+font-weight:bold;
+cursor:pointer;
+transition:all .2s;
+}
+
+.bj-btn:hover{ transform:scale(1.05); }
+.bj-btn:disabled{ opacity:0.4; cursor:default; transform:none; }
+
+#bjDealBtn{ background:#ffd700; color:#000; }
+#bjHitBtn{ background:#27ae60; color:#fff; }
+#bjStandBtn{ background:#e74c3c; color:#fff; }
+#bjDoubleBtn{ background:#8e44ad; color:#fff; }
+
+#bjBetRow{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+#bjBetInput{
+width:70px;
+padding:6px;
+border-radius:6px;
+border:none;
+font-size:16px;
+text-align:center;
+}
+
+#bjBalanceDisplay{
+font-size:14px;
+color:#ffd700;
+background:rgba(0,0,0,0.3);
+border-radius:20px;
+padding:4px 14px;
+}
+
+/* OIL PRICE BUTTON */
+
+#oilBtn{
+position:fixed;
+bottom:90px;
+right:20px;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#8B4513;
+border:none;
+font-size:22px;
+cursor:pointer;
+box-shadow:0 0 12px rgba(139,69,19,0.6);
+transition:all .2s;
+z-index:10;
+}
+
+#oilBtn:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px rgba(139,69,19,0.9);
+}
+
+/* OIL MODAL */
+
+#oilModal{
+display:none;
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+background:rgba(0,0,0,0.75);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#oilModal.open{
+display:flex;
+}
+
+#oilModalBox{
+background:#1a1a1a;
+border-radius:16px;
+border:1px solid rgba(139,69,19,0.4);
+box-shadow:0 0 40px rgba(139,69,19,0.3);
+width:85vw;
+height:80vh;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:oilModalIn .25s ease;
+}
+
+@keyframes oilModalIn{
+from{transform:scale(0.92);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#oilModalHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px 20px;
+background:rgba(139,69,19,0.15);
+border-bottom:1px solid rgba(139,69,19,0.3);
+flex-shrink:0;
+}
+
+#oilModalHeader h3{
+margin:0;
+font-size:16px;
+color:#e8a87c;
+letter-spacing:1px;
+}
+
+#oilCloseBtn{
+background:none;
+border:none;
+color:white;
+font-size:22px;
+cursor:pointer;
+opacity:0.7;
+line-height:1;
+}
+
+#oilCloseBtn:hover{opacity:1;}
+
+#oilChartContainer{
+flex:1;
+width:100%;
+}
+
+/* VESSEL TRACKER BUTTON */
+
+#vesselBtn{
+position:fixed;
+bottom:300px;
+right:20px;
+width:55px;
+height:55px;
+border-radius:50%;
+background:#1a5276;
+border:none;
+font-size:22px;
+cursor:pointer;
+box-shadow:0 0 12px rgba(26,82,118,0.6);
+transition:all .2s;
+z-index:10;
+}
+
+#vesselBtn:hover{
+transform:scale(1.1);
+box-shadow:0 0 20px rgba(26,82,118,0.9);
+}
+
+/* VESSEL MODAL */
+
+#vesselModal{
+display:none;
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+background:rgba(0,0,0,0.75);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#vesselModal.open{
+display:flex;
+}
+
+#vesselModalBox{
+background:#0a1628;
+border-radius:16px;
+border:1px solid rgba(26,82,118,0.5);
+box-shadow:0 0 40px rgba(26,82,118,0.4);
+width:88vw;
+height:84vh;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:vesselModalIn .25s ease;
+}
+
+@keyframes vesselModalIn{
+from{transform:scale(0.92);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#vesselModalHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:12px 20px;
+background:rgba(26,82,118,0.2);
+border-bottom:1px solid rgba(26,82,118,0.4);
+flex-shrink:0;
+gap:12px;
+}
+
+#vesselModalHeader h3{
+margin:0;
+font-size:15px;
+color:#7fb3d3;
+letter-spacing:1px;
+white-space:nowrap;
+}
+
+#vesselBtns{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+
+.vesselGroupLabel{
+font-size:10px;
+font-weight:bold;
+color:#5dade2;
+letter-spacing:2px;
+opacity:0.7;
+padding:0 4px;
+align-self:center;
+border-left:2px solid #5dade2;
+padding-left:6px;
+}
+
+.vesselSelectBtn{
+background:rgba(26,82,118,0.4);
+border:1px solid rgba(26,82,118,0.6);
+color:white;
+border-radius:20px;
+padding:5px 14px;
+font-size:12px;
+cursor:pointer;
+transition:all .2s;
+white-space:nowrap;
+}
+
+.vesselSelectBtn:hover{
+background:rgba(26,82,118,0.8);
+}
+
+.vesselSelectBtn.active{
+background:#1a5276;
+border-color:#5dade2;
+color:#5dade2;
+}
+
+#vesselDetailsLink{
+color:#5dade2;
+font-size:12px;
+text-decoration:none;
+white-space:nowrap;
+opacity:0.8;
+}
+
+#vesselDetailsLink:hover{opacity:1;}
+
+#weatherToggleBtn{
+background:rgba(41,128,185,0.3);
+border:1px solid rgba(41,128,185,0.6);
+color:white;
+border-radius:20px;
+padding:5px 12px;
+font-size:12px;
+cursor:pointer;
+transition:all .2s;
+white-space:nowrap;
+}
+
+#weatherToggleBtn.active{
+background:rgba(41,128,185,0.8);
+border-color:#7fb3d3;
+color:#c8e6f5;
+}
+
+#weatherToggleBtn:hover{
+background:rgba(41,128,185,0.6);
+}
+
+#vesselCloseBtn{
+background:none;
+border:none;
+color:white;
+font-size:22px;
+cursor:pointer;
+opacity:0.7;
+line-height:1;
+flex-shrink:0;
+}
+
+#vesselCloseBtn:hover{opacity:1;}
+
+#vesselMapContainer{
+flex:1;
+position:relative;
+}
+
+#vesselMapFrame{
+position:absolute;
+top:0;left:0;
+width:100%;height:100%;
+border:none;
+}
+
+/* OIL MODAL */
+
+#oilModal{
+display:none;
+position:fixed;
+top:0; left:0;
+width:100%; height:100%;
+background:rgba(0,0,0,0.75);
+z-index:100;
+justify-content:center;
+align-items:center;
+}
+
+#oilModal.open{
+display:flex;
+}
+
+#oilModalBox{
+background:#131722;
+border-radius:16px;
+border:1px solid rgba(139,69,19,0.4);
+box-shadow:0 0 40px rgba(139,69,19,0.3);
+width:85vw;
+height:80vh;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+animation:oilModalIn .25s ease;
+}
+
+@keyframes oilModalIn{
+from{transform:scale(0.92);opacity:0;}
+to{transform:scale(1);opacity:1;}
+}
+
+#oilModalHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:14px 20px;
+background:rgba(139,69,19,0.15);
+border-bottom:1px solid rgba(139,69,19,0.3);
+flex-shrink:0;
+}
+
+#oilModalHeader h3{
+margin:0;
+font-size:16px;
+color:#e8a87c;
+letter-spacing:1px;
+}
+
+#oilCloseBtn{
+background:none;
+border:none;
+color:white;
+font-size:22px;
+cursor:pointer;
+opacity:0.7;
+line-height:1;
+}
+
+#oilCloseBtn:hover{opacity:1;}
+
+#oilChartContainer{
+flex:1;
+width:100%;
+}
+
+/* USER LIST */
+
+#userList{
+list-style:none;
+padding:0;
+margin:0;
+}
+
+#userList li{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:6px;
+font-size:12px;
+gap:6px;
+}
+
+.userDot{
+width:8px;
+height:8px;
+border-radius:50%;
+flex-shrink:0;
+}
+
+.userDot.online{ background:#1DB954; box-shadow:0 0 4px #1DB954; }
+.userDot.offline{ background:#555; }
+.userDot.banned{ background:#e74c3c; }
+
+.userLabel{
+flex:1;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+
+.resetBtn{
+background:#e74c3c;
+border:none;
+color:white;
+border-radius:4px;
+cursor:pointer;
+padding:2px 7px;
+font-size:11px;
+}
+
+.resetBtn:hover{
+background:#c0392b;
+}
+
 </style>
 </head>
 
@@ -359,33 +1549,41 @@ opacity:.95;
 <div id="bg"></div>
 
 <div id="weatherWidget">
-
 <div id="weatherCity"></div>
 <div id="weatherNow"></div>
 <div id="weatherForecast"></div>
-
 </div>
 
+<!-- CURRENCY CALCULATOR -->
 <div id="currencyWidget">
+<div class="currencyTitle">Currency Calculator</div>
 
-<div class="currencyTitle">EUR Rates</div>
-<div id="currencyRates">Loading...</div>
-
+<div id="currencySelector">
+  <select id="currencyPicker" onchange="onCurrencyChange()">
+    <option value="GBP">GBP 🇬🇧</option>
+    <option value="USD">USD 🇺🇸</option>
+    <option value="PLN">PLN 🇵🇱</option>
+    <option value="SEK">SEK 🇸🇪</option>
+    <option value="NOK">NOK 🇳🇴</option>
+    <option value="DKK">DKK 🇩🇰</option>
+  </select>
 </div>
 
-<!-- HOLIDAY CALENDAR -->
-<div id="calendarWidget">
-  <div class="cal-header">
-    <button class="cal-nav" onclick="calNavigate(-1)">◀</button>
-    <span class="cal-month-label" id="calMonthLabel"></span>
-    <button class="cal-nav" onclick="calNavigate(1)">▶</button>
-  </div>
-  <div class="cal-grid" id="calGrid"></div>
+<div class="calc-row">
+  <span class="calc-label">EUR</span>
+  <input class="calc-input" id="eurInput" type="number" placeholder="0.00" oninput="calcFromEur()">
 </div>
-<div class="cal-tooltip" id="calTooltip"></div>
-  
-<img id="cornerGif" src="/dancer.gif">
-<img id="topRightGif" src="/penguin.gif">
+
+<div class="calc-row">
+  <span class="calc-label" id="foreignLabel">GBP</span>
+  <input class="calc-input" id="foreignInput" type="number" placeholder="0.00" oninput="calcFromForeign()">
+</div>
+
+<div id="rateLabel">loading rate...</div>
+</div>
+
+<img id="cornerGif" src="/dancer.gif" onerror="this.style.display='none'">
+<img id="topRightGif" src="/penguin.gif" onerror="this.style.display='none'">
 
 <div class="layout">
 
@@ -402,30 +1600,352 @@ opacity:.95;
 
 <div id="artistName"></div>
 
+<!-- SONG STATS -->
+<div id="songStatsBar">
+  <span id="statPlays" title="Times played">▶ 0</span>
+  <span id="statSkips" title="Times skipped">⏭ 0</span>
+  <span id="statLikes" title="Likes">👍 0</span>
+  <span id="statDislikes" title="Dislikes">👎 0</span>
+</div>
+
+<!-- LIKE / DISLIKE -->
+<div id="reactionBtns">
+  <button id="likeBtn" onclick="songVote('like')" class="reaction-btn">👍 Like</button>
+  <button id="dislikeBtn" onclick="songVote('dislike')" class="reaction-btn">👎 Dislike</button>
+</div>
+
 <div class="progress-container">
 <div id="progressBar"></div>
 </div>
 
 <div id="voteCounter">0 / 0 votes</div>
 
+<!-- COIN BAR -->
+<div id="coinBar">
+  <span id="coinDisplay">🪙 <span id="coinCount">...</span> coins</span>
+  <button id="boostBtn" onclick="boostVote()" title="Spend 1 coin for an extra skip vote">⚡ Boost Vote (1🪙)</button>
+</div>
+
 <button id="skipBtn" onclick="vote()">SKIP</button>
 
 <ul id="voters"></ul>
 
+<!-- VOLUME VOTE -->
+<div id="volumeBar">
+  <span id="volumeDisplay">🔊 <span id="volumeLevel">...</span>%</span>
+  <div id="volumeVoteRow">
+    <button id="volUpBtn" onclick="voteVolume('up')" class="vol-btn">▲ +5% <span id="volUpCount"></span></button>
+    <button id="volDownBtn" onclick="voteVolume('down')" class="vol-btn">▼ -5% <span id="volDownCount"></span></button>
+  </div>
 </div>
+
+</div>
+</div>
+
+<button id="oilBtn" onclick="toggleOilModal()" title="Brent Crude Oil Price">🛢️</button>
+
+<!-- OIL PRICE MODAL -->
+<div id="oilModal" onclick="closeOilModalOutside(event)">
+  <div id="oilModalBox">
+    <div id="oilModalHeader">
+      <h3>🛢️ BRENT CRUDE OIL — LIVE PRICE</h3>
+      <button id="oilCloseBtn" onclick="toggleOilModal()">✕</button>
+    </div>
+    <div id="oilChartContainer">
+      <div class="tradingview-widget-container" style="height:100%;width:100%">
+        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
+        <div class="tradingview-widget-copyright">
+          <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">
+            <span style="color:#888;font-size:11px">Track on TradingView</span>
+          </a>
+        </div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+        {
+          "autosize": true,
+          "symbol": "TVC:UKOIL",
+          "interval": "60",
+          "timezone": "Europe/Riga",
+          "theme": "dark",
+          "style": "1",
+          "locale": "en",
+          "allow_symbol_change": false,
+          "calendar": false,
+          "support_host": "https://www.tradingview.com"
+        }
+        </script>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="oilBtn" onclick="toggleOilModal()" title="Brent Crude Oil Price">🛢️</button>
+
+<button id="msBtn" onclick="toggleMsModal()" title="Minesweeper">💣</button>
+
+<!-- MINESWEEPER MODAL -->
+<div id="msModal" onclick="closeMsModalOutside(event)">
+  <div id="msModalBox">
+    <div id="msTopBar">
+      <h3>💣 MINESWEEPER</h3>
+      <div style="display:flex;gap:4px;">
+        <button class="ms-diff-btn active" id="diffEasy" onclick="setDifficulty('easy',this)">Easy</button>
+        <button class="ms-diff-btn" id="diffMedium" onclick="setDifficulty('medium',this)">Medium</button>
+        <button class="ms-diff-btn" id="diffExpert" onclick="setDifficulty('expert',this)">Expert</button>
+      </div>
+      <div class="ms-display" id="msMines">010</div>
+      <span id="msFace" onclick="initMinesweeper()">🙂</span>
+      <div class="ms-display" id="msTimer">000</div>
+      <button id="msCloseBtn" onclick="toggleMsModal()">✕</button>
+    </div>
+    <div id="msContent">
+      <div id="msGrid"></div>
+      <div id="msLeaderboardPanel">
+        <h4>🏆 Best Times</h4>
+        <ul id="msLeaderboard"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="bjBtn" onclick="toggleBjModal()" title="Games">🪙</button>
+
+<!-- GAMES MODAL -->
+<div id="bjModal">
+  <div id="bjModalBox">
+    <div id="bjHeader">
+      <h3>🎮 OFFICE GAMES</h3>
+      <div style="display:flex;gap:4px;">
+        <button class="game-tab-btn active" id="tabBlackjack" onclick="switchGame('blackjack',this)">Blackjack</button>
+        <button class="game-tab-btn" id="tabCoinflip" onclick="switchGame('coinflip',this)">Coin Flip</button>
+        <button class="game-tab-btn" id="tabSlots" onclick="switchGame('slots',this)">Slots</button>
+      </div>
+      <div id="bjBalanceDisplay">🪙 <span id="bjCoins">...</span> coins</div>
+      <button id="bjCloseBtn" onclick="toggleBjModal()">✕</button>
+    </div>
+
+    <!-- BLACKJACK PANEL -->
+    <div id="bjBody" class="game-panel">
+      <div class="bj-hand-label">Dealer</div>
+      <div class="bj-hand" id="bjDealerHand"></div>
+      <div class="bj-score" id="bjDealerScore"></div>
+      <div id="bjStatus"></div>
+      <div class="bj-hand" id="bjPlayerHand"></div>
+      <div class="bj-score" id="bjPlayerScore"></div>
+      <div class="bj-hand-label">Your Hand</div>
+      <div id="bjBetRow">
+        <label style="color:white;font-size:13px;">Bet:</label>
+        <input id="bjBetInput" type="number" min="1" value="1">
+        <span style="color:#ffd700;font-size:13px;">coins</span>
+      </div>
+      <div id="bjControls">
+        <button class="bj-btn" id="bjDealBtn" onclick="bjDeal()">Deal</button>
+        <button class="bj-btn" id="bjHitBtn" onclick="bjHit()" disabled>Hit</button>
+        <button class="bj-btn" id="bjStandBtn" onclick="bjStand()" disabled>Stand</button>
+        <button class="bj-btn" id="bjDoubleBtn" onclick="bjDouble()" disabled>Double</button>
+      </div>
+    </div>
+
+    <!-- COIN FLIP PANEL -->
+    <div id="cfBody" class="game-panel" style="display:none;">
+      <div id="cfCoin">🪙</div>
+      <div id="cfStatus" style="font-size:18px;font-weight:bold;color:#ffd700;min-height:28px;"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin:10px 0;">
+        <label style="color:white;font-size:13px;">Bet:</label>
+        <input id="cfBetInput" type="number" min="1" value="1" style="width:60px;padding:6px;border-radius:6px;border:none;font-size:15px;text-align:center;">
+        <span style="color:#ffd700;font-size:13px;">coins</span>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="bj-btn" id="cfHeadsBtn" onclick="cfFlip('heads')" style="background:#ffd700;color:#000;">Heads</button>
+        <button class="bj-btn" id="cfTailsBtn" onclick="cfFlip('tails')" style="background:#c0c0c0;color:#000;">Tails</button>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:12px;">Win = 2× bet &nbsp;|&nbsp; 50/50 odds</div>
+    </div>
+
+    <!-- SLOTS PANEL -->
+    <div id="slotsBody" class="game-panel" style="display:none;">
+      <div id="slotsReels">
+        <div class="slot-reel" id="reel0"><div class="slot-symbol" id="sym0">🍒</div></div>
+        <div class="slot-reel" id="reel1"><div class="slot-symbol" id="sym1">🍒</div></div>
+        <div class="slot-reel" id="reel2"><div class="slot-symbol" id="sym2">🍒</div></div>
+      </div>
+      <div id="slotsStatus" style="font-size:18px;font-weight:bold;color:#ffd700;min-height:28px;margin:10px 0;"></div>
+      <div style="display:flex;align-items:center;gap:10px;margin:10px 0;">
+        <label style="color:white;font-size:13px;">Bet:</label>
+        <input id="slotsBetInput" type="number" min="1" value="1" style="width:60px;padding:6px;border-radius:6px;border:none;font-size:15px;text-align:center;">
+        <span style="color:#ffd700;font-size:13px;">coins</span>
+      </div>
+      <button class="bj-btn" id="slotsSpinBtn" onclick="slotsSpín()" style="background:#ffd700;color:#000;padding:12px 40px;font-size:16px;">SPIN 🎰</button>
+      <div id="slotsPaytable">
+        <div class="pay-row"><span>💎💎💎</span><span>50×</span></div>
+        <div class="pay-row"><span>⭐⭐⭐</span><span>25×</span></div>
+        <div class="pay-row"><span>🔔🔔🔔</span><span>15×</span></div>
+        <div class="pay-row"><span>🍇🍇🍇</span><span>10×</span></div>
+        <div class="pay-row"><span>🍊🍊🍊</span><span>5×</span></div>
+        <div class="pay-row"><span>🍋🍋🍋</span><span>3×</span></div>
+        <div class="pay-row"><span>🍒🍒🍒</span><span>2×</span></div>
+        <div class="pay-row"><span>Any pair</span><span>1×</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<button id="vesselBtn" onclick="toggleVesselModal()" title="Vessel Tracker">⚓</button>
+
+<!-- VESSEL TRACKER MODAL -->
+<div id="vesselModal" onclick="closeVesselModalOutside(event)">
+  <div id="vesselModalBox">
+    <div id="vesselModalHeader">
+      <h3>⚓ VESSEL TRACKER</h3>
+      <div id="vesselBtns">
+        <span class="vesselGroupLabel">BALT1</span>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '209659000', '9814014')">Containerships Aurora</button>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '210028000', '9866249')">Containerships Borealis</button>
+        <span class="vesselGroupLabel">BALT2</span>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '256800000', '9961295')">CMA CGM Ermitage</button>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '256883000', '9961312')">CMA CGM Tivoli</button>
+        <span class="vesselGroupLabel">SECI</span>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '255805903', '9344253')">CT Pachuca</button>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '255916246', '9331191')">Canarias Express</button>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '255806405', '9331206')">Andalucia Express</button>
+        <span class="vesselGroupLabel">BENI</span>
+        <button class="vesselSelectBtn" onclick="selectVessel(this, '255772000', '9436197')">BG Onyx</button>
+      </div>
+      <a id="vesselDetailsLink" href="#" target="_blank" style="display:none">📋 Full Details ↗</a>
+      <button id="weatherToggleBtn" onclick="toggleWeatherLayer()" title="Toggle Weather" style="display:none">🌦️ Weather OFF</button>
+      <button id="vesselCloseBtn" onclick="toggleVesselModal()">✕</button>
+    </div>
+    <div id="vesselMapContainer" style="flex:1;position:relative;">
+      <iframe id="vesselMapFrame" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
+      <iframe id="windyFrame" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;display:none;" allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- OIL CHART MODAL -->
+<div id="oilModal" onclick="closeOilModalOutside(event)">
+  <div id="oilModalBox">
+    <div id="oilModalHeader">
+      <h3>🛢️ BRENT CRUDE OIL — LIVE PRICE</h3>
+      <button id="oilCloseBtn" onclick="toggleOilModal()">✕</button>
+    </div>
+    <div id="oilChartContainer"></div>
+  </div>
+</div>
+
+<!-- QUOTE WIDGET -->
+<div id="quoteWidget">
+  <span id="quoteText">Loading...</span>
+  <span id="quoteAuthor"></span>
+</div>
+
+<button id="patchBtn" onclick="togglePatchModal()">📋 PATCH NOTES</button>
+
+<!-- PATCH NOTES MODAL -->
+<div id="patchModal" onclick="closePatchModalOutside(event)">
+  <div id="patchModalBox">
+    <div id="patchModalHeader">
+      <h3>📋 PATCH NOTES</h3>
+      <span id="patchVersion">v2.0.0 — "PAY TO WIN"</span>
+      <button id="patchCloseBtn" onclick="togglePatchModal()">✕</button>
+    </div>
+    <div id="patchContent">
+
+      <div class="patch-section">
+        <div class="patch-section-header">
+          <span class="patch-tag patch-tag-new">New System</span>
+          <span class="patch-section-title">Daily Coin Economy</span>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">🪙</div>
+          <div>
+            <div class="patch-entry-name">Daily Coin Allowance</div>
+            <div class="patch-entry-desc">All players now receive 5 coins each day upon login. Coins are tied to your username and persist across sessions. Balance resets every midnight Riga time — whether you spent them or not. Use them wisely.</div>
+            <span class="patch-note-tag">RESETS: 00:00 EET / EEST</span>
+          </div>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">⚡</div>
+          <div>
+            <div class="patch-entry-name">Boost Vote — Spend 1 Coin for an Extra Skip</div>
+            <div class="patch-entry-desc">Found a song so terrible you simply cannot wait for your colleagues to agree? Spend 1 coin to add an extra vote toward the skip threshold. Multiple players can boost simultaneously — enough boosts can tip a vote over the majority line without anyone else clicking Skip.</div>
+            <span class="patch-note-tag">COST: 1 COIN PER BOOST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="patch-section">
+        <div class="patch-section-header">
+          <span class="patch-tag patch-tag-feature">New Feature</span>
+          <span class="patch-section-title">Song Reputation System</span>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">▶</div>
+          <div>
+            <div class="patch-entry-name">Play & Skip Counter</div>
+            <div class="patch-entry-desc">Every song now tracks how many times it has been played and how many times the office has voted to remove it. Stats are displayed live under the song title and persist permanently — so that one song everyone keeps skipping will have a permanent record of shame.</div>
+            <span class="patch-note-tag">STORED IN: SUPABASE DATABASE</span>
+          </div>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">👍</div>
+          <div>
+            <div class="patch-entry-name">Like & Dislike Voting</div>
+            <div class="patch-entry-desc">Each time a song appears, players can cast one Like or one Dislike. Changing your mind is allowed — clicking the opposite reaction switches your vote. Clicking the same button again removes it. Votes are tracked per song appearance, so you can vote fresh each time.</div>
+            <span class="patch-note-tag">ONE VOTE PER PLAYER PER APPEARANCE</span>
+          </div>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">📊</div>
+          <div>
+            <div class="patch-entry-name">Live Stats Bar</div>
+            <div class="patch-entry-desc">A compact stats row now appears under every song showing total plays, total skips, total likes and total dislikes — all time, across every session, every day. This data survives server restarts and does not reset.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="patch-section">
+        <div class="patch-section-header">
+          <span class="patch-tag patch-tag-game">New Game</span>
+          <span class="patch-section-title">Office Blackjack — Coin Gambling Expansion</span>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">🃏</div>
+          <div>
+            <div class="patch-entry-name">Blackjack Table is Open</div>
+            <div class="patch-entry-desc">A fully functional Blackjack game is now accessible via the card button on the right panel. Standard rules apply: dealer hits on soft 16, stands on 17+. You can Hit, Stand, or Double Down. Winnings and losses update your coin balance in real time.</div>
+            <span class="patch-note-tag">ACCESS: 🃏 BUTTON · RIGHT PANEL</span>
+          </div>
+        </div>
+        <div class="patch-entry">
+          <div class="patch-entry-icon">💰</div>
+          <div>
+            <div class="patch-entry-name">Bet Your Coins</div>
+            <div class="patch-entry-desc">Set your bet before each hand. Win and receive your bet back plus the same amount in coins. Hit Blackjack (Ace + 10-value on deal) and earn 1.5x your bet. Lose and the coins are gone. Going bust on a doubled bet hurts twice as much — you have been warned.</div>
+            <span class="patch-note-tag">BLACKJACK PAYS: 1.5x</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div id="patchFooter">OFFICE SPOTIFY SKIP &nbsp;·&nbsp; BUILD APRIL 2026 &nbsp;·&nbsp; NOT FOR PUBLIC DISTRIBUTION &nbsp;·&nbsp; POWERED BY RENDER + SUPABASE</div>
+  </div>
+</div>
+
+<!-- DEVICE BANNED OVERLAY -->
+<div id="bannedOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:999;justify-content:center;align-items:center;flex-direction:column;gap:16px;">
+  <div style="font-size:48px;">🚫</div>
+  <div style="font-size:22px;font-weight:bold;color:#e74c3c;">Device Banned</div>
+  <div style="font-size:14px;color:rgba(255,255,255,0.5);text-align:center;max-width:300px;">Your device has been banned from this app. Contact the admin if you think this is a mistake.</div>
 </div>
 
 <button id="adminBtn" onclick="toggleAdminPanel()">⚙</button>
 
-<!-- ADMIN PANEL -->
-
 <div id="adminPanel">
 
 <div id="loginSection">
-
 <input type="password" id="adminPasswordInput" placeholder="Admin password">
 <button onclick="adminLogin()">Login</button>
-
 </div>
 
 <div id="adminControls" style="display:none">
@@ -443,15 +1963,24 @@ opacity:.95;
 <div id="soundSwitch" class="switch" onclick="toggleSound()"></div>
 </div>
 
-<h4>Connected Users</h4>
+<h4>All Users</h4>
 <ul id="userList"></ul>
 
-<h4>Ban User</h4>
+<h4>Banned Devices</h4>
+<ul id="bannedList" style="list-style:none;padding:0;margin:0;font-size:12px;"></ul>
 
-<input id="banName" placeholder="Name">
+<h4>Give Coins 🪙</h4>
+<select id="coinTargetSelect" style="width:100%;margin-bottom:6px;background:#222;color:white;border:1px solid #444;border-radius:4px;padding:4px;">
+  <option value="">— select user —</option>
+</select>
+<div style="display:flex;gap:6px;align-items:center;">
+  <input id="coinAmount" type="number" min="-99" max="99" value="5" style="width:60px;background:#222;color:white;border:1px solid #444;border-radius:4px;padding:4px;font-size:13px;">
+  <button onclick="giveCoins()" style="flex:1;">Give Coins</button>
+</div>
 
-<button onclick="banUser()">Ban</button>
-<button onclick="clearVotes()">Clear Votes</button>
+<div style="margin-top:10px;">
+<button onclick="clearVotes()" style="width:100%;">Clear Votes</button>
+</div>
 
 <div id="adminMessage"></div>
 
@@ -463,466 +1992,1527 @@ opacity:.95;
 
 <script>
 
-const socket=io();
+const socket = io();
+const pingSound = new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
 
-const pingSound=new Audio("https://actions.google.com/sounds/v1/cartoon/pop.ogg");
+let userId = localStorage.getItem("userId");
+let userName = localStorage.getItem("userName");
+let lastCount = 0;
+let hasVoted = false;
+let rates = {};
 
-let userId=localStorage.getItem("userId");
-let userName=localStorage.getItem("userName");
-let lastCount=0;
-
-if(!userId){
-userId=crypto.randomUUID();
-localStorage.setItem("userId",userId);
+if (!userId) {
+  userId = crypto.randomUUID();
+  localStorage.setItem("userId", userId);
 }
 
-if(!userName){
-userName=prompt("Enter your name:");
-localStorage.setItem("userName",userName);
-}
-
-socket.on("voteUpdate",data=>updateUI(data));
-socket.emit("registerUser", {userId, name:userName});
-
-function vote(){
-
-fetch("/vote",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({userId,name:userName})
-})
-.then(res=>res.json())
-.then(updateUI);
-
-}
-
-function updateUI(data){
-
-if(data.count>lastCount && data.soundEnabled){
-pingSound.play().catch(()=>{});
-}
-
-lastCount=data.count;
-
-document.getElementById("voteCounter").innerText =
-data.count+" / "+data.needed+" votes";
-
-const percent=data.needed>0?(data.count/data.needed)*100:0;
-
-document.getElementById("progressBar").style.width =
-Math.min(percent,100)+"%";
-
-const list=document.getElementById("voters");
-list.innerHTML="";
-
-data.voters.forEach(v=>{
-const li=document.createElement("li");
-li.innerText=v;
-list.appendChild(li);
-});
-
-updateSwitch("votingSwitch",data.votingEnabled);
-updateSwitch("soundSwitch",data.soundEnabled);
-
-if(data.message){
-document.getElementById("adminMessage").innerText=data.message;
-}
-
-/* CONNECTED USERS */
-
-if(data.users){
-const list=document.getElementById("userList");
-list.innerHTML="";
-data.users.forEach(u=>{
-const li=document.createElement("li");
-li.innerText=u;
-list.appendChild(li);
-});
-}
-
-}
-
-function loadWeather(){
-
-fetch("/weather")
-.then(res=>res.json())
-.then(data=>{
-
-document.getElementById("weatherCity").innerText=data.city;
-
-document.getElementById("weatherNow").innerHTML=
-`
-<div>${data.temp}°C</div>
-<div>Wind ${data.wind} km/h</div>
-<div>Rain ${data.rain}%</div>
-`;
-
-const f=document.getElementById("weatherForecast");
-f.innerHTML="";
-
-data.forecast.forEach(d=>{
-
-const date=new Date(d.date);
-const day=date.toLocaleDateString("en-US",{weekday:"short"});
-
-const line=document.createElement("div");
-line.innerText=day+" "+d.temp+"°C";
-
-f.appendChild(line);
-
-});
-
-});
-
-}
-
-function loadCurrency(){
-
-fetch("/currency")
-.then(res=>res.json())
-.then(data=>{
-
-if(!data) return;
-
-document.getElementById("currencyRates").innerHTML=`
-
-GB GBP → ${data.GBP ?? "-"}<br>
-US USD → ${data.USD ?? "-"}<br>
-PL PLN → ${data.PLN ?? "-"}<br>
-SE SEK → ${data.SEK ?? "-"}<br>
-NO NOK → ${data.NOK ?? "-"}<br>
-DK DKK → ${data.DKK ?? "-"}
-
-`;
-
-});
-
-}
-
-function applyAlbumColor(imageUrl){
-
-const img=new Image();
-img.crossOrigin="anonymous";
-img.src=imageUrl;
-
-img.onload=function(){
-
-const canvas=document.createElement("canvas");
-const ctx=canvas.getContext("2d");
-
-canvas.width=img.width;
-canvas.height=img.height;
-
-ctx.drawImage(img,0,0);
-
-const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;
-
-let r=0,g=0,b=0,count=0;
-
-for(let i=0;i<data.length;i+=40){
-
-r+=data[i];
-g+=data[i+1];
-b+=data[i+2];
-count++;
-
-}
-
-r=Math.floor(r/count);
-g=Math.floor(g/count);
-b=Math.floor(b/count);
-
-const color=`rgb(${r},${g},${b})`;
-
-document.getElementById("weatherWidget").style.boxShadow=`0 0 20px ${color}`;
-document.getElementById("currencyWidget").style.boxShadow=`0 0 20px ${color}`;
-
-};
-
-}
-
-function updateSwitch(id,state){
-const el=document.getElementById(id);
-state?el.classList.add("on"):el.classList.remove("on");
-}
-
-function loadVotes(){
-fetch("/votes").then(res=>res.json()).then(updateUI);
-}
-
-function loadSong(){
-
-fetch("/current-song")
-.then(res=>res.json())
-.then(data=>{
-
-if(!data.title)return;
-
-const parts=data.title.split(" - ");
-
-document.getElementById("songTitle").innerText=parts[0];
-document.getElementById("artistName").innerText=parts[1]||"";
-
-if(data.image){
-document.getElementById("albumCover").src=data.image;
-  applyAlbumColor(data.image);
-document.getElementById("bg").style.backgroundImage=`url(${data.image})`;
-}
-
-loadVotes();
-
-});
-
-}
-
-function loadLastSkip(){
-
-fetch("/last-skip")
-.then(res=>res.json())
-.then(data=>{
-
-const panel=document.getElementById("lastSkipPanel");
-
-if(!data){
-panel.innerHTML="No skips yet";
-return;
-}
-
-panel.innerHTML=`
-<p><strong>Song:</strong><br>${data.song}</p>
-<p><strong>Skipped By:</strong></p>
-<ul>${data.skippedBy.map(n=>`<li>${n}</li>`).join("")}</ul>
-<p><strong>Time:</strong><br>${data.time}</p>
-`;
-
-});
-
-}
-
-function toggleAdminPanel(){
-const panel=document.getElementById("adminPanel");
-panel.style.display=panel.style.display==="none"?"block":"none";
-}
-
-function adminLogin(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/admin-auth",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-})
-.then(res=>{
-if(res.status===403){alert("Wrong password");return;}
-document.getElementById("loginSection").style.display="none";
-document.getElementById("adminControls").style.display="block";
-});
-
-}
-
-function setTotal(){
-
-const total=document.getElementById("totalInput").value;
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/set-total",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({total,password})
-});
-
-}
-
-function toggleVoting(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/toggle-voting",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-});
-
-}
-
-function toggleSound(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/toggle-sound",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-});
-
-}
-
-function banUser(){
-
-const name=document.getElementById("banName").value;
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/ban-user",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({name,password})
-});
-
-}
-
-function clearVotes(){
-
-const password=document.getElementById("adminPasswordInput").value;
-
-fetch("/clear-votes",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({password})
-});
-
-}
-
-/* ---------------- HOLIDAY CALENDAR ---------------- */
-
-const CAL_COUNTRIES = {
-  FI:'🇫🇮 Finland', EE:'🇪🇪 Estonia', LV:'🇱🇻 Latvia',
-  LT:'🇱🇹 Lithuania', PL:'🇵🇱 Poland', NL:'🇳🇱 Netherlands',
-  DE:'🇩🇪 Germany', BE:'🇧🇪 Belgium', GB:'🇬🇧 UK',
-  IE:'🇮🇪 Ireland', ES:'🇪🇸 Spain', PT:'🇵🇹 Portugal',
-  DK:'🇩🇰 Denmark', NO:'🇳🇴 Norway', SE:'🇸🇪 Sweden'
-};
-
-function getEaster(year) {
-  const a=year%19,b=Math.floor(year/100),c=year%100;
-  const d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25);
-  const g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30;
-  const i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7;
-  const m=Math.floor((a+11*h+22*l)/451);
-  const month=Math.floor((h+l-7*m+114)/31);
-  const day=((h+l-7*m+114)%31)+1;
-  return new Date(year,month-1,day);
-}
-
-function getMidsummerSat(year) {
-  const d=new Date(year,5,20);
-  while(d.getDay()!==6) d.setDate(d.getDate()+1);
-  return d;
-}
-
-function buildHolidays(year) {
-  const easter=getEaster(year);
-  const em=easter.getTime(), day=86400000;
-  function ep(n){ const d=new Date(em+n*day); return pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
-  function pad(n){ return n.toString().padStart(2,'0'); }
-  function fmt(d){ return pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
-  const ms=getMidsummerSat(year);
-  const mse=new Date(ms.getTime()-day);
-  const h={};
-  function add(mmdd,name,countries){ if(!h[mmdd])h[mmdd]=[]; h[mmdd].push({name,countries}); }
-
-  add('01-01',"New Year's Day",['FI','EE','LV','LT','PL','NL','DE','BE','GB','IE','ES','PT','DK','NO','SE']);
-  add('01-06','Epiphany',['FI','LT','PL','ES','PT']);
-  add('02-16','Restoration of Independence',['LT']);
-  add('02-24','Independence Day',['EE']);
-  add('03-11','Restoration of Independence',['LT']);
-  add(ep(-2),'Good Friday',['FI','EE','DE','NL','BE','GB','IE','DK','NO','SE']);
-  add(ep(0),'Easter Sunday',['EE','LV','LT','PL','NL','DE','BE','IE','ES','PT','DK','SE']);
-  add(ep(1),'Easter Monday',['FI','EE','LV','LT','PL','NL','DE','BE','GB','IE','ES','DK','NO','SE']);
-  add(ep(39),'Ascension Day',['FI','EE','NL','DE','BE','NO','DK','SE']);
-  add(ep(49),'Whit Sunday (Pentecost)',['EE','LV','NL','DE','NO','DK','SE']);
-  add(ep(50),'Whit Monday',['FI','EE','LT','NL','DE','BE','DK','IE']);
-  add('05-01','Labour Day / May Day',['FI','EE','LV','LT','PL','NL','DE','BE','ES','PT','DK','NO','SE']);
-  add('05-04','Restoration of Independence',['LV']);
-  add('05-05','Liberation Day',['NL']);
-  add('05-17','Constitution Day',['NO']);
-  add('06-05','Constitution Day',['DK']);
-  add('06-06','National Day',['SE']);
-  add(fmt(mse),'Midsummer Eve',['FI']);
-  add(fmt(ms),'Midsummer Day',['FI','SE']);
-  add('06-23','Midsummer Eve (Ligo) / Victory Day',['LV','EE','LT']);
-  add('06-24',"Midsummer (Jāņi) / St. John's Day",['LV','LT']);
-  add('08-15','Assumption of Mary',['BE','ES','PT','IE']);
-  add('08-20','Restoration of Independence',['EE']);
-  add('10-03','German Unity Day',['DE']);
-  add('11-01',"All Saints' Day",['PL','ES','PT','BE','LT']);
-  add('11-11','Independence Day / Armistice Day',['PL','BE']);
-  add('11-18','Proclamation of Independence',['LV']);
-  add('12-06','Independence Day',['FI']);
-  add('12-08','Immaculate Conception',['ES','PT','IE']);
-  add('12-24','Christmas Eve',['FI','EE','LV','LT','DE','DK','NO','SE']);
-  add('12-25','Christmas Day',['FI','EE','LV','LT','PL','NL','DE','BE','GB','IE','ES','PT','DK','NO','SE']);
-  add('12-26',"Boxing Day / St. Stephen's Day",['FI','EE','LV','LT','PL','NL','DE','BE','GB','IE','DK','NO','SE']);
-  add('12-31',"New Year's Eve",['LV','DE']);
-  return h;
-}
-
-let calYear=new Date().getFullYear(), calMonth=new Date().getMonth(), holidayCache={};
-function getHolidays(y){ if(!holidayCache[y])holidayCache[y]=buildHolidays(y); return holidayCache[y]; }
-
-function renderCalendar() {
-  const today=new Date(), holidays=getHolidays(calYear);
-  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('calMonthLabel').innerText=months[calMonth]+' '+calYear;
-  const grid=document.getElementById('calGrid');
-  grid.innerHTML='';
-  ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(d=>{ const h=document.createElement('div'); h.className='cal-day-header'; h.innerText=d; grid.appendChild(h); });
-  const firstDay=new Date(calYear,calMonth,1).getDay();
-  const startOffset=(firstDay===0?6:firstDay-1);
-  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
-  const daysInPrev=new Date(calYear,calMonth,0).getDate();
-  for(let i=0;i<startOffset;i++){ const d=document.createElement('div'); d.className='cal-day other-month'; d.innerText=daysInPrev-startOffset+1+i; grid.appendChild(d); }
-  for(let day=1;day<=daysInMonth;day++){
-    const d=document.createElement('div'); d.className='cal-day'; d.innerText=day;
-    const mmdd=(calMonth+1).toString().padStart(2,'0')+'-'+day.toString().padStart(2,'0');
-    const dh=holidays[mmdd];
-    if(today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===day) d.classList.add('today');
-    if(dh&&dh.length>0){
-      d.classList.add('has-holiday');
-      d.addEventListener('mouseenter',e=>showCalTooltip(e,dh));
-      d.addEventListener('mouseleave',hideCalTooltip);
-      d.addEventListener('mousemove',moveCalTooltip);
+if (!userName) {
+  let name = "";
+  while (!name || !name.trim()) {
+    name = prompt("Enter your name to continue:");
+    if (!name || !name.trim()) {
+      alert("A name is required to use this app!");
     }
-    grid.appendChild(d);
   }
-  const remaining=(startOffset+daysInMonth)%7===0?0:7-((startOffset+daysInMonth)%7);
-  for(let i=1;i<=remaining;i++){ const d=document.createElement('div'); d.className='cal-day other-month'; d.innerText=i; grid.appendChild(d); }
+  userName = name.trim();
+  localStorage.setItem("userName", userName);
 }
 
-function showCalTooltip(e,dayHolidays){
-  const tip=document.getElementById('calTooltip');
-  let html='';
-  dayHolidays.forEach(h=>{ html+='<div class="cal-tooltip-name">'+h.name+'</div>'+h.countries.map(c=>CAL_COUNTRIES[c]).join('<br>')+'<br>'; });
-  tip.innerHTML=html; tip.style.display='block'; moveCalTooltip(e);
+socket.on("voteUpdate", data => updateUI(data));
+socket.on("device_banned", () => {
+  document.getElementById("bannedOverlay").style.display = "flex";
+  document.getElementById("skipBtn").disabled = true;
+});
+socket.on("force_rename", () => {
+  localStorage.removeItem("userName");
+  let name = "";
+  while (!name || !name.trim()) {
+    name = prompt("Admin has reset your name. Please enter a new name:");
+    if (!name || !name.trim()) alert("A name is required!");
+  }
+  userName = name.trim();
+  localStorage.setItem("userName", userName);
+  socket.emit("registerUser", { userId, name: userName });
+});
+socket.on("name_updated", (data) => {
+  userName = data.newName;
+  localStorage.setItem("userName", userName);
+});
+socket.on("coinUpdate", (data) => {
+  myCoins = data.balance;
+  document.getElementById("coinCount").innerText = myCoins;
+  document.getElementById("bjCoins").innerText = myCoins;
+  document.getElementById("boostBtn").disabled = myCoins < 1;
+  const display = document.getElementById("coinDisplay");
+  display.classList.remove("flash");
+  void display.offsetWidth;
+  display.classList.add("flash");
+  playCoinSound();
+});
+socket.on("volumeChanged", (data) => {
+  document.getElementById("volumeLevel").innerText = data.volume;
+});
+socket.on("songSkipped", () => {
+  // poll rapidly after skip until new song appears
+  let attempts = 0;
+  const poll = setInterval(() => {
+    loadSong();
+    attempts++;
+    if (attempts >= 8) clearInterval(poll);
+  }, 800);
+});
+socket.emit("registerUser", { userId, name: userName });
+
+/* ---------------- VOLUME VOTE ---------------- */
+
+let myVolVote = null; // 'up' | 'down' | null
+
+function voteVolume(direction) {
+  fetch("/vote-volume", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, name: userName, direction })
+  })
+  .then(r => r.json())
+  .then(data => {
+    updateUI(data);
+    if (data.newVolume !== undefined) {
+      document.getElementById("volumeLevel").innerText = data.newVolume;
+    }
+  });
 }
 
-function moveCalTooltip(e){
-  const tip=document.getElementById('calTooltip');
-  tip.style.left=Math.min(e.clientX+12,window.innerWidth-240)+'px';
-  tip.style.top=Math.max(10,e.clientY-tip.offsetHeight-4)+'px';
+function loadVolume() {
+  fetch("/current-volume")
+    .then(r => r.json())
+    .then(data => {
+      if (data.volume !== null) {
+        document.getElementById("volumeLevel").innerText = data.volume;
+      }
+    });
 }
 
-function hideCalTooltip(){ document.getElementById('calTooltip').style.display='none'; }
+/* ---------------- COIN SOUND ---------------- */
 
-function calNavigate(dir){
-  calMonth+=dir;
-  if(calMonth>11){calMonth=0;calYear++;}
-  if(calMonth<0){calMonth=11;calYear--;}
-  renderCalendar();
+function playCoinSound() {
+  const sound = new Audio("/slot.mp3");
+  sound.volume = 0.25;
+  sound.play().catch(() => {});
 }
 
-renderCalendar();
+/* ---------------- VOTE ---------------- */
+
+function vote() {
+  if (hasVoted) return;
+
+  fetch("/vote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, name: userName })
+  })
+  .then(res => res.json())
+  .then(data => {
+    hasVoted = true;
+    setVotedState(true);
+    updateUI(data);
+  });
+}
+
+function setVotedState(voted) {
+  const btn = document.getElementById("skipBtn");
+  if (voted) {
+    btn.classList.add("voted");
+    btn.innerText = "✓ Voted";
+  } else {
+    btn.classList.remove("voted");
+    btn.innerText = "SKIP";
+  }
+}
+
+/* ---------------- UI ---------------- */
+
+function updateUI(data) {
+
+  if (data.count > lastCount && data.soundEnabled) {
+    pingSound.play().catch(() => {});
+  }
+
+  // reset voted state when votes clear after a skip or song change
+  if (data.count === 0 && lastCount > 0) {
+    hasVoted = false;
+    setVotedState(false);
+  }
+
+  lastCount = data.count;
+
+  document.getElementById("voteCounter").innerText =
+    data.count + " / " + data.needed + " votes";
+
+  const percent = data.needed > 0 ? (data.count / data.needed) * 100 : 0;
+  document.getElementById("progressBar").style.width = Math.min(percent, 100) + "%";
+
+  const list = document.getElementById("voters");
+  list.innerHTML = "";
+  data.voters.forEach(v => {
+    const li = document.createElement("li");
+    li.innerText = v;
+    if (v === userName) li.style.color = "#1DB954";
+    list.appendChild(li);
+  });
+
+  updateSwitch("votingSwitch", data.votingEnabled);
+  updateSwitch("soundSwitch", data.soundEnabled);
+
+  // volume vote counts
+  if (data.volUp !== undefined) {
+    const upBtn = document.getElementById("volUpBtn");
+    const downBtn = document.getElementById("volDownBtn");
+    document.getElementById("volUpCount").innerText = data.volUp > 0 ? "(" + data.volUp + ")" : "";
+    document.getElementById("volDownCount").innerText = data.volDown > 0 ? "(" + data.volDown + ")" : "";
+    upBtn.disabled = data.volCooldown;
+    downBtn.disabled = data.volCooldown;
+    upBtn.title = data.volCooldown ? "Volume on cooldown" : "Vote to increase volume";
+    downBtn.title = data.volCooldown ? "Volume on cooldown" : "Vote to decrease volume";
+  }
+
+  if (data.message) {
+    document.getElementById("adminMessage").innerText = data.message;
+  }
+
+  if (data.users) {
+    onlineUserIds = new Set(data.userIds);
+    onlineUserNames = new Map(data.userIds.map((id, i) => [id, data.users[i]]));
+    renderAllUsers();
+  }
+
+}
+
+let onlineUserIds = new Set();
+let onlineUserNames = new Map();
+let allKnownUsers = [];
+
+function renderAllUsers() {
+  const userList = document.getElementById("userList");
+  userList.innerHTML = "";
+  const select = document.getElementById("coinTargetSelect");
+  const prevVal = select.value;
+  select.innerHTML = "<option value=''>— select user —</option>";
+
+  // merge: all known users + any online users not yet in known list
+  const combined = [...allKnownUsers];
+  onlineUserIds.forEach(uid => {
+    if (!combined.find(u => u.user_id === uid)) {
+      combined.push({ user_id: uid, user_name: onlineUserNames.get(uid) || uid, balance: "?" });
+    }
+  });
+
+  combined.sort((a, b) => {
+    const aOnline = onlineUserIds.has(a.user_id);
+    const bOnline = onlineUserIds.has(b.user_id);
+    if (aOnline && !bOnline) return -1;
+    if (!aOnline && bOnline) return 1;
+    return (a.user_name || "").localeCompare(b.user_name || "");
+  });
+
+  combined.forEach(u => {
+    const isOnline = onlineUserIds.has(u.user_id);
+    const isBanned = window._bannedIds && window._bannedIds.has(u.user_id);
+    const safeName = u.user_name ? u.user_name.replace(/'/g,"") : "";
+    const li = document.createElement("li");
+    li.style.cssText = "flex-wrap:wrap;gap:4px;";
+    li.innerHTML =
+      "<div class='userDot " + (isBanned ? "banned" : isOnline ? "online" : "offline") + "'></div>" +
+      "<span class='userLabel' title='" + safeName + "' style='" + (isBanned ? "color:#e74c3c;text-decoration:line-through;" : "") + "'>" + (u.user_name || "<i style='color:#888'>null</i>") + "</span>" +
+      "<button class='resetBtn' style='background:#2471a3;font-size:10px;' onclick=\"showRenameInput(this,'" + u.user_id + "','" + safeName + "')\">✏️</button>" +
+      (isOnline && !isBanned ? "<button class='resetBtn' onclick=\"resetUser('" + u.user_id + "')\">Reset</button>" : "") +
+      (isBanned
+        ? "<button class='resetBtn' style='background:#27ae60;font-size:10px;' onclick=\"unbanDevice('" + u.user_id + "','" + safeName + "')\">Unban</button>"
+        : "<button class='resetBtn' style='background:#c0392b;' onclick=\"banUserById('" + u.user_id + "','" + safeName + "')\">Ban</button>"
+      ) +
+      "<div class='renameRow' id='rename_" + u.user_id + "' style='display:none;width:100%;margin-top:4px;display:none;gap:4px;'>" +
+        "<input type='text' placeholder='New name' style='flex:1;background:#333;color:white;border:1px solid #555;border-radius:4px;padding:3px 6px;font-size:12px;' id='renameInput_" + u.user_id + "'>" +
+        "<button class='resetBtn' style='background:#1DB954;' onclick=\"submitRename('" + u.user_id + "')\">Save</button>" +
+        "<button class='resetBtn' style='background:#555;' onclick=\"hideRenameInput('" + u.user_id + "')\">✕</button>" +
+      "</div>";
+    userList.appendChild(li);
+
+    if (!isBanned) {
+      const opt = document.createElement("option");
+      opt.value = u.user_id;
+      opt.innerText = (u.user_name || "null") + " (" + u.balance + "🪙)" + (isOnline ? " 🟢" : "");
+      select.appendChild(opt);
+    }
+  });
+
+  if (prevVal) select.value = prevVal;
+}
+
+function loadAllKnownUsers() {
+  const password = document.getElementById("adminPasswordInput").value;
+  Promise.all([
+    fetch("/all-users?password=" + encodeURIComponent(password)).then(r => r.json()),
+    fetch("/banned-devices?password=" + encodeURIComponent(password)).then(r => r.json())
+  ]).then(([users, banned]) => {
+    allKnownUsers = users || [];
+    const bannedIds = new Set((banned || []).map(b => b.user_id));
+    window._bannedIds = bannedIds;
+    renderAllUsers();
+    loadBannedDevices();
+  });
+}
+
+function adminLogin() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/admin-auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password })
+  })
+  .then(res => {
+    if (res.status === 403) { alert("Wrong password"); return; }
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("adminControls").style.display = "block";
+    loadAllKnownUsers();
+    setInterval(loadAllKnownUsers, 30000);
+  });
+}
+
+function banUserById(uid, name) {
+  if (!confirm("Ban device for " + name + "? They will be kicked and blocked from all interactions.")) return;
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/ban-device", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: uid, userName: name, password })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("adminMessage").innerText = name + "'s device banned!";
+      loadAllKnownUsers();
+    }
+  });
+}
+
+function unbanDevice(uid, name) {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/unban-device", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: uid, password })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("adminMessage").innerText = name + " unbanned!";
+      loadAllKnownUsers();
+    }
+  });
+}
+
+function loadBannedDevices() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/banned-devices?password=" + encodeURIComponent(password))
+    .then(r => r.json())
+    .then(list => {
+      const ul = document.getElementById("bannedList");
+      ul.innerHTML = "";
+      if (!list.length) {
+        ul.innerHTML = "<li style='color:#555;font-size:11px;'>No banned devices</li>";
+        return;
+      }
+      list.forEach(b => {
+        const li = document.createElement("li");
+        li.style.cssText = "display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;";
+        li.innerHTML = "<span style='font-size:11px;color:#e74c3c;'>🚫 " + b.user_name + "</span>" +
+          "<button class='resetBtn' style='background:#27ae60;font-size:10px;' onclick=\"unbanDevice('" + b.user_id + "','" + b.user_name.replace(/'/g,"") + "')\">Unban</button>";
+        ul.appendChild(li);
+      });
+    });
+}
+
+function giveCoins() {
+  const password = document.getElementById("adminPasswordInput").value;
+  const select = document.getElementById("coinTargetSelect");
+  const userId = select.value;
+  const amount = parseInt(document.getElementById("coinAmount").value);
+  const userName = select.options[select.selectedIndex]?.text;
+
+  if (!userId) {
+    document.getElementById("adminMessage").innerText = "Select a user first!";
+    return;
+  }
+  if (isNaN(amount) || amount === 0) {
+    document.getElementById("adminMessage").innerText = "Enter a valid coin amount!";
+    return;
+  }
+
+  fetch("/admin-give-coins", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, userName, amount, password })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("adminMessage").innerText = "🪙 Gave " + amount + " coins to " + userName + "! New balance: " + data.newBalance;
+    } else {
+      document.getElementById("adminMessage").innerText = data.message || "Failed";
+    }
+  });
+}
+
+function showRenameInput(btn, uid, currentName) {
+  const row = document.getElementById("rename_" + uid);
+  const input = document.getElementById("renameInput_" + uid);
+  row.style.display = "flex";
+  input.value = currentName;
+  input.focus();
+}
+
+function hideRenameInput(uid) {
+  document.getElementById("rename_" + uid).style.display = "none";
+}
+
+function submitRename(uid) {
+  const input = document.getElementById("renameInput_" + uid);
+  const newName = input.value.trim();
+  if (!newName) { alert("Name cannot be empty!"); return; }
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/rename-user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: uid, newName, password })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("adminMessage").innerText = "✅ Renamed to " + newName;
+      loadAllKnownUsers();
+    }
+  });
+}
+
+function resetUser(uid) {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/reset-user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: uid, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("adminMessage").innerText = "User reset — they will be prompted for a new name on reload.";
+    }
+  });
+}
+
+/* ---------------- CURRENCY CALCULATOR ---------------- */
+
+function loadCurrency() {
+  fetch("/currency")
+    .then(res => res.json())
+    .then(data => {
+      if (!data) return;
+      rates = data;
+      updateRateLabel();
+    });
+}
+
+function getSelectedCurrency() {
+  return document.getElementById("currencyPicker").value;
+}
+
+function getRate() {
+  const cur = getSelectedCurrency();
+  return parseFloat(rates[cur]) || 1;
+}
+
+function updateRateLabel() {
+  const cur = getSelectedCurrency();
+  const rate = getRate();
+  document.getElementById("foreignLabel").innerText = cur;
+  document.getElementById("rateLabel").innerText = "1 EUR = " + rate + " " + cur;
+}
+
+function onCurrencyChange() {
+  updateRateLabel();
+  const eurVal = document.getElementById("eurInput").value;
+  if (eurVal !== "") {
+    calcFromEur();
+  } else {
+    calcFromForeign();
+  }
+}
+
+function calcFromEur() {
+  const eur = parseFloat(document.getElementById("eurInput").value);
+  if (isNaN(eur)) {
+    document.getElementById("foreignInput").value = "";
+    return;
+  }
+  document.getElementById("foreignInput").value = (eur * getRate()).toFixed(2);
+}
+
+function calcFromForeign() {
+  const foreign = parseFloat(document.getElementById("foreignInput").value);
+  if (isNaN(foreign)) {
+    document.getElementById("eurInput").value = "";
+    return;
+  }
+  document.getElementById("eurInput").value = (foreign / getRate()).toFixed(2);
+}
+
+/* ---------------- WEATHER ---------------- */
+
+function loadWeather() {
+  fetch("/weather")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("weatherCity").innerText = data.city;
+      document.getElementById("weatherNow").innerHTML =
+        "<div>" + data.temp + "°C</div>" +
+        "<div>Wind " + data.wind + " km/h</div>" +
+        "<div>Rain " + data.rain + "%</div>";
+
+      const f = document.getElementById("weatherForecast");
+      f.innerHTML = "";
+      data.forecast.forEach(d => {
+        const date = new Date(d.date);
+        const day = date.toLocaleDateString("en-US", { weekday: "short" });
+        const line = document.createElement("div");
+        line.innerText = day + " " + d.temp + "°C";
+        f.appendChild(line);
+      });
+    });
+}
+
+/* ---------------- MISC ---------------- */
+
+function applyAlbumColor(imageUrl) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = imageUrl;
+  img.onload = function () {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    let r = 0, g = 0, b = 0, count = 0;
+    for (let i = 0; i < data.length; i += 40) {
+      r += data[i]; g += data[i + 1]; b += data[i + 2]; count++;
+    }
+    r = Math.floor(r / count); g = Math.floor(g / count); b = Math.floor(b / count);
+    const color = "rgb(" + r + "," + g + "," + b + ")";
+    document.getElementById("weatherWidget").style.boxShadow = "0 0 20px " + color;
+    document.getElementById("currencyWidget").style.boxShadow = "0 0 20px " + color;
+  };
+}
+
+function updateSwitch(id, state) {
+  const el = document.getElementById(id);
+  state ? el.classList.add("on") : el.classList.remove("on");
+}
+
+function loadVotes() {
+  fetch("/votes").then(res => res.json()).then(updateUI);
+}
+
+function loadSong() {
+  fetch("/current-song")
+    .then(res => res.json())
+    .then(data => {
+      if (!data.title) return;
+      const parts = data.title.split(" - ");
+      document.getElementById("songTitle").innerText = parts[0];
+      document.getElementById("artistName").innerText = parts[1] || "";
+      if (data.image) {
+        document.getElementById("albumCover").src = data.image;
+        applyAlbumColor(data.image);
+        document.getElementById("bg").style.backgroundImage = "url(" + data.image + ")";
+      }
+
+      // new song — reset session vote state
+      if (data.songId && data.songId !== currentSongId) {
+        currentSongId = data.songId;
+        currentSessionId = generateSessionId();
+        myVoteThisSession = null;
+        updateReactionButtons();
+        if (data.isOfficePlaylist) {
+          loadSongStats(currentSongId);
+          document.getElementById("songStatsBar").style.display = "flex";
+          document.getElementById("reactionBtns").style.display = "flex";
+        } else {
+          document.getElementById("songStatsBar").style.display = "none";
+          document.getElementById("reactionBtns").style.display = "none";
+        }
+      }
+
+      loadVotes();
+    });
+}
+
+function loadLastSkip() {
+  fetch("/last-skip")
+    .then(res => res.json())
+    .then(data => {
+      const panel = document.getElementById("lastSkipPanel");
+      if (!data) { panel.innerHTML = "No skips yet"; return; }
+      panel.innerHTML =
+        "<p><strong>Song:</strong><br>" + data.song + "</p>" +
+        "<p><strong>Skipped By:</strong></p>" +
+        "<ul>" + data.skippedBy.map(n => "<li>" + n + "</li>").join("") + "</ul>" +
+        "<p><strong>Time:</strong><br>" + data.time + "</p>";
+    });
+}
+
+function toggleAdminPanel() {
+  const panel = document.getElementById("adminPanel");
+  panel.style.display = panel.style.display === "none" ? "block" : "none";
+}
+
+function setTotal() {
+  const total = document.getElementById("totalInput").value;
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/set-total", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ total, password })
+  });
+}
+
+function toggleVoting() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/toggle-voting", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password })
+  });
+}
+
+function toggleSound() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/toggle-sound", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password })
+  });
+}
+
+function clearVotes() {
+  const password = document.getElementById("adminPasswordInput").value;
+  fetch("/clear-votes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password })
+  });
+}
+
+function toggleOilModal() {
+  const modal = document.getElementById("oilModal");
+  modal.classList.toggle("open");
+}
+
+function closeOilModalOutside(event) {
+  if (event.target === document.getElementById("oilModal")) {
+    document.getElementById("oilModal").classList.remove("open");
+  }
+}
+
+const vessels = {
+  '209659000': { name: 'Containerships Aurora',  imo: '9814014' },
+  '210028000': { name: 'Containerships Borealis', imo: '9866249' },
+  '256800000': { name: 'CMA CGM Ermitage',        imo: '9961295' }
+};
+
+function toggleVesselModal() {
+  const modal = document.getElementById("vesselModal");
+  modal.classList.toggle("open");
+}
+
+function closeVesselModalOutside(event) {
+  if (event.target === document.getElementById("vesselModal")) {
+    document.getElementById("vesselModal").classList.remove("open");
+  }
+}
+
+let currentMmsi = null;
+let weatherLayerOn = false;
+
+function selectVessel(btn, mmsi, imo) {
+  // highlight active button
+  document.querySelectorAll(".vesselSelectBtn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+
+  currentMmsi = mmsi;
+
+  // load vessel map
+  const frame = document.getElementById("vesselMapFrame");
+  frame.src = "https://www.vesselfinder.com/aismap?mmsi=" + mmsi + "&zoom=8&names=true&fleet=false";
+
+  // reset weather layer
+  weatherLayerOn = false;
+  const windyFrame = document.getElementById("windyFrame");
+  windyFrame.style.display = "none";
+  windyFrame.src = "";
+  document.getElementById("vesselMapFrame").style.display = "block";
+  const toggleBtn = document.getElementById("weatherToggleBtn");
+  toggleBtn.innerText = "🌦️ Weather OFF";
+  toggleBtn.classList.remove("active");
+  toggleBtn.style.display = "inline";
+
+  // show full details link
+  const link = document.getElementById("vesselDetailsLink");
+  link.href = "https://www.vesselfinder.com/vessels/details/" + imo;
+  link.style.display = "inline";
+}
+
+function toggleWeatherLayer() {
+  weatherLayerOn = !weatherLayerOn;
+  const vesselFrame = document.getElementById("vesselMapFrame");
+  const windyFrame = document.getElementById("windyFrame");
+  const toggleBtn = document.getElementById("weatherToggleBtn");
+
+  if (weatherLayerOn) {
+    // deselect any active vessel button
+    document.querySelectorAll(".vesselSelectBtn").forEach(b => b.classList.remove("active"));
+    document.getElementById("vesselDetailsLink").style.display = "none";
+
+    // load Windy centered on same region as vessel map
+    windyFrame.src = "https://embed.windy.com/embed2.html?lat=55&lon=10&detailLat=55&detailLon=10&width=650&height=450&zoom=5&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1";
+    windyFrame.style.display = "block";
+    vesselFrame.style.display = "none";
+    toggleBtn.innerText = "🚢 Vessels ON";
+    toggleBtn.classList.add("active");
+  } else {
+    windyFrame.style.display = "none";
+    vesselFrame.style.display = "block";
+    toggleBtn.innerText = "🌦️ Weather OFF";
+    toggleBtn.classList.remove("active");
+  }
+}
+
+let oilChartLoaded = false;
+
+function toggleOilModal() {
+  const modal = document.getElementById("oilModal");
+  modal.classList.toggle("open");
+
+  // only inject the TradingView widget once
+  if (modal.classList.contains("open") && !oilChartLoaded) {
+    oilChartLoaded = true;
+    const container = document.getElementById("oilChartContainer");
+    const script = document.createElement("script");
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      autosize: true,
+      symbol: "TVC:UKOIL",
+      interval: "60",
+      timezone: "Europe/Riga",
+      theme: "dark",
+      style: "1",
+      locale: "en",
+      allow_symbol_change: false,
+      calendar: false,
+      support_host: "https://www.tradingview.com"
+    });
+    const wrapper = document.createElement("div");
+    wrapper.className = "tradingview-widget-container";
+    wrapper.style.height = "100%";
+    wrapper.style.width = "100%";
+    const chartDiv = document.createElement("div");
+    chartDiv.className = "tradingview-widget-container__widget";
+    chartDiv.style.height = "calc(100% - 32px)";
+    chartDiv.style.width = "100%";
+    wrapper.appendChild(chartDiv);
+    wrapper.appendChild(script);
+    container.appendChild(wrapper);
+  }
+}
+
+function closeOilModalOutside(event) {
+  if (event.target === document.getElementById("oilModal")) {
+    document.getElementById("oilModal").classList.remove("open");
+  }
+}
+
+/* ---------------- MINESWEEPER ---------------- */
+
+const MS_DIFFICULTIES = {
+  easy:   { cols: 9,  rows: 9,  mines: 10, label: "Easy (9×9)",    noGuess: true  },
+  medium: { cols: 16, rows: 16, mines: 40, label: "Medium (16×16)", noGuess: true  },
+  expert: { cols: 30, rows: 16, mines: 99, label: "Expert (30×16)", noGuess: true  }
+};
+let msDifficulty = "easy";
+let MS_COLS = 9, MS_ROWS = 9, MS_MINES = 10;
+let msBoard = [], msRevealed = [], msFlagged = [];
+let msGameOver = false, msFirstClick = true, msStarted = false;
+let msTimer = null, msSeconds = 0;
+const msNumColors = ["","#0000ff","#007b00","#ff0000","#00007b","#7b0000","#007b7b","#000","#7b7b7b"];
+
+/* --- constraint solver: returns true if board is solvable without guessing --- */
+function canSolveBoard(board, rows, cols, mines, startR, startC) {
+  const rev = Array.from({length:rows}, () => Array(cols).fill(false));
+  const flag = Array.from({length:rows}, () => Array(cols).fill(false));
+
+  function flood(r, c) {
+    if (r<0||r>=rows||c<0||c>=cols||rev[r][c]||board[r][c]===-1) return;
+    rev[r][c] = true;
+    if (board[r][c] === 0)
+      for (let dr=-1;dr<=1;dr++) for (let dc=-1;dc<=1;dc++) flood(r+dr,c+dc);
+  }
+  flood(startR, startC);
+
+  let progress = true;
+  while (progress) {
+    progress = false;
+    // basic deduction pass
+    for (let r=0;r<rows;r++) {
+      for (let c=0;c<cols;c++) {
+        if (!rev[r][c] || board[r][c] <= 0) continue;
+        const safe=[], flagged_n=[];
+        for (let dr=-1;dr<=1;dr++) for (let dc=-1;dc<=1;dc++) {
+          if(!dr&&!dc) continue;
+          const nr=r+dr, nc=c+dc;
+          if (nr<0||nr>=rows||nc<0||nc>=cols) continue;
+          if (flag[nr][nc]) flagged_n.push([nr,nc]);
+          else if (!rev[nr][nc]) safe.push([nr,nc]);
+        }
+        const rem = board[r][c] - flagged_n.length;
+        if (rem === 0 && safe.length > 0) {
+          safe.forEach(([nr,nc]) => { flood(nr,nc); });
+          progress = true;
+        }
+        if (rem === safe.length && safe.length > 0) {
+          safe.forEach(([nr,nc]) => { flag[nr][nc] = true; });
+          progress = true;
+        }
+      }
+    }
+    // subset deduction pass
+    const constraints = [];
+    for (let r=0;r<rows;r++) {
+      for (let c=0;c<cols;c++) {
+        if (!rev[r][c] || board[r][c] <= 0) continue;
+        const unknowns = [], flagCount = [];
+        for (let dr=-1;dr<=1;dr++) for (let dc=-1;dc<=1;dc++) {
+          if(!dr&&!dc) continue;
+          const nr=r+dr, nc=c+dc;
+          if (nr<0||nr>=rows||nc<0||nc>=cols) continue;
+          if (flag[nr][nc]) flagCount.push(1);
+          else if (!rev[nr][nc]) unknowns.push(nr*cols+nc);
+        }
+        const rem = board[r][c] - flagCount.length;
+        if (unknowns.length > 0) constraints.push({ cells: unknowns, mines: rem });
+      }
+    }
+    for (let i=0;i<constraints.length;i++) {
+      for (let j=0;j<constraints.length;j++) {
+        if (i===j) continue;
+        const a=constraints[i], b=constraints[j];
+        if (a.cells.length===0||b.cells.length===0) continue;
+        const aSet=new Set(a.cells);
+        const bInA = b.cells.every(x=>aSet.has(x));
+        if (!bInA) continue;
+        const diff = a.cells.filter(x=>!b.cells.includes(x));
+        const diffMines = a.mines - b.mines;
+        if (diff.length===0) continue;
+        if (diffMines === 0) {
+          diff.forEach(idx => { const nr=Math.floor(idx/cols),nc=idx%cols; if(!rev[nr][nc]){flood(nr,nc); progress=true;} });
+        }
+        if (diffMines === diff.length) {
+          diff.forEach(idx => { const nr=Math.floor(idx/cols),nc=idx%cols; if(!flag[nr][nc]){flag[nr][nc]=true; progress=true;} });
+        }
+      }
+    }
+  }
+
+  // check fully solved
+  for (let r=0;r<rows;r++)
+    for (let c=0;c<cols;c++)
+      if (board[r][c]!==-1 && !rev[r][c]) return false;
+  return true;
+}
+
+function buildBoard(r, c, rows, cols, mines) {
+  const b = Array.from({length:rows}, () => Array(cols).fill(0));
+  let placed = 0;
+  while (placed < mines) {
+    const mr = Math.floor(Math.random()*rows);
+    const mc = Math.floor(Math.random()*cols);
+    if (Math.abs(mr-r)<=1 && Math.abs(mc-c)<=1) continue;
+    if (b[mr][mc]===-1) continue;
+    b[mr][mc] = -1;
+    placed++;
+  }
+  for (let br=0;br<rows;br++) for (let bc=0;bc<cols;bc++) {
+    if (b[br][bc]===-1) continue;
+    let n=0;
+    for (let dr=-1;dr<=1;dr++) for (let dc=-1;dc<=1;dc++) {
+      const nr=br+dr,nc=bc+dc;
+      if (nr>=0&&nr<rows&&nc>=0&&nc<cols&&b[nr][nc]===-1) n++;
+    }
+    b[br][bc]=n;
+  }
+  return b;
+}
+
+function placeMines(safeR, safeC) {
+  const maxAttempts = 200;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const candidate = buildBoard(safeR, safeC, MS_ROWS, MS_COLS, MS_MINES);
+    if (canSolveBoard(candidate, MS_ROWS, MS_COLS, MS_MINES, safeR, safeC)) {
+      for (let r=0;r<MS_ROWS;r++) for (let c=0;c<MS_COLS;c++) msBoard[r][c]=candidate[r][c];
+      return;
+    }
+  }
+  // fallback: use last candidate even if not fully solvable
+  const fallback = buildBoard(safeR, safeC, MS_ROWS, MS_COLS, MS_MINES);
+  for (let r=0;r<MS_ROWS;r++) for (let c=0;c<MS_COLS;c++) msBoard[r][c]=fallback[r][c];
+}
+
+function setDifficulty(diff, btn) {
+  msDifficulty = diff;
+  const d = MS_DIFFICULTIES[diff];
+  MS_COLS = d.cols; MS_ROWS = d.rows; MS_MINES = d.mines;
+  document.querySelectorAll(".ms-diff-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  // resize grid CSS
+  document.getElementById("msGrid").style.gridTemplateColumns = "repeat(" + MS_COLS + ", 22px)";
+  document.getElementById("msGrid").style.gridTemplateRows = "repeat(" + MS_ROWS + ", 22px)";
+  initMinesweeper();
+  loadMsScores();
+}
+
+function toggleMsModal() {
+  const modal = document.getElementById("msModal");
+  const wasOpen = modal.classList.contains("open");
+  modal.classList.toggle("open");
+  if (!wasOpen) {
+    setDifficulty("easy", document.getElementById("diffEasy"));
+  }
+}
+
+function closeMsModalOutside(e) {
+  if (e.target === document.getElementById("msModal")) {
+    document.getElementById("msModal").classList.remove("open");
+    clearInterval(msTimer);
+  }
+}
+
+function initMinesweeper() {
+  clearInterval(msTimer);
+  msBoard = Array.from({length:MS_ROWS}, () => Array(MS_COLS).fill(0));
+  msRevealed = Array.from({length:MS_ROWS}, () => Array(MS_COLS).fill(false));
+  msFlagged = Array.from({length:MS_ROWS}, () => Array(MS_COLS).fill(false));
+  msGameOver = false; msFirstClick = true; msStarted = false; msSeconds = 0;
+  document.getElementById("msTimer").innerText = "000";
+  document.getElementById("msMines").innerText = String(MS_MINES).padStart(3,"0");
+  document.getElementById("msFace").innerText = "🙂";
+  renderMsBoard();
+}
+
+function revealFlood(r, c) {
+  if (r<0||r>=MS_ROWS||c<0||c>=MS_COLS||msRevealed[r][c]||msFlagged[r][c]) return;
+  msRevealed[r][c] = true;
+  if (msBoard[r][c] === 0)
+    for (let dr=-1;dr<=1;dr++)
+      for (let dc=-1;dc<=1;dc++)
+        revealFlood(r+dr, c+dc);
+}
+
+function msClick(r, c) {
+  if (msGameOver || msFlagged[r][c] || msRevealed[r][c]) return;
+  if (msFirstClick) {
+    msFirstClick = false;
+    placeMines(r, c);
+    msStarted = true;
+    msTimer = setInterval(() => {
+      msSeconds++;
+      document.getElementById("msTimer").innerText = String(Math.min(msSeconds,999)).padStart(3,"0");
+    }, 1000);
+  }
+  if (msBoard[r][c] === -1) {
+    msGameOver = true;
+    clearInterval(msTimer);
+    msRevealed[r][c] = true;
+    document.getElementById("msFace").innerText = "😵";
+    renderMsBoard(r, c);
+    return;
+  }
+  revealFlood(r, c);
+  checkMsWin();
+  renderMsBoard();
+}
+
+function msChord(r, c) {
+  if (!msRevealed[r][c] || msBoard[r][c] <= 0) return;
+  let flagCount = 0;
+  for (let dr=-1;dr<=1;dr++)
+    for (let dc=-1;dc<=1;dc++) {
+      const nr=r+dr, nc=c+dc;
+      if (nr>=0&&nr<MS_ROWS&&nc>=0&&nc<MS_COLS&&msFlagged[nr][nc]) flagCount++;
+    }
+  if (flagCount === msBoard[r][c])
+    for (let dr=-1;dr<=1;dr++)
+      for (let dc=-1;dc<=1;dc++) {
+        const nr=r+dr, nc=c+dc;
+        if (nr>=0&&nr<MS_ROWS&&nc>=0&&nc<MS_COLS&&!msFlagged[nr][nc]&&!msRevealed[nr][nc])
+          msClick(nr, nc);
+      }
+}
+
+function msRightClick(e, r, c) {
+  e.preventDefault();
+  if (msGameOver || msRevealed[r][c] || !msStarted) return;
+  msFlagged[r][c] = !msFlagged[r][c];
+  const flagged = msFlagged.flat().filter(Boolean).length;
+  document.getElementById("msMines").innerText = String(Math.max(0, MS_MINES-flagged)).padStart(3,"0");
+  renderMsBoard();
+}
+
+function checkMsWin() {
+  const revealed = msRevealed.flat().filter(Boolean).length;
+  if (revealed === MS_ROWS*MS_COLS - MS_MINES) {
+    msGameOver = true;
+    clearInterval(msTimer);
+    document.getElementById("msFace").innerText = "😎";
+    fetch("/minesweeper-score", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({name: userName, time: msSeconds, difficulty: msDifficulty})
+    }).then(() => loadMsScores());
+  }
+}
+
+function loadMsScores() {
+  fetch("/minesweeper-scores?difficulty=" + msDifficulty)
+    .then(r => r.json())
+    .then(scores => {
+      const ul = document.getElementById("msLeaderboard");
+      const label = MS_DIFFICULTIES[msDifficulty].label;
+      ul.previousElementSibling.innerText = "🏆 " + label;
+      ul.innerHTML = "";
+      if (!scores.length) {
+        ul.innerHTML = "<li style='color:#666;font-size:10px;'>No records yet!</li>";
+        return;
+      }
+      scores.slice(0,10).forEach((s,i) => {
+        const li = document.createElement("li");
+        if (i===0) li.classList.add("ms-gold");
+        if (i===1) li.classList.add("ms-silver");
+        if (i===2) li.classList.add("ms-bronze");
+        if (s.name === userName) li.classList.add("ms-me");
+        li.innerHTML = "<span>" + (i+1) + ". " + s.name + "</span><span>" + s.time + "s</span>";
+        ul.appendChild(li);
+      });
+    });
+}
+
+function renderMsBoard(hitR, hitC) {
+  const grid = document.getElementById("msGrid");
+  grid.innerHTML = "";
+  for (let r=0;r<MS_ROWS;r++) {
+    for (let c=0;c<MS_COLS;c++) {
+      const cell = document.createElement("div");
+      cell.className = "ms-cell";
+      if (msRevealed[r][c]) {
+        cell.classList.add("revealed");
+        if (msBoard[r][c] === -1) {
+          cell.classList.add(r===hitR&&c===hitC ? "mine-hit" : "mine-shown");
+          cell.innerText = "💣";
+        } else if (msBoard[r][c] > 0) {
+          cell.innerText = msBoard[r][c];
+          cell.style.color = msNumColors[msBoard[r][c]];
+        }
+      } else if (msFlagged[r][c]) {
+        cell.classList.add("flagged");
+        cell.innerText = msGameOver && msBoard[r][c] !== -1 ? "❌" : "🚩";
+      } else if (msGameOver && msBoard[r][c] === -1) {
+        cell.classList.add("revealed","mine-shown");
+        cell.innerText = "💣";
+      }
+      cell.onclick = () => msClick(r, c);
+      cell.ondblclick = () => msChord(r, c);
+      cell.oncontextmenu = e => msRightClick(e, r, c);
+      grid.appendChild(cell);
+    }
+  }
+}
+
+/* ---------------- SONG STATS & LIKES ---------------- */
+
+let currentSongId = null;
+let currentSessionId = null;
+let myVoteThisSession = null; // 'like' | 'dislike' | null
+
+function generateSessionId() {
+  return Math.random().toString(36).slice(2);
+}
+
+function loadSongStats(songId) {
+  if (!songId) return;
+  fetch("/song-stats/" + songId)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("statPlays").innerText = "▶ " + (data.plays || 0);
+      document.getElementById("statSkips").innerText = "⏭ " + (data.skips || 0);
+      document.getElementById("statLikes").innerText = "👍 " + (data.likes || 0);
+      document.getElementById("statDislikes").innerText = "👎 " + (data.dislikes || 0);
+    });
+}
+
+function songVote(vote) {
+  if (!currentSongId) return;
+  fetch("/song-vote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, songId: currentSongId, sessionId: currentSessionId, vote })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.action === "removed") {
+      myVoteThisSession = null;
+    } else {
+      myVoteThisSession = vote;
+    }
+    updateReactionButtons();
+    loadSongStats(currentSongId);
+  });
+}
+
+function updateReactionButtons() {
+  const likeBtn = document.getElementById("likeBtn");
+  const dislikeBtn = document.getElementById("dislikeBtn");
+  likeBtn.classList.remove("liked", "disliked");
+  dislikeBtn.classList.remove("liked", "disliked");
+  if (myVoteThisSession === "like") likeBtn.classList.add("liked");
+  if (myVoteThisSession === "dislike") dislikeBtn.classList.add("disliked");
+}
+
+/* ---------------- COINS ---------------- */
+
+let myCoins = 0;
+
+function loadCoins() {
+  fetch("/coins/" + userId + "?name=" + encodeURIComponent(userName))
+    .then(r => r.json())
+    .then(data => {
+      myCoins = data.balance;
+      document.getElementById("coinCount").innerText = myCoins;
+      document.getElementById("bjCoins").innerText = myCoins;
+      document.getElementById("boostBtn").disabled = myCoins < 1;
+    });
+}
+
+function boostVote() {
+  if (myCoins < 1) return;
+  fetch("/boost-vote", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, name: userName })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      myCoins = data.newBalance;
+      document.getElementById("coinCount").innerText = myCoins;
+      document.getElementById("bjCoins").innerText = myCoins;
+      document.getElementById("boostBtn").disabled = myCoins < 1;
+      if (data.skipped) {
+        document.getElementById("adminMessage").innerText = "⚡ Coin boost tipped the vote — song skipped!";
+      } else {
+        document.getElementById("adminMessage").innerText = "⚡ Coin boost added! Vote count increased.";
+      }
+    } else {
+      document.getElementById("adminMessage").innerText = data.message || "Boost failed";
+    }
+  });
+}
+
+/* ---------------- GAME HUB ---------------- */
+
+let currentGame = "blackjack";
+
+function switchGame(game, btn) {
+  currentGame = game;
+  document.querySelectorAll(".game-tab-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("bjBody").style.display = game === "blackjack" ? "flex" : "none";
+  document.getElementById("cfBody").style.display = game === "coinflip" ? "flex" : "none";
+  document.getElementById("slotsBody").style.display = game === "slots" ? "flex" : "none";
+  if (game === "blackjack" && !bjGameActive) bjReset();
+  // slots and coinflip preserve state naturally — no reset on tab switch
+}
+
+/* ---------------- COIN FLIP ---------------- */
+
+let cfActive = false;
+
+function cfFlip(choice) {
+  if (cfActive) return;
+  const bet = parseInt(document.getElementById("cfBetInput").value);
+  if (isNaN(bet) || bet < 1) return alert("Enter a valid bet!");
+  if (bet > myCoins) return alert("Not enough coins!");
+
+  cfActive = true;
+  document.getElementById("cfHeadsBtn").disabled = true;
+  document.getElementById("cfTailsBtn").disabled = true;
+  document.getElementById("cfStatus").innerText = "Flipping...";
+
+  const coin = document.getElementById("cfCoin");
+  coin.classList.add("flipping");
+
+  setTimeout(() => {
+    coin.classList.remove("flipping");
+    const result = Math.random() < 0.5 ? "heads" : "tails";
+    const won = result === choice;
+    const delta = won ? bet : -bet;
+    coin.innerText = result === "heads" ? "🪙" : "🔘";
+    document.getElementById("cfStatus").innerText = (won ? "🎉 " : "😞 ") + result.toUpperCase() + (won ? " — You win " + bet + " coins!" : " — You lose " + bet + " coins");
+
+    fetch("/blackjack-result", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, userName, delta })
+    })
+    .then(r => r.json())
+    .then(data => {
+      myCoins = data.newBalance;
+      document.getElementById("bjCoins").innerText = myCoins;
+      document.getElementById("coinCount").innerText = myCoins;
+      document.getElementById("boostBtn").disabled = myCoins < 1;
+    });
+
+    setTimeout(() => {
+      coin.innerText = "🪙";
+      document.getElementById("cfStatus").innerText = "";
+      document.getElementById("cfHeadsBtn").disabled = false;
+      document.getElementById("cfTailsBtn").disabled = false;
+      cfActive = false;
+    }, 2000);
+  }, 700);
+}
+
+/* ---------------- SLOTS ---------------- */
+
+const SLOT_SYMBOLS = ["🍒","🍋","🍊","🍇","🔔","⭐","💎"];
+const SLOT_PAYOUTS = {
+  "💎💎💎": 50, "⭐⭐⭐": 25, "🔔🔔🔔": 15,
+  "🍇🍇🍇": 10, "🍊🍊🍊": 5, "🍋🍋🍋": 3, "🍒🍒🍒": 2
+};
+
+let slotsActive = false;
+
+function slotsReset() {
+  ["sym0","sym1","sym2"].forEach(id => { document.getElementById(id).innerText = "🎰"; });
+  document.getElementById("slotsStatus").innerText = "";
+  document.getElementById("slotsSpinBtn").disabled = false;
+}
+
+function slotsSpín() {
+  if (slotsActive) return;
+  const bet = parseInt(document.getElementById("slotsBetInput").value);
+  if (isNaN(bet) || bet < 1) return alert("Enter a valid bet!");
+  if (bet > myCoins) return alert("Not enough coins!");
+
+  slotsActive = true;
+  document.getElementById("slotsSpinBtn").disabled = true;
+  document.getElementById("slotsStatus").innerText = "🎰 Spinning...";
+
+  // spin animation
+  ["reel0","reel1","reel2"].forEach(id => document.getElementById(id).classList.add("spinning"));
+
+  const finalSyms = [0,1,2].map(() => SLOT_SYMBOLS[Math.floor(Math.random()*SLOT_SYMBOLS.length)]);
+
+  // stop reels one by one
+  [0,1,2].forEach((i, idx) => {
+    setTimeout(() => {
+      document.getElementById("reel"+i).classList.remove("spinning");
+      document.getElementById("sym"+i).innerText = finalSyms[i];
+      if (idx === 2) {
+        // calculate payout
+        setTimeout(() => {
+          const key = finalSyms.join("");
+          let multiplier = 0;
+          if (SLOT_PAYOUTS[key]) {
+            multiplier = SLOT_PAYOUTS[key];
+          } else if (finalSyms[0]===finalSyms[1]||finalSyms[1]===finalSyms[2]||finalSyms[0]===finalSyms[2]) {
+            multiplier = 1;
+          }
+          const delta = multiplier > 0 ? bet * multiplier - bet : -bet;
+          let msg = multiplier === 0 ? "😞 No match — lost " + bet + " coins" :
+                    multiplier === 1 ? "😌 Pair! Got your bet back" :
+                    "🎉 " + key + " — " + multiplier + "× — +" + (bet*multiplier-bet) + " coins!";
+          document.getElementById("slotsStatus").innerText = msg;
+
+          fetch("/blackjack-result", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, userName, delta })
+          })
+          .then(r => r.json())
+          .then(data => {
+            myCoins = data.newBalance;
+            document.getElementById("bjCoins").innerText = myCoins;
+            document.getElementById("coinCount").innerText = myCoins;
+            document.getElementById("boostBtn").disabled = myCoins < 1;
+            document.getElementById("slotsSpinBtn").disabled = false;
+            slotsActive = false;
+          });
+        }, 300);
+      }
+    }, 400 + idx * 400);
+  });
+}
+
+/* ---------------- QUOTE OF THE DAY ---------------- */
+
+const FUNNY_QUOTES = [
+  { q: "I always arrive late at the office, but I make up for it by leaving early.", a: "Charles Lamb" },
+  { q: "Hard work never killed anybody, but why take a chance?", a: "Edgar Bergen" },
+  { q: "The brain is a wonderful organ. It starts working the moment you get up in the morning and does not stop until you get into the office.", a: "Robert Frost" },
+  { q: "I like work; it fascinates me. I can sit and look at it for hours.", a: "Jerome K. Jerome" },
+  { q: "By working faithfully eight hours a day you may eventually get to be boss and work twelve hours a day.", a: "Robert Frost" },
+  { q: "Son, if you really want something in this life, you have to work for it. Now quiet! They're about to announce the lottery numbers.", a: "Homer Simpson" },
+  { q: "Monday is a great day to be miserable... said no one ever.", a: "Office Wisdom" },
+  { q: "There is no I in team, but there is in wine.", a: "Office Wisdom" },
+  { q: "Teamwork means never having to take all the blame yourself.", a: "Office Wisdom" },
+  { q: "I thought I wanted a career. Turns out I just wanted paychecks.", a: "Office Wisdom" },
+  { q: "My keyboard must be broken. The escape key doesn't work.", a: "Office Wisdom" },
+  { q: "I'm not lazy, I'm on energy-saving mode.", a: "Office Wisdom" },
+  { q: "My boss told me to have a good day, so I went home.", a: "Office Wisdom" },
+  { q: "The best part of going to work is coming back home at the end of the day.", a: "Office Wisdom" },
+  { q: "I pretend to work. They pretend to pay me.", a: "Soviet Joke" },
+  { q: "If you think you are too small to make a difference, try sleeping with a mosquito.", a: "Dalai Lama" },
+  { q: "Age is something that doesn't matter, unless you are a cheese.", a: "Luis Buñuel" },
+  { q: "People who think they know everything are a great annoyance to those of us who do.", a: "Isaac Asimov" },
+  { q: "Before you criticize someone, walk a mile in their shoes. That way, when you do criticize them, you're a mile away and have their shoes.", a: "Jack Handey" },
+  { q: "A day without sunshine is like, you know, night.", a: "Steve Martin" },
+  { q: "We've all heard that a million monkeys banging on a million typewriters will eventually reproduce the entire works of Shakespeare. Now, thanks to the Internet, we know this is not true.", a: "Robert Wilensky" },
+  { q: "Never put off till tomorrow what you can do the day after tomorrow just as well.", a: "Mark Twain" },
+  { q: "If at first you don't succeed, then skydiving definitely isn't for you.", a: "Steven Wright" },
+  { q: "I asked God for a bike, but I know God doesn't work that way. So I stole a bike and asked for forgiveness.", a: "Emo Philips" },
+  { q: "To steal ideas from one person is plagiarism; to steal from many is research.", a: "Steven Wright" },
+  { q: "I find television very educating. Every time somebody turns on the set, I go into the other room and read a book.", a: "Groucho Marx" },
+  { q: "Behind every great man is a woman rolling her eyes.", a: "Jim Carrey" },
+  { q: "The early bird might get the worm, but the second mouse gets the cheese.", a: "Willie Nelson" },
+  { q: "If you're going to do something tonight that you'll be sorry for tomorrow morning, sleep late.", a: "Henny Youngman" },
+  { q: "Alcohol does not solve any problems, but then again, neither does milk.", a: "Office Wisdom" },
+];
+
+function loadQuote() {
+  const dayIndex = Math.floor(Date.now() / 86400000) % FUNNY_QUOTES.length;
+  const quote = FUNNY_QUOTES[dayIndex];
+  document.getElementById("quoteText").innerText = "\"" + quote.q + "\"";
+  document.getElementById("quoteAuthor").innerText = "— " + quote.a;
+}
+
+/* ---------------- BLACKJACK ---------------- */
+
+const BJ_SUITS = ["♠","♥","♦","♣"];
+const BJ_VALUES = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+const BJ_RED = ["♥","♦"];
+
+let bjDeck = [], bjPlayerCards = [], bjDealerCards = [], bjBet = 0, bjGameActive = false;
+
+function toggleBjModal() {
+  const modal = document.getElementById("bjModal");
+  modal.classList.toggle("open");
+  if (modal.classList.contains("open")) {
+    loadCoins();
+    // only reset if nothing has been started yet
+    if (!bjGameActive && document.getElementById("bjDealerHand").children.length === 0) bjReset();
+  }
+}
+
+function closeBjModalOutside(e) {
+  if (e.target === document.getElementById("bjModal")) {
+    document.getElementById("bjModal").classList.remove("open");
+  }
+}
+
+function bjShuffleDeck() {
+  bjDeck = [];
+  for (const suit of BJ_SUITS)
+    for (const val of BJ_VALUES)
+      bjDeck.push({ suit, val });
+  for (let i = bjDeck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [bjDeck[i], bjDeck[j]] = [bjDeck[j], bjDeck[i]];
+  }
+}
+
+function bjCardValue(card) {
+  if (["J","Q","K"].includes(card.val)) return 10;
+  if (card.val === "A") return 11;
+  return parseInt(card.val);
+}
+
+function bjHandScore(cards) {
+  let score = 0, aces = 0;
+  for (const c of cards) {
+    score += bjCardValue(c);
+    if (c.val === "A") aces++;
+  }
+  while (score > 21 && aces > 0) { score -= 10; aces--; }
+  return score;
+}
+
+function bjRenderCard(card, hidden) {
+  const div = document.createElement("div");
+  div.className = "bj-card" + (hidden ? " back" : (BJ_RED.includes(card.suit) ? " red" : ""));
+  if (!hidden) div.innerHTML = "<div>" + card.val + "</div><div>" + card.suit + "</div>";
+  return div;
+}
+
+function bjRenderHands(hideDealer) {
+  const ph = document.getElementById("bjPlayerHand");
+  const dh = document.getElementById("bjDealerHand");
+  ph.innerHTML = ""; dh.innerHTML = "";
+  bjPlayerCards.forEach(c => ph.appendChild(bjRenderCard(c, false)));
+  bjDealerCards.forEach((c, i) => dh.appendChild(bjRenderCard(c, hideDealer && i === 1)));
+  document.getElementById("bjPlayerScore").innerText = bjHandScore(bjPlayerCards);
+  document.getElementById("bjDealerScore").innerText = hideDealer ? "?" : bjHandScore(bjDealerCards);
+}
+
+function bjSetButtons(inGame) {
+  document.getElementById("bjDealBtn").disabled = inGame;
+  document.getElementById("bjHitBtn").disabled = !inGame;
+  document.getElementById("bjStandBtn").disabled = !inGame;
+  document.getElementById("bjDoubleBtn").disabled = !inGame || bjPlayerCards.length > 2 || myCoins < bjBet;
+  document.getElementById("bjBetInput").disabled = inGame;
+}
+
+function bjReset() {
+  bjPlayerCards = []; bjDealerCards = []; bjGameActive = false;
+  document.getElementById("bjPlayerHand").innerHTML = "";
+  document.getElementById("bjDealerHand").innerHTML = "";
+  document.getElementById("bjPlayerScore").innerText = "";
+  document.getElementById("bjDealerScore").innerText = "";
+  document.getElementById("bjStatus").innerText = "";
+  bjSetButtons(false);
+}
+
+function bjDeal() {
+  const betInput = parseInt(document.getElementById("bjBetInput").value);
+  if (isNaN(betInput) || betInput < 1) return alert("Enter a valid bet!");
+  if (betInput > myCoins) return alert("Not enough coins!");
+  bjBet = betInput;
+  bjShuffleDeck();
+  bjPlayerCards = [bjDeck.pop(), bjDeck.pop()];
+  bjDealerCards = [bjDeck.pop(), bjDeck.pop()];
+  bjGameActive = true;
+  bjRenderHands(true);
+  bjSetButtons(true);
+  document.getElementById("bjStatus").innerText = "";
+
+  // check player blackjack
+  if (bjHandScore(bjPlayerCards) === 21) {
+    bjFinish(true);
+  }
+}
+
+function bjHit() {
+  bjPlayerCards.push(bjDeck.pop());
+  bjRenderHands(true);
+  if (bjHandScore(bjPlayerCards) > 21) bjFinish(false);
+}
+
+function bjStand() {
+  // dealer plays
+  while (bjHandScore(bjDealerCards) < 17) bjDealerCards.push(bjDeck.pop());
+  bjFinish(null);
+}
+
+function bjDouble() {
+  bjBet *= 2;
+  bjPlayerCards.push(bjDeck.pop());
+  bjRenderHands(true);
+  if (bjHandScore(bjPlayerCards) > 21) {
+    bjFinish(false);
+  } else {
+    bjStand();
+  }
+}
+
+function bjFinish(playerBJ) {
+  bjGameActive = false;
+  bjRenderHands(false);
+  bjSetButtons(false);
+
+  const ps = bjHandScore(bjPlayerCards);
+  const ds = bjHandScore(bjDealerCards);
+  let delta = 0;
+  let msg = "";
+
+  if (ps > 21) {
+    msg = "💀 Bust! You lose " + bjBet + " coins";
+    delta = -bjBet;
+  } else if (playerBJ) {
+    const win = Math.ceil(bjBet * 1.5);
+    msg = "🃏 Blackjack! You win " + win + " coins!";
+    delta = win;
+  } else if (ds > 21) {
+    msg = "🎉 Dealer busts! You win " + bjBet + " coins!";
+    delta = bjBet;
+  } else if (ps > ds) {
+    msg = "🎉 You win " + bjBet + " coins!";
+    delta = bjBet;
+  } else if (ps < ds) {
+    msg = "😞 Dealer wins. You lose " + bjBet + " coins";
+    delta = -bjBet;
+  } else {
+    msg = "🤝 Push — bet returned";
+    delta = 0;
+  }
+
+  document.getElementById("bjStatus").innerText = msg;
+
+  fetch("/blackjack-result", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, userName, delta })
+  })
+  .then(r => r.json())
+  .then(data => {
+    myCoins = data.newBalance;
+    document.getElementById("bjCoins").innerText = myCoins;
+    document.getElementById("coinCount").innerText = myCoins;
+    document.getElementById("boostBtn").disabled = myCoins < 1;
+    document.getElementById("bjBetInput").value = Math.min(bjBet, myCoins) || 1;
+  });
+}
+
+function togglePatchModal() {
+  document.getElementById("patchModal").classList.toggle("open");
+}
+
+function closePatchModalOutside(e) {
+  if (e.target === document.getElementById("patchModal")) {
+    document.getElementById("patchModal").classList.remove("open");
+  }
+}
 
 loadSong();
 loadVotes();
 loadLastSkip();
 loadWeather();
 loadCurrency();
+loadCoins();
+loadQuote();
+loadVolume();
 
-setInterval(loadSong,10000);
-setInterval(loadLastSkip,5000);
-setInterval(loadWeather,600000);
-setInterval(loadCurrency,600000);
+setInterval(loadSong, 10000);
+setInterval(loadLastSkip, 5000);
+setInterval(loadWeather, 600000);
+setInterval(loadCurrency, 600000);
+setInterval(loadCoins, 30000);
+setInterval(loadVolume, 15000);
 
 </script>
 
