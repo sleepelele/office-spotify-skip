@@ -196,23 +196,7 @@ margin-top:4px;
 }
 
 /* HOLIDAY CALENDAR */
-
-#calendarWidget{
-position:fixed;
-bottom:175px;
-left:360px;
-background:rgba(0,0,0,0.65);
-backdrop-filter:blur(10px);
--webkit-backdrop-filter:blur(10px);
-padding:12px;
-border-radius:12px;
-font-size:12px;
-width:210px;
-border:1px solid rgba(255,255,255,0.1);
-color:white;
-z-index:5;
-}
-
+#calendarWidget{position:fixed;bottom:20px;left:590px;background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:12px;border-radius:12px;font-size:12px;width:210px;border:1px solid rgba(255,255,255,0.1);color:white;z-index:5;}
 .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .cal-nav{background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:14px;padding:0 4px;line-height:1;}
 .cal-nav:hover{color:white;}
@@ -960,10 +944,8 @@ padding:1px 0;
 #quoteWidget{
 position:fixed;
 bottom:20px;
-left:50%;
-transform:translateX(-50%);
-max-width:440px;
-width:max-content;
+right:90px;
+max-width:380px;
 text-align:center;
 z-index:5;
 background:rgba(0,0,0,0.45);
@@ -1980,7 +1962,7 @@ background:#c0392b;
           <div class="patch-entry-icon">🔊</div>
           <div>
             <div class="patch-entry-name">Vote to Change Volume ±5%</div>
-            <div class="patch-entry-desc">Two new vote buttons below the skip button let the office vote to nudge volume up or down by 5%. Same majority rules as skip voting. A 30-second cooldown applies after each change. Volume display stays in sync with Spotify automatically.</div>
+            <div class="patch-entry-desc">Two new vote buttons below the skip button let the office vote to nudge volume up or down by 5%. Same majority rules as skip. 30-second cooldown after each change. Volume display stays in sync with Spotify automatically every 15 seconds.</div>
             <span class="patch-note-tag">COOLDOWN: 30 SECONDS</span>
           </div>
         </div>
@@ -1995,7 +1977,7 @@ background:#c0392b;
           <div class="patch-entry-icon">📅</div>
           <div>
             <div class="patch-entry-name">Public Holidays for 15 Countries</div>
-            <div class="patch-entry-desc">A mini calendar sits next to the currency calculator showing public holidays across Finland, Estonia, Latvia, Lithuania, Poland, Netherlands, Germany, Belgium, UK, Ireland, Spain, Portugal, Denmark, Norway and Sweden. Hover any highlighted date to see which countries observe that holiday. Navigate months freely.</div>
+            <div class="patch-entry-desc">A mini calendar sits at the bottom of the screen showing public holidays across Finland, Estonia, Latvia, Lithuania, Poland, Netherlands, Germany, Belgium, UK, Ireland, Spain, Portugal, Denmark, Norway and Sweden. Hover any highlighted date to see which countries observe it. Navigate freely between months.</div>
             <span class="patch-note-tag">EASTER CALCULATED DYNAMICALLY · ALL YEARS</span>
           </div>
         </div>
@@ -2010,21 +1992,14 @@ background:#c0392b;
           <div class="patch-entry-icon">🚫</div>
           <div>
             <div class="patch-entry-name">Device Banning</div>
-            <div class="patch-entry-desc">Bans are now tied to device ID rather than username — so changing names doesn't bypass a ban. Banned users see a full-screen block immediately. Bans persist across server restarts in Supabase. Unban button available per user.</div>
+            <div class="patch-entry-desc">Bans are now tied to device ID rather than username. Changing name no longer bypasses a ban. Banned users see a full-screen block immediately and are kicked live. Bans persist across server restarts via Supabase.</div>
           </div>
         </div>
         <div class="patch-entry">
           <div class="patch-entry-icon">✏️</div>
           <div>
-            <div class="patch-entry-name">Rename Users</div>
-            <div class="patch-entry-desc">Admins can now edit any user's display name directly from the panel — including offline users. The rename updates live on their screen if they're connected. Fixes null usernames from early sessions.</div>
-          </div>
-        </div>
-        <div class="patch-entry">
-          <div class="patch-entry-icon">💾</div>
-          <div>
-            <div class="patch-entry-name">Persistent Settings</div>
-            <div class="patch-entry-desc">Voting on/off, ping sound, and people count now survive server restarts. Settings are saved to Supabase the moment they're changed and restored automatically on startup.</div>
+            <div class="patch-entry-name">Rename Users + Persistent Settings</div>
+            <div class="patch-entry-desc">Admins can edit any user's display name directly from the panel. Voting on/off, ping sound, and people count now survive server restarts — saved to Supabase the moment they change.</div>
           </div>
         </div>
       </div>
@@ -3601,17 +3576,13 @@ function closePatchModalOutside(e) {
 }
 
 /* ---------------- HOLIDAY CALENDAR ---------------- */
-
 const CAL_COUNTRIES={FI:'🇫🇮 Finland',EE:'🇪🇪 Estonia',LV:'🇱🇻 Latvia',LT:'🇱🇹 Lithuania',PL:'🇵🇱 Poland',NL:'🇳🇱 Netherlands',DE:'🇩🇪 Germany',BE:'🇧🇪 Belgium',GB:'🇬🇧 UK',IE:'🇮🇪 Ireland',ES:'🇪🇸 Spain',PT:'🇵🇹 Portugal',DK:'🇩🇰 Denmark',NO:'🇳🇴 Norway',SE:'🇸🇪 Sweden'};
-
 function getEaster(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da);}
 function getMidsummerSat(y){const d=new Date(y,5,20);while(d.getDay()!==6)d.setDate(d.getDate()+1);return d;}
-
 function buildHolidays(y){
-  const e=getEaster(y),em=e.getTime(),D=86400000;
+  const e=getEaster(y),em=e.getTime(),D=86400000,ms=getMidsummerSat(y),mse=new Date(ms.getTime()-D);
   const p=n=>{const d=new Date(em+n*D);return(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');};
   const f=d=>(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
-  const ms=getMidsummerSat(y),mse=new Date(ms.getTime()-D);
   const h={},add=(k,n,c)=>{if(!h[k])h[k]=[];h[k].push({name:n,countries:c});};
   add('01-01',"New Year's Day",['FI','EE','LV','LT','PL','NL','DE','BE','GB','IE','ES','PT','DK','NO','SE']);
   add('01-06','Epiphany',['FI','LT','PL','ES','PT']);
@@ -3648,18 +3619,15 @@ function buildHolidays(y){
   add('12-31',"New Year's Eve",['LV','DE']);
   return h;
 }
-
 let calYear=new Date().getFullYear(),calMonth=new Date().getMonth(),calCache={};
 function calHolidays(y){if(!calCache[y])calCache[y]=buildHolidays(y);return calCache[y];}
-
 function renderCalendar(){
   const today=new Date(),h=calHolidays(calYear);
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('calMonthLabel').innerText=months[calMonth]+' '+calYear;
   const grid=document.getElementById('calGrid');grid.innerHTML='';
   ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(d=>{const el=document.createElement('div');el.className='cal-day-header';el.innerText=d;grid.appendChild(el);});
-  const first=new Date(calYear,calMonth,1).getDay(),offset=(first===0?6:first-1);
-  const dim=new Date(calYear,calMonth+1,0).getDate(),prev=new Date(calYear,calMonth,0).getDate();
+  const first=new Date(calYear,calMonth,1).getDay(),offset=(first===0?6:first-1),dim=new Date(calYear,calMonth+1,0).getDate(),prev=new Date(calYear,calMonth,0).getDate();
   for(let i=0;i<offset;i++){const d=document.createElement('div');d.className='cal-day other-month';d.innerText=prev-offset+1+i;grid.appendChild(d);}
   for(let day=1;day<=dim;day++){
     const d=document.createElement('div');d.className='cal-day';d.innerText=day;
@@ -3671,16 +3639,10 @@ function renderCalendar(){
   const rem=(offset+dim)%7===0?0:7-((offset+dim)%7);
   for(let i=1;i<=rem;i++){const d=document.createElement('div');d.className='cal-day other-month';d.innerText=i;grid.appendChild(d);}
 }
-
-function calShowTip(e,holidays){
-  const t=document.getElementById('calTooltip');
-  t.innerHTML=holidays.map(h=>'<div class="cal-tooltip-name">'+h.name+'</div>'+h.countries.map(c=>CAL_COUNTRIES[c]).join('<br>')).join('<br>');
-  t.style.display='block';calMoveTip(e);
-}
+function calShowTip(e,holidays){const t=document.getElementById('calTooltip');t.innerHTML=holidays.map(h=>'<div class="cal-tooltip-name">'+h.name+'</div>'+h.countries.map(c=>CAL_COUNTRIES[c]).join('<br>')).join('<br>');t.style.display='block';calMoveTip(e);}
 function calMoveTip(e){const t=document.getElementById('calTooltip');t.style.left=Math.min(e.clientX+12,window.innerWidth-244)+'px';t.style.top=Math.max(8,e.clientY-t.offsetHeight-4)+'px';}
 function calHideTip(){document.getElementById('calTooltip').style.display='none';}
 function calNavigate(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
-
 renderCalendar();
 
 loadSong();
