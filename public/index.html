@@ -2040,7 +2040,7 @@ background:#c0392b;
 <div id="soundSwitch" class="switch" onclick="toggleSound()"></div>
 </div>
 
-<h4>All Users</h4>
+<h4 style="display:flex;justify-content:space-between;align-items:center;">All Users <button onclick="toggleUserList()" id="userListToggle" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;border-radius:4px;cursor:pointer;padding:1px 8px;font-size:11px;">Hide</button></h4>
 <ul id="userList"></ul>
 
 <h4>Banned Devices</h4>
@@ -2267,6 +2267,14 @@ function updateUI(data) {
 let onlineUserIds = new Set();
 let onlineUserNames = new Map();
 let allKnownUsers = [];
+
+function toggleUserList() {
+  const list = document.getElementById("userList");
+  const btn = document.getElementById("userListToggle");
+  const hidden = list.style.display === "none";
+  list.style.display = hidden ? "" : "none";
+  btn.innerText = hidden ? "Hide" : "Show";
+}
 
 function renderAllUsers() {
   const userList = document.getElementById("userList");
