@@ -1008,6 +1008,7 @@ letter-spacing:1px;
 #pkMyName{font-weight:bold;font-size:13px;margin-bottom:2px;}
 #pkMyChipsLabel{color:#ffd700;font-size:12px;}
 #pkMyBetLabel{color:rgba(255,255,255,0.45);font-size:11px;}
+#pkTimer{font-size:12px;color:#ff6b6b;font-weight:bold;display:none;}
 #pkActions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
 #pkBtnRow{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
 .pk-btn{padding:8px 16px;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;transition:all .15s;white-space:nowrap;}
@@ -1909,6 +1910,7 @@ background:#c0392b;
           <div id="pkMyName">—</div>
           <div id="pkMyChipsLabel">🪙 <span id="pkMyChipsVal">0</span> chips</div>
           <div id="pkMyBetLabel"></div>
+          <div id="pkTimer">⏱ <span id="pkTimerVal">30</span>s</div>
         </div>
         <div id="pkActions">
           <div id="pkWaitingBtns" style="display:flex;flex-direction:column;gap:8px;align-items:center;">
@@ -3713,6 +3715,7 @@ function closePatchModalOutside(e) {
 /* ---------------- POKER CLIENT ---------------- */
 
 let pkState = null;
+let pkTimerInterval = null;
 const PK_RS = {11:'J',12:'Q',13:'K',14:'A'};
 const PK_SS = {s:'♠',h:'♥',d:'♦',c:'♣'};
 const PK_RED = {h:1,d:1};
@@ -3743,6 +3746,22 @@ function pkStart(){ socket.emit('poker:start'); }
 function pkAct(action){ socket.emit('poker:act',{action,amount:0}); }
 function pkRaise(){ const a=parseInt(document.getElementById('pkRaiseInput').value); if(!isNaN(a)&&a>0) socket.emit('poker:act',{action:'raise',amount:a}); }
 
+function pkStartCountdown(deadline, isMyTurn) {
+  if (pkTimerInterval) { clearInterval(pkTimerInterval); pkTimerInterval=null; }
+  const timerEl = document.getElementById('pkTimer');
+  const timerVal = document.getElementById('pkTimerVal');
+  if (!deadline || !isMyTurn) { timerEl.style.display='none'; return; }
+  timerEl.style.display='block';
+  function tick() {
+    const secs = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+    timerVal.innerText = secs;
+    timerEl.style.color = secs <= 10 ? '#ff3333' : '#ff6b6b';
+    if (secs <= 0) { clearInterval(pkTimerInterval); pkTimerInterval=null; }
+  }
+  tick();
+  pkTimerInterval = setInterval(tick, 500);
+}
+
 function pkRender() {
   if (!pkState) return;
   const s=pkState;
@@ -3752,16 +3771,13 @@ function pkRender() {
   const isMyTurn=me&&!me.folded&&!me.allIn&&s.seated[s.activeIdx]?.userId===userId&&inGame;
   const amSeated=!!me;
 
-  // header balance
   document.getElementById('pkBalanceVal').innerText=me?me.chips:(myCoins||'...');
 
-  // community cards
   const cc=document.getElementById('pkCommunityCards'); cc.innerHTML='';
   for(let i=0;i<5;i++) cc.appendChild(s.community&&s.community[i]?pkCardEl(s.community[i]):pkPh());
   document.getElementById('pkPot').innerText='Pot: '+(s.pot||0)+' 🪙';
   document.getElementById('pkPhaseLabel').innerText=(s.phase||'waiting').toUpperCase();
 
-  // opponents
   const opp=document.getElementById('pkOpponents'); opp.innerHTML='';
   others.forEach(p=>{
     const seat=document.createElement('div');
@@ -3770,8 +3786,7 @@ function pkRender() {
     if(p.isDealer) role='<span class="pk-seat-role" style="background:#888;color:#fff">D</span>';
     else if(p.isSB) role='<span class="pk-seat-role" style="background:#b8860b;color:#fff">SB</span>';
     else if(p.isBB) role='<span class="pk-seat-role" style="background:#8B4513;color:#fff">BB</span>';
-    const cards=inGame&&!p.folded
-      ?'<div class="pk-card pk-card-sm card-back"></div><div class="pk-card pk-card-sm card-back"></div>':'';
+    const cards=inGame&&!p.folded?'<div class="pk-card pk-card-sm card-back"></div><div class="pk-card pk-card-sm card-back"></div>':'';
     seat.innerHTML=role
       +'<div class="pk-seat-name">'+(p.folded?'<s>':'')+p.userName+(p.folded?'</s>':'')+(p.allIn?' 🔴':'')+'</div>'
       +'<div class="pk-seat-chips">🪙 '+p.chips+'</div>'
@@ -3780,7 +3795,6 @@ function pkRender() {
     opp.appendChild(seat);
   });
 
-  // my cards
   const mc=document.getElementById('pkMyCards'); mc.innerHTML='';
   if(s.myHand&&s.myHand.length>0) s.myHand.forEach(c=>mc.appendChild(pkCardEl(c)));
   else { mc.appendChild(pkBack()); mc.appendChild(pkBack()); }
@@ -3790,9 +3804,10 @@ function pkRender() {
   document.getElementById('pkMyChipsVal').innerText=me?me.chips:(myCoins||0);
   document.getElementById('pkMyBetLabel').innerText=me?.bet>0?'Bet: '+me.bet:'';
 
-  // button logic
-  const wb=document.getElementById('pkWaitingBtns'), gb=document.getElementById('pkGameBtns');
+  // countdown timer
+  pkStartCountdown(s.turnDeadline, isMyTurn);
 
+  const wb=document.getElementById('pkWaitingBtns'), gb=document.getElementById('pkGameBtns');
   if(!amSeated){
     wb.style.display='flex'; gb.style.display='none';
     document.getElementById('pkJoinBtn').style.display='';
@@ -3824,7 +3839,6 @@ function pkRender() {
     document.getElementById('pkRaiseInput').disabled=!isMyTurn;
   }
 
-  // sidebar seated list
   const sl=document.getElementById('pkSeatedList'); sl.innerHTML='';
   if(s.seated?.length) s.seated.forEach(p=>{
     const d=document.createElement('div');
@@ -3835,7 +3849,6 @@ function pkRender() {
   });
   else document.getElementById('pkSeatedList').innerHTML='<span style="color:rgba(255,255,255,0.3)">Empty</span>';
 
-  // log
   const log=document.getElementById('pkLog'); log.innerHTML='';
   if(s.log) s.log.forEach(msg=>{ const d=document.createElement('div'); d.innerText=msg; log.appendChild(d); });
 }
