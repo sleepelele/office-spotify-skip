@@ -81,9 +81,37 @@ io.on("connection", (socket) => {
     io.emit("voteUpdate", buildVoteResponse());
   });
 
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
     if (socket.userId) connectedUsers.delete(socket.userId);
     io.emit("voteUpdate", buildVoteResponse());
+
+    // auto-remove from poker table on disconnect
+    const pkIdx = pk.seated.findIndex(p => p.userId === socket.userId);
+    if (pkIdx >= 0) {
+      const chips = pk.seated[pkIdx].chips;
+      const name = pk.seated[pkIdx].userName;
+      pkLog(name + ' disconnected — removed from table');
+      if (pk.phase !== 'waiting' && pk.phase !== 'showdown') {
+        pk.seated[pkIdx].folded = true;
+        // if it was their turn, advance
+        if (pk.seated[pk.activeIdx]?.userId === socket.userId) {
+          pk.seated.splice(pkIdx, 1);
+          if (pk.seated.length === 0) {
+            pk.phase = 'waiting'; pk.pot = 0; pk.community = []; pk.currentBet = 0;
+          } else {
+            pk.activeIdx = pk.activeIdx % pk.seated.length;
+            await pkNextPhase();
+          }
+        } else {
+          pk.seated.splice(pkIdx, 1);
+          if (pk.activeIdx >= pk.seated.length) pk.activeIdx = 0;
+        }
+      } else {
+        pk.seated.splice(pkIdx, 1);
+      }
+      try { await supabase.from('coins').update({ balance: chips }).eq('user_id', socket.userId); } catch(e) {}
+      pkBroadcast();
+    }
   });
 
 });
@@ -744,6 +772,26 @@ let pk = {
   log: []
 };
 
+let pkTurnTimer = null;
+const PK_TURN_SECONDS = 30;
+
+function pkClearTimer() {
+  if (pkTurnTimer) { clearTimeout(pkTurnTimer); pkTurnTimer = null; }
+}
+
+function pkStartTimer() {
+  pkClearTimer();
+  if (pk.phase === 'waiting' || pk.phase === 'showdown') return;
+  const activePlayer = pk.seated[pk.activeIdx];
+  if (!activePlayer || activePlayer.folded || activePlayer.allIn) return;
+  pkTurnTimer = setTimeout(async () => {
+    const p = pk.seated[pk.activeIdx];
+    if (!p || p.folded || p.allIn) return;
+    pkLog('⏰ ' + p.userName + ' timed out — auto-folded');
+    await pkDoAction(p.userId, 'fold', 0);
+  }, PK_TURN_SECONDS * 1000);
+}
+
 function pkLog(msg) { pk.log.unshift(msg); if (pk.log.length > 20) pk.log.pop(); }
 
 function pkDeck() {
@@ -806,6 +854,7 @@ function pkBroadcast() {
   const base = {
     phase:pk.phase, community:pk.community, pot:pk.pot,
     currentBet:pk.currentBet, activeIdx:pk.activeIdx, log:pk.log,
+    turnDeadline: (pk.phase !== 'waiting' && pk.phase !== 'showdown') ? Date.now() + PK_TURN_SECONDS * 1000 : null,
     seated:pk.seated.map(p=>({
       userId:p.userId,userName:p.userName,chips:p.chips,
       bet:p.bet,folded:p.folded,allIn:p.allIn,
@@ -816,6 +865,8 @@ function pkBroadcast() {
     const me=pk.seated.find(p=>p.userId===sock.userId);
     sock.emit('poker:state',{...base, myHand:me?me.hand:[], myUserId:sock.userId});
   }
+  // restart turn timer whenever we broadcast a new active player
+  pkStartTimer();
 }
 
 function pkNotFolded(){ return pk.seated.filter(p=>!p.folded); }
@@ -828,6 +879,7 @@ function pkNextActive(from){
 }
 
 async function pkEndHand(winners){
+  pkClearTimer();
   pk.phase='showdown';
   const share=Math.floor(pk.pot/winners.length);
   const rem=pk.pot%winners.length;
