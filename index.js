@@ -147,9 +147,11 @@ function getRigaDateString() {
 }
 
 async function checkAndResetCoins(userId, userName) {
+  const today = getRigaDateString();
+
   const { data, error } = await supabase
     .from("coins")
-    .select("balance")
+    .select("*")
     .eq("user_id", userId)
     .single();
 
@@ -159,12 +161,22 @@ async function checkAndResetCoins(userId, userName) {
       user_id: userId,
       user_name: userName,
       balance: 5,
-      last_reset: getRigaDateString()
+      last_reset: today
     });
     return 5;
   }
 
-  // no daily reset — coins persist permanently
+  // daily top-up: if balance < 5, bring it back to 5 — but never reduce
+  if (data.last_reset !== today) {
+    const newBalance = Math.max(data.balance, 5);
+    await supabase.from("coins").update({
+      balance: newBalance,
+      last_reset: today,
+      user_name: userName
+    }).eq("user_id", userId);
+    return newBalance;
+  }
+
   return data.balance;
 }
 
@@ -717,7 +729,7 @@ app.get("/banned-devices", async (req, res) => {
 
 /* ---------------- POKER ---------------- */
 
-const PK_SB = 2, PK_BB = 5;
+const PK_SB = 1, PK_BB = 2;
 
 let pk = {
   seated: [],
@@ -820,7 +832,7 @@ async function pkEndHand(winners){
   const share=Math.floor(pk.pot/winners.length);
   const rem=pk.pot%winners.length;
   winners.forEach((w,i)=>{w.chips+=share+(i===0?rem:0);});
-  pkLog('🏆 '+winners.map(w=>w.userName+' (🪙'+w.chips+')').join(' & ')+' win'+( pk.pot>0?' '+pk.pot+' chips!':'!'));
+  pkLog('🏆 '+winners.map(w=>w.userName+' (🪙'+w.chips+')').join(' & ')+' win '+pk.pot+' chips!');
   pkBroadcast();
   for(const p of pk.seated){
     try{await supabase.from('coins').update({balance:p.chips}).eq('user_id',p.userId);}catch(e){}
@@ -836,8 +848,10 @@ async function pkEndHand(winners){
 async function pkNextPhase(){
   const nf=pkNotFolded();
   if(nf.length<=1){await pkEndHand(nf);return;}
+
   pk.seated.forEach(p=>p.bet=0);
   pk.currentBet=0; pk.acted=new Set();
+
   if(pk.phase==='preflop'){
     pk.phase='flop';
     pk.community=[pk.deck.pop(),pk.deck.pop(),pk.deck.pop()];
@@ -862,6 +876,16 @@ async function pkNextPhase(){
     }).join(' | '));
     await pkEndHand(winners); return;
   }
+
+  pkBroadcast();
+
+  // KEY FIX: if nobody can act (all all-in or folded), auto-advance after delay
+  if(pkCanAct().length === 0){
+    setTimeout(()=>pkNextPhase(), 2500);
+    return;
+  }
+
+  // find first active player after dealer
   let si=(pk.dealerIdx+1)%pk.seated.length,t=0;
   while((pk.seated[si].folded||pk.seated[si].allIn)&&t<pk.seated.length){si=(si+1)%pk.seated.length;t++;}
   pk.activeIdx=si;
