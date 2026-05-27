@@ -167,13 +167,14 @@ async function checkAndResetCoins(userId, userName) {
   }
 
   if (data.last_reset !== today) {
-    // new day — reset to 5
+    // new day — top up to 5 only if below 5, never reduce
+    const newBalance = Math.max(data.balance, 5);
     await supabase.from("coins").update({
-      balance: 5,
+      balance: newBalance,
       last_reset: today,
       user_name: userName
     }).eq("user_id", userId);
-    return 5;
+    return newBalance;
   }
 
   return data.balance;
