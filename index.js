@@ -727,6 +727,17 @@ app.get("/banned-devices", async (req, res) => {
   res.json(data || []);
 });
 
+app.get('/steam-price', async (req, res) => {
+  const name = req.query.name;
+  if (!name) return res.status(400).json({ error: 'Missing name' });
+  try {
+    const url = `https://steamcommunity.com/market/priceoverview/?appid=730&currency=3&market_hash_name=${encodeURIComponent(name)}`;
+    const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Referer': 'https://steamcommunity.com/market/' } });
+    const d = await r.json();
+    res.json(d);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 /* ---------------- START SERVER ---------------- */
 
 server.listen(process.env.PORT || 3000, () => {
