@@ -349,7 +349,7 @@ app.get("/current-song", async (req, res) => {
 
   } catch (err) {
     console.error("Spotify error:", err.response?.data || err.message);
-    res.json({ title: err.response?.data?.error?.message || err.message, image: null });
+    res.json({ title: null, image: null });
   }
 
 });
@@ -504,11 +504,11 @@ app.get("/last-skip", (req, res) => res.json(lastSkipInfo));
 app.get("/weather", async (req, res) => {
   try {
     const response = await axios.get(
-      "https://api.open-meteo.com/v1/forecast?latitude=56.95&longitude=24.1&current_weather=true&hourly=precipitation_probability&daily=temperature_2m_max&timezone=auto"
+      "https://api.open-meteo.com/v1/forecast?latitude=56.95&longitude=24.1&current=temperature_2m,wind_speed_10m,precipitation_probability&daily=temperature_2m_max&timezone=auto&forecast_days=7"
     );
     const w = response.data;
     const forecast = w.daily.time.slice(1, 4).map((d, i) => ({ date: d, temp: w.daily.temperature_2m_max[i + 1] }));
-    res.json({ city: "Riga, Latvia", temp: w.current_weather.temperature, wind: w.current_weather.windspeed, rain: w.hourly.precipitation_probability[0] || 0, forecast });
+    res.json({ city: "Riga, Latvia", temp: w.current.temperature_2m, wind: w.current.wind_speed_10m, rain: w.current.precipitation_probability ?? 0, forecast });
   } catch {
     res.json({ city: "Weather error", temp: "?", wind: "?", forecast: [] });
   }
@@ -726,6 +726,7 @@ app.get("/banned-devices", async (req, res) => {
   const { data } = await supabase.from("banned_devices").select("*").order("banned_at", { ascending: false });
   res.json(data || []);
 });
+
 /* ---------------- START SERVER ---------------- */
 
 server.listen(process.env.PORT || 3000, () => {
